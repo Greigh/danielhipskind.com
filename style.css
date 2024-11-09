@@ -1,0 +1,39 @@
+.gradient_background {
+  background-color: #243b56; /* For browsers that do not support gradients */
+  background-image: linear-gradient(#243b56, #631510);
+  height: 100vh;
+}
+
+.img-center {
+  display: block;
+  margin: 0 auto 0 auto;
+  padding: 0;
+}
+
+.img-header-resize {
+  clip-path: circle();
+  width: 7%;
+}
+
+.body-text {
+  width: 100% !important;
+  padding: 0;
+  margin: 0;
+  color: white;
+  text-align: center;
+}
+
+h1 {
+  font-family: Lexend;
+  font-size: 2rem;
+}
+
+h2 {
+  font-family: Lexend;
+  font-weight: 100;
+  font-size: 1rem;
+}
+
+.svg-icon-changes {
+  width: 50px;
+}
