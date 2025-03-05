@@ -36,10 +36,13 @@ danielhipskind.com/
 ├── assets/
 │   ├── css/
 │   │   └── style.css
+│   ├── images/
+│   │   └── selfedited2.jpg
 │   └── js/
 │       ├── projectManager.js
 │       ├── iconManager.js
 │       ├── contentManager.js
+│       ├── config.js
 │       └── icons.js
 ├── index.html
 └── README.md

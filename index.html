@@ -23,6 +23,14 @@
     <meta property="og:type" content="website" />
     <link rel="stylesheet" href="assets/css/style.css" type="text/css" />
 
+    <!-- Update preload tags -->
+    <link
+      rel="preload"
+      href="./assets/js/config.js"
+      as="script"
+      crossorigin="anonymous"
+    />
+
     <!-- Load icons first -->
     <script type="module" src="assets/js/icons.js"></script>
 
@@ -60,9 +68,10 @@
     <!-- Hero Section -->
     <section class="hero">
       <img
-        src="assets/images/selfedited2.jpg"
+        src="./assets/images/selfedited2.jpg"
         alt="Daniel Hipskind"
         class="profile-image"
+        loading="lazy"
       />
       <h1>Daniel Hipskind</h1>
       <p class="tagline">Software Developer & Problem Solver</p>
