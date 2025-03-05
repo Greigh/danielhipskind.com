@@ -1,0 +1,6 @@
+.DS_Store
+node_modules/
+.env
+*.log
+.backup
+assets/js/config.js

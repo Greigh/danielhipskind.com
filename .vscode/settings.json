@@ -1,6 +1,10 @@
 {
-  "editor.tokenColorCustomizations": {
-    "comments": "",
-    "textMateRules": []
-  }
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "eslint.validate": ["javascript"],
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "files.eol": "\n",
+  "files.trimTrailingWhitespace": true
 }
