@@ -2,6 +2,12 @@
 
 A modern, responsive portfolio website built with vanilla JavaScript and progressive enhancement principles.
 
+🌐 Personal portfolio website
+💻 Built with vanilla JavaScript
+🎨 Dark/light theme
+⚡ Performance focused
+🔄 Dynamic GitHub integration
+
 ## 🚀 Live Demo
 
 Visit [danielhipskind.com](https://danielhipskind.com)

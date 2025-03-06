@@ -1,68 +1,44 @@
-// Theme manager class to handle theme switching and persistence
+import { icons } from './icons.js';
+
 class ThemeManager {
   constructor() {
     this.html = document.documentElement;
     this.themeToggle = document.getElementById('theme-toggle');
-    this.darkIcon = this.themeToggle?.querySelector('.moon-icon');
-    this.lightIcon = this.themeToggle?.querySelector('.sun-icon');
     this.THEME_KEY = 'theme-preference';
-
-    this.initialize();
   }
 
-  getSystemTheme() {
-    return window.matchMedia('(prefers-color-scheme: dark)').matches
-      ? 'dark'
-      : 'light';
-  }
+  initialize() {
+    const storedTheme = localStorage.getItem(this.THEME_KEY);
+    const prefersDark = window.matchMedia(
+      '(prefers-color-scheme: dark)'
+    ).matches;
+    const initialTheme = storedTheme || (prefersDark ? 'dark' : 'light');
 
-  getStoredTheme() {
-    return localStorage.getItem(this.THEME_KEY);
+    this.setTheme(initialTheme);
+    this.updateIcon(initialTheme);
+
+    if (this.themeToggle) {
+      this.themeToggle.addEventListener('click', () => {
+        const currentTheme = this.html.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        this.setTheme(newTheme);
+        this.updateIcon(newTheme);
+      });
+    }
   }
 
   setTheme(theme) {
     this.html.setAttribute('data-theme', theme);
     localStorage.setItem(this.THEME_KEY, theme);
-    this.updateIcons(theme);
   }
 
-  updateIcons(theme) {
-    if (this.darkIcon && this.lightIcon) {
-      const isDark = theme === 'dark';
-      this.darkIcon.style.display = isDark ? 'none' : 'block';
-      this.lightIcon.style.display = isDark ? 'block' : 'none';
+  updateIcon(theme) {
+    if (this.themeToggle) {
+      this.themeToggle.innerHTML =
+        theme === 'dark' ? icons.theme.light : icons.theme.dark;
     }
   }
-
-  handleThemeChange() {
-    const currentTheme = this.html.getAttribute('data-theme');
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    this.setTheme(newTheme);
-  }
-
-  initialize() {
-    // Set initial theme
-    const storedTheme = this.getStoredTheme();
-    const initialTheme = storedTheme || this.getSystemTheme();
-    this.setTheme(initialTheme);
-
-    // Add event listeners
-    this.themeToggle?.addEventListener('click', () => this.handleThemeChange());
-
-    // Listen for system theme changes
-    window
-      .matchMedia('(prefers-color-scheme: dark)')
-      .addEventListener('change', (e) => {
-        if (!this.getStoredTheme()) {
-          this.setTheme(e.matches ? 'dark' : 'light');
-        }
-      });
-  }
 }
 
-// Initialize theme manager when DOM is ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => new ThemeManager());
-} else {
-  new ThemeManager();
-}
+const themeManager = new ThemeManager();
+export default themeManager;

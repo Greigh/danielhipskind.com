@@ -1,18 +1,20 @@
 import { initializeContent } from './contentManager.js';
 import { initializeObservers } from './observerManager.js';
+import themeManager from './theme.js';
+import navigationManager from './navigationManager.js';
 
-// Function to initialize the application
 const initializeApp = async () => {
   try {
-    // Initialize GitHub API if the script is loaded
-    if (typeof Octokit !== 'undefined') {
-      window.Octokit = Octokit;
-    }
+    const { config } = await import('./config.js');
+    const { projectManager } = await import('./projectManager.js');
 
-    // Initialize content (includes projects, skills, and social links)
+    // Initialize managers
+    themeManager.initialize();
+    navigationManager.initialize();
+    await projectManager.initialize();
+
+    // Initialize content and observers
     await initializeContent();
-
-    // Initialize intersection observers for animations
     initializeObservers();
   } catch (error) {
     console.error('Error initializing application:', error);
@@ -26,5 +28,4 @@ if (document.readyState === 'loading') {
   initializeApp();
 }
 
-// Export for potential use in other modules
 export { initializeApp };

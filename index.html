@@ -23,23 +23,24 @@
     <meta property="og:type" content="website" />
     <link rel="stylesheet" href="assets/css/style.css" type="text/css" />
 
-    <!-- Update preload tags -->
-    <link
-      rel="preload"
-      href="./assets/js/config.js"
-      as="script"
-      crossorigin="anonymous"
-    />
+    <script type="importmap">
+      {
+        "imports": {
+          "@octokit/core": "https://esm.sh/@octokit/core",
+          "/assets/js/config.js": "/assets/js/config.js",
+          "/assets/js/icons.js": "/assets/js/icons.js",
+          "/assets/js/iconManager.js": "/assets/js/iconManager.js",
+          "/assets/js/projectManager.js": "/assets/js/projectManager.js",
+          "/assets/js/contentManager.js": "/assets/js/contentManager.js",
+          "/assets/js/skillManager.js": "/assets/js/skillManager.js",
+          "/assets/js/theme.js": "/assets/js/theme.js",
+          "/assets/js/index.js": "/assets/js/index.js",
+          "/assets/js/observerManager.js": "/assets/js/observerManager.js"
+        }
+      }
+    </script>
 
-    <!-- Load icons first -->
-    <script type="module" src="assets/js/icons.js"></script>
-
-    <!-- Then load managers -->
-    <script type="module" src="assets/js/iconManager.js"></script>
-    <script type="module" src="assets/js/projectManager.js"></script>
-    <script type="module" src="assets/js/contentManager.js"></script>
-
-    <!-- Load main script last -->
+    <!-- Only load the main entry point -->
     <script type="module" src="assets/js/index.js"></script>
 
     <!-- Cloudflare Web Analytics -->
@@ -50,130 +51,140 @@
     ></script>
     <!-- End Cloudflare Web Analytics -->
   </head>
-  <body class="container">
-    <!-- Navigation -->
-    <nav class="nav-links">
-      <a href="#about">About</a>
-      <a href="#projects">Projects</a>
-      <a href="#skills">Skills</a>
-      <a href="/demos" target="_blank">Demos</a>
-      <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
-        <svg class="sun-icon" viewBox="0 0 24 24">
-          <path
-            fill="currentColor"
-            d="M12 18a6 6 0 1 1 0-12 6 6 0 0 1 0 12zm0-2a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.515 4.929l1.414-1.414L7.05 5.636 5.636 7.05 3.515 4.93zM16.95 18.364l1.414-1.414 2.121 2.121-1.414 1.414-2.121-2.121zm2.121-14.85l1.414 1.415-2.121 2.121-1.414-1.414 2.121-2.121zM5.636 16.95l1.414 1.414-2.121 2.121-1.414-1.414 2.121-2.121zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"
-          />
-        </svg>
-        <svg class="moon-icon" viewBox="0 0 24 24">
-          <path
-            fill="currentColor"
-            d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446A9 9 0 1 1 12 3z"
-          />
-        </svg>
-      </button>
-    </nav>
-
-    <!-- Hero Section -->
-    <section class="hero">
-      <img
-        src="./assets/images/selfedited2.jpg"
-        alt="Daniel Hipskind"
-        class="profile-image"
-        loading="lazy"
-      />
-      <h1>Daniel Hipskind</h1>
-      <p class="tagline">Software Developer & Problem Solver</p>
-    </section>
-
-    <!-- About Section -->
-    <section id="about" class="section">
-      <h2 class="section-header">About Me</h2>
-      <div class="about-content">
-        <div class="about-text">
-          <p class="about-intro">
-            I'm Daniel Hipskind, a passionate and dedicated software developer
-            with a focus on creating responsive and user-friendly web
-            applications.
-          </p>
-          <p>
-            My journey into the world of programming began with a curiosity
-            about how technology shapes our daily lives, and it has since
-            evolved into a deep-seated passion for crafting elegant solutions to
-            complex problems.
-          </p>
-          <p>
-            With a solid foundation in front-end technologies like HTML, CSS,
-            and JavaScript, as well as experience with modern frameworks like
-            React, I strive to build intuitive and engaging user interfaces.
-          </p>
-          <p>
-            I'm currently pursuing an Associate's degree in Computer Programming
-            at Grand Rapids Community College, where I'm constantly expanding my
-            knowledge and honing my skills.
-          </p>
-          <p>
-            When I'm not coding, you can find me exploring new programming
-            concepts, contributing to open-source projects, or enjoying the
-            great outdoors. I believe in the power of technology to make a
-            positive impact, and I'm eager to be part of that change.
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <!-- Projects Section -->
-    <section id="projects" class="section">
-      <div class="projects-grid">
-        <!-- BlockingMachine Project -->
-        <article class="project-card" id="blocking-machine">
-          <div class="project-content">
-            <h3>Blocking Machine</h3>
-            <p id="project-description">Loading project description...</p>
-            <div class="project-meta">
-              <div id="tech-stack" class="tech-stack"></div>
-              <div id="workflow-info" class="workflow-info"></div>
+  <body>
+    <!-- Header -->
+    <header class="header">
+      <nav class="nav-container">
+        <div class="nav-content">
+          <div class="nav-links">
+            <div class="nav-items">
+              <a href="#about">About</a>
+              <a href="#projects">Projects</a>
+              <a href="#skills">Skills</a>
             </div>
-            <div class="project-links">
-              <a class="github-link" href="#" target="_blank" rel="noopener">
-                View on GitHub
-              </a>
-            </div>
+            <button
+              id="theme-toggle"
+              class="theme-toggle"
+              aria-label="Toggle theme"
+            ></button>
           </div>
-        </article>
+          <button class="mobile-menu-toggle" aria-label="Toggle menu">
+            <svg viewBox="0 0 24 24" width="24" height="24">
+              <path
+                fill="currentColor"
+                d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"
+              />
+            </svg>
+          </button>
+        </div>
+      </nav>
+    </header>
 
-        <!-- Portfolio Project -->
-        <article class="project-card" id="portfolio">
-          <div class="project-content">
-            <h3>Portfolio Website</h3>
-            <p id="portfolio-description">Loading project description...</p>
-            <div class="project-meta">
-              <div id="portfolio-tech-stack" class="tech-stack"></div>
-              <div id="portfolio-workflow-info" class="workflow-info"></div>
-            </div>
-            <div class="project-links">
-              <a class="github-link" href="#" target="_blank" rel="noopener">
-                View on GitHub
-              </a>
-            </div>
+    <!-- Main Content -->
+    <main class="container">
+      <!-- Hero Section -->
+      <section class="hero">
+        <img
+          src="./assets/images/selfedited2.jpg"
+          alt="Daniel Hipskind"
+          class="profile-image"
+          loading="lazy"
+        />
+        <h1>Daniel Hipskind</h1>
+        <p class="tagline">Software Developer & Problem Solver</p>
+      </section>
+
+      <!-- About Section -->
+      <section id="about" class="section">
+        <h2 class="section-header">About Me</h2>
+        <div class="about-content">
+          <div class="about-text">
+            <p class="about-intro">
+              I'm Daniel Hipskind, a passionate and dedicated software developer
+              with a focus on creating responsive and user-friendly web
+              applications.
+            </p>
+            <p>
+              My journey into the world of programming began with a curiosity
+              about how technology shapes our daily lives, and it has since
+              evolved into a deep-seated passion for crafting elegant solutions
+              to complex problems.
+            </p>
+            <p>
+              With a solid foundation in front-end technologies like HTML, CSS,
+              and JavaScript, as well as experience with modern frameworks like
+              React, I strive to build intuitive and engaging user interfaces.
+            </p>
+            <p>
+              I'm currently pursuing an Associate's degree in Computer
+              Programming at Grand Rapids Community College, where I'm
+              constantly expanding my knowledge and honing my skills.
+            </p>
+            <p>
+              When I'm not coding, you can find me exploring new programming
+              concepts, contributing to open-source projects, or enjoying the
+              great outdoors. I believe in the power of technology to make a
+              positive impact, and I'm eager to be part of that change.
+            </p>
           </div>
-        </article>
-      </div>
-    </section>
+        </div>
+      </section>
 
-    <!-- Skills Section -->
-    <section id="skills" class="section">
-      <h2 class="section-header">Skills</h2>
-      <div class="skills-grid">
-        <div class="skill-category">
-          <h3 class="category-header">Technical Skills</h3>
-          <ul class="skill-list" id="technical-skills"></ul>
+      <!-- Projects Section -->
+      <section id="projects" class="section">
+        <h2 class="section-header">Projects</h2>
+        <div class="projects-grid">
+          <!-- Blocking Machine Project -->
+          <article class="project-card" id="blocking-machine">
+            <div class="project-content">
+              <h3>Blocking Machine</h3>
+              <p id="project-description">Loading project description...</p>
+              <div class="project-meta">
+                <div id="tech-stack" class="tech-stack"></div>
+                <div id="workflow-info" class="workflow-info"></div>
+              </div>
+              <div class="project-links">
+                <a class="github-link" href="#" target="_blank" rel="noopener"
+                  >View on GitHub</a
+                >
+              </div>
+            </div>
+          </article>
+
+          <!-- Portfolio Project -->
+          <article class="project-card" id="portfolio">
+            <div class="project-content">
+              <h3>Portfolio Website</h3>
+              <p id="portfolio-description">Loading project description...</p>
+              <div class="project-meta">
+                <div id="portfolio-tech-stack" class="tech-stack"></div>
+                <div id="portfolio-workflow-info" class="workflow-info"></div>
+              </div>
+              <div class="project-links">
+                <a class="github-link" href="#" target="_blank" rel="noopener"
+                  >View on GitHub</a
+                >
+              </div>
+            </div>
+          </article>
         </div>
-        <div class="skill-category">
-          <h3 class="category-header">Professional Skills</h3>
-          <ul class="skill-list" id="professional-skills"></ul>
+      </section>
+
+      <!-- Skills Section -->
+      <section id="skills" class="section">
+        <h2 class="section-header">Skills</h2>
+        <div class="skills-grid">
+          <div class="skill-category">
+            <h3 class="category-header">Technical Skills</h3>
+            <ul class="skill-list" id="technical-skills"></ul>
+          </div>
+          <div class="skill-category">
+            <h3 class="category-header">Professional Skills</h3>
+            <ul class="skill-list" id="professional-skills"></ul>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </main>
 
     <footer>
       <div class="container">
@@ -211,18 +222,5 @@
         </div>
       </div>
     </footer>
-
-    <!-- Core Dependencies -->
-    <script type="module">
-      import { Octokit } from 'https://esm.sh/@octokit/core';
-      window.Octokit = Octokit;
-    </script>
-
-    <!-- Application Modules -->
-    <script type="module" src="assets/js/config.js"></script>
-    <script type="module" src="assets/js/theme.js"></script>
-    <script type="module" src="assets/js/content.js"></script>
-    <script type="module" src="assets/js/skillManager.js"></script>
-    <script type="module" src="assets/js/observerManager.js"></script>
   </body>
 </html>

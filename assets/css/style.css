@@ -35,24 +35,17 @@
   /* Transitions */
   --transition-speed: 0.25s;
   --animation-timing: cubic-bezier(0.4, 0, 0.2, 1);
-}
 
-/* Light theme */
-[data-theme='light'] {
-  --bg-primary: #f8fafc;
-  --bg-secondary: #f1f5f9;
+  /* Theme Variables */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
   --text-primary: #1e293b;
   --text-secondary: #475569;
+  --accent: #3b82f6;
   --card-border: rgba(0, 0, 0, 0.1);
-}
-
-/* Dark theme */
-[data-theme='dark'] {
-  --bg-primary: #0f172a;
-  --bg-secondary: #1e293b;
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --card-border: rgba(255, 255, 255, 0.1);
+  --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
 /* Base styles */
@@ -71,17 +64,91 @@ html {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Base Layout */
 body {
   font-family: 'Inter', sans-serif;
   line-height: 1.6;
   background: var(--bg-primary);
   color: var(--text-primary);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+}
+
+/* Base Navigation Styles */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 1rem;
+}
+
+.nav-container {
+  width: 100%;
+  padding: 1rem;
+}
+
+.nav-content {
+  max-width: var(--container-width);
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg-secondary);
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--card-border);
+  box-shadow: var(--card-shadow);
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.nav-items {
+  display: flex;
+  gap: 2rem;
+}
+
+.nav-items a {
+  color: var(--text-primary);
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.nav-items a:hover {
+  background: var(--accent);
+  color: var(--bg-primary);
+}
+
+.theme-toggle {
+  margin-right: auto;
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  border-radius: 0.5rem;
+  color: var(--text-primary);
+}
+
+.mobile-menu-toggle {
+  display: none;
 }
 
 /* Layout & Sections */
 .container {
   width: min(100% - 2rem, var(--container-width));
   margin-inline: auto;
+  padding: 2rem 0;
+  flex: 1;
 }
 
 .section {
@@ -305,7 +372,7 @@ p {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  margin-bottom: 1rem;
+  margin: 0.5rem 0;
 }
 
 .language-tag,
@@ -316,7 +383,7 @@ p {
   padding: 0.25rem 0.5rem;
   border-radius: 0.25rem;
   background: var(--bg-secondary);
-  color: var(--text-secondary);
+  color: var (--text-secondary);
   font-size: 0.875rem;
   transition: all 0.3s ease;
 }
@@ -343,6 +410,35 @@ p {
 .workflow-item svg {
   width: var(--icon-size-sm);
   height: var(--icon-size-sm);
+}
+
+.tech-badge,
+.workflow-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  margin: 0.25rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--card-border);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tech-badge:hover,
+.workflow-badge:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.tech-badge .icon,
+.workflow-badge .icon {
+  display: inline-flex;
+  align-items: center;
+  height: 1em;
+  width: 1em;
+  color: var(--accent);
 }
 
 .project-links {
@@ -427,72 +523,51 @@ p {
 .theme-toggle {
   background: none;
   border: none;
-  padding: 0.75rem;
   cursor: pointer;
   color: var(--text-primary);
-  border-radius: var(--border-radius);
+  transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all var(--transition-speed) ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
 }
 
 .theme-toggle:hover {
-  background: var(--accent);
-  color: var(--bg-primary);
-  transform: rotate(15deg);
+  background-color: var(--bg-secondary);
+  transform: scale(1.05);
+}
+
+.theme-toggle:active {
+  transform: scale(0.95);
 }
 
 .theme-toggle svg {
-  width: var(--icon-size-md);
-  height: var(--icon-size-md);
+  width: 24px;
+  height: 24px;
+  transition: transform 0.3s ease;
+}
+
+.theme-toggle.theme-transitioning svg {
+  transform: rotate(180deg);
 }
 
 [data-theme='dark'] .sun-icon {
-  display: block;
+  display: block !important;
 }
 
 [data-theme='dark'] .moon-icon {
-  display: none;
+  display: none !important;
 }
 
 [data-theme='light'] .sun-icon {
-  display: none;
+  display: none !important;
 }
 
 [data-theme='light'] .moon-icon {
-  display: block;
-}
-
-/* Navigation */
-.nav-links {
-  display: flex;
-  justify-content: center;
-  gap: 2rem;
-  margin: 2rem 0;
-  background: var(--bg-secondary);
-  padding: 1rem 2rem;
-  border-radius: var(--border-radius);
-  box-shadow: var(--card-shadow);
-  position: sticky;
-  top: 1rem;
-  z-index: 100;
-  backdrop-filter: blur(8px);
-  border: 1px solid var(--card-border);
-}
-
-.nav-links a {
-  color: var(--text-primary);
-  text-decoration: none;
-  font-weight: 500;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  transition: all 0.3s ease;
-}
-
-.nav-links a:hover {
-  background: var(--accent);
-  color: var (--bg-primary);
+  display: block !important;
 }
 
 /* Skills Section */
@@ -783,8 +858,25 @@ footer p:hover {
   opacity: 0.8;
 }
 
-@keyframes spin {
-  to {
-    transform: translate(-50%, -50%) rotate(360deg);
-  }
+/* Button styles */
+.mobile-menu-toggle,
+.theme-toggle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-primary);
+  border: 1px solid var(--card-border);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.mobile-menu-toggle:hover,
+.theme-toggle:hover {
+  background: var(--bg-secondary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
 }

@@ -84,10 +84,14 @@ export const projectManager = {
   },
 
   async initialize() {
+    document.addEventListener('retryProjectLoad', async (event) => {
+      const { owner, repo, elementIds } = event.detail;
+      await this.updateProjectDisplay(owner, repo, elementIds);
+    });
+
     try {
       await Promise.all([
         this.updateProjectDisplay('greigh', 'blockingmachine', {
-          // lowercase to match GitHub
           description: 'project-description',
           techStack: 'tech-stack',
           workflowInfo: 'workflow-info',
@@ -101,7 +105,7 @@ export const projectManager = {
         }),
       ]);
     } catch (error) {
-      console.error('Error initializing project manager:', error);
+      console.error('Failed to initialize projects:', error);
     }
   },
 
@@ -110,7 +114,6 @@ export const projectManager = {
       // Check cache first
       const cached = await this.getCache(owner, repo);
       if (cached) {
-        console.log(`Using cached data for ${owner}/${repo}`);
         return cached;
       }
 
@@ -185,7 +188,7 @@ export const projectManager = {
   // Add fallback data method
   getFallbackData(owner, repo) {
     const fallbackData = {
-      BlockingMachine: {
+      blockingmachine: {
         description:
           'A custom-built aggregator that compiles and standardizes blocking lists, making them adaptable and powerful across platforms.',
         languages: ['JavaScript', 'Python', 'Shell'].map((lang) => ({
@@ -236,132 +239,57 @@ export const projectManager = {
     }
   },
 
-  updateProjectDisplay: async function (owner, repo, elementIds) {
-    const projectCard = document
-      .querySelector(`#${elementIds.techStack}`)
-      .closest('.project-card');
-
+  async updateProjectDisplay(owner, repo, elementIds) {
     try {
-      // Validate GitHub URL first
-      const isValidRepo = await this.validateGitHubUrl(owner, repo);
-      if (!isValidRepo) {
-        throw new Error('Invalid GitHub repository');
+      const data = await this.getProjectData(owner, repo);
+      if (!data) return;
+
+      const descriptionEl = document.getElementById(elementIds.description);
+      const techStackEl = document.getElementById(elementIds.techStack);
+      const workflowEl = document.getElementById(elementIds.workflowInfo);
+      const githubLinkEl = document.querySelector(elementIds.githubLink);
+
+      if (descriptionEl) {
+        descriptionEl.textContent = data.description;
       }
 
-      // Remove any existing error states
-      projectCard.classList.remove('error');
-
-      // Set loading state
-      projectCard.classList.add('loading');
-
-      // Replace content with loading text
-      const description = document.getElementById(elementIds.description);
-      const techStack = document.getElementById(elementIds.techStack);
-      const workflowInfo = document.getElementById(elementIds.workflowInfo);
-
-      description.innerHTML =
-        '<span class="loading-text">Loading project description...</span>';
-      techStack.innerHTML =
-        '<span class="loading-text">Loading technologies...</span>';
-      workflowInfo.innerHTML =
-        '<span class="loading-text">Loading workflow info...</span>';
-
-      // Fetch data
-      const data = await this.fetchGitHubData(owner, repo);
-      if (!data) {
-        throw new Error('Failed to fetch project data');
-      }
-
-      // Update content
-      if (techStack && data.languages) {
-        techStack.innerHTML = data.languages
+      if (techStackEl && data.languages) {
+        techStackEl.innerHTML = data.languages
           .map(
             (lang) => `
-            <span class="language-tag" title="${lang.name}">
-              ${lang.icon}
-              <span class="language-name">${lang.name}</span>
+            <span class="tech-badge">
+              ${lang.icon ? `<span class="icon">${lang.icon}</span>` : ''}
+              ${lang.name}
             </span>
           `
           )
           .join('');
       }
 
-      // Update other elements
-      const elements = {
-        description: document.getElementById(elementIds.description),
-        workflowInfo: document.getElementById(elementIds.workflowInfo),
-        githubLink: document.querySelector(elementIds.githubLink),
-      };
-
-      if (elements.description) {
-        elements.description.textContent = data.description;
-      }
-
-      if (elements.workflowInfo && data.workflows) {
-        elements.workflowInfo.innerHTML = data.workflows
+      if (workflowEl && data.workflows && data.workflows.length > 0) {
+        workflowEl.innerHTML = data.workflows
           .map(
             (workflow) => `
-            <span class="workflow-item" title="${workflow.name}">
-              ${workflow.icon}
+            <span class="workflow-badge">
+              ${
+                workflow.icon
+                  ? `<span class="icon">${workflow.icon}</span>`
+                  : ''
+              }
               ${workflow.name}
             </span>
           `
           )
           .join('');
+      } else if (workflowEl) {
+        workflowEl.style.display = 'none'; // Hide workflows section if empty
       }
 
-      if (elements.githubLink) {
-        const githubUrl =
-          data.html_url || `https://github.com/${owner}/${repo}`;
-        elements.githubLink.href = githubUrl.toLowerCase(); // ensure lowercase URL
-        elements.githubLink.setAttribute('rel', 'noopener noreferrer');
-        elements.githubLink.setAttribute('target', '_blank');
-        elements.githubLink.innerHTML = `
-          ${iconManager.getSocialIcon('github')}
-          <span>View on GitHub</span>
-        `;
-
-        // Validate the URL
-        const isValid = await this.validateGitHubUrl(owner, repo);
-        if (!isValid) {
-          elements.githubLink.classList.add('disabled');
-          elements.githubLink.title = 'Repository not available';
-        }
+      if (githubLinkEl) {
+        githubLinkEl.href = data.html_url;
       }
     } catch (error) {
-      console.error('Error updating project display:', error);
-
-      // Show error state
-      projectCard.classList.add('error');
-
-      const errorMessage = this.getErrorMessage(error);
-      const retryButton = this.createRetryButton(() =>
-        this.updateProjectDisplay(owner, repo, elementIds)
-      );
-
-      // Update elements with error state
-      const elements = {
-        description: document.getElementById(elementIds.description),
-        techStack: document.getElementById(elementIds.techStack),
-        workflowInfo: document.getElementById(elementIds.workflowInfo),
-      };
-
-      elements.description.innerHTML = `
-        <div class="error-message">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="12" y1="8" x2="12" y2="12"/>
-            <line x1="12" y1="16" x2="12" y2="16"/>
-          </svg>
-          ${errorMessage}
-        </div>
-        ${retryButton}
-      `;
-
-      elements.techStack.innerHTML = '';
-      elements.workflowInfo.innerHTML = '';
-    } finally {
-      projectCard.classList.remove('loading');
+      console.error(`Error updating project display for ${repo}:`, error);
     }
   },
 
@@ -378,13 +306,133 @@ export const projectManager = {
     return 'Using locally stored project data.';
   },
 
-  createRetryButton(retryFunction) {
+  createRetryButton(owner, repo, elementIds) {
+    const retryFunction = async () => {
+      await this.updateProjectDisplay(owner, repo, elementIds);
+    };
+
     return `
       <button
         class="retry-button"
-        onclick="(${retryFunction.toString()})()">
+        onclick="document.dispatchEvent(new CustomEvent('retryProjectLoad', {
+          detail: {
+            owner: '${owner}',
+            repo: '${repo}',
+            elementIds: ${JSON.stringify(elementIds)}
+          }
+        }))">
         Try Again
       </button>
     `;
+  },
+
+  async getProjectData(owner, repo) {
+    try {
+      // Try cache first
+      const cachedData = await this.getCache(owner, repo);
+      if (cachedData) return cachedData;
+
+      // Set up headers for GitHub API
+      const headers = {
+        Accept: 'application/vnd.github.v3+json',
+        'User-Agent': 'danielhipskind-portfolio',
+      };
+
+      // Fetch repository data
+      const repoResponse = await fetch(
+        `https://api.github.com/repos/${owner}/${repo}`,
+        { headers }
+      );
+      if (!repoResponse.ok) {
+        throw new Error(`GitHub API error: ${repoResponse.status}`);
+      }
+      const repoData = await repoResponse.json();
+
+      // Fetch languages data
+      const languagesResponse = await fetch(repoData.languages_url, {
+        headers,
+      });
+      const languagesData = await languagesResponse.json();
+
+      // Process the data
+      const data = {
+        description: repoData.description || 'No description available',
+        languages: Object.keys(languagesData).map((lang) => ({
+          name: lang,
+          icon: iconManager.getLanguageIcon(lang),
+        })),
+        workflows:
+          repo === 'blockingmachine'
+            ? [
+                {
+                  name: 'Linting',
+                  icon: iconManager.getWorkflowIcon('linting'),
+                },
+                {
+                  name: 'Testing',
+                  icon: iconManager.getWorkflowIcon('testing'),
+                },
+                {
+                  name: 'Error Webhook',
+                  icon: iconManager.getWorkflowIcon('error webhook'),
+                },
+              ]
+            : [], // Empty array for portfolio project
+        html_url: repoData.html_url,
+      };
+
+      // Cache the processed data
+      this.setCache(owner, repo, data);
+      return data;
+    } catch (error) {
+      console.error(`Error fetching project data for ${repo}:`, error);
+      return this.getFallbackData(owner, repo);
+    }
+  },
+
+  async getWorkflows(owner, repo) {
+    try {
+      const octokit = new window.Octokit();
+      const response = await octokit.request(
+        'GET /repos/{owner}/{repo}/actions/workflows',
+        {
+          owner,
+          repo,
+        }
+      );
+      return response.data.workflows.map((workflow) => ({
+        name: workflow.name,
+        state: workflow.state,
+      }));
+    } catch (error) {
+      console.warn(`No workflows found for ${repo}`);
+      return [];
+    }
+  },
+
+  async initialize() {
+    document.addEventListener('retryProjectLoad', async (event) => {
+      const { owner, repo, elementIds } = event.detail;
+      await this.updateProjectDisplay(owner, repo, elementIds);
+    });
+
+    try {
+      await Promise.all([
+        this.updateProjectDisplay('greigh', 'blockingmachine', {
+          description: 'project-description',
+          techStack: 'tech-stack',
+          workflowInfo: 'workflow-info',
+          githubLink: '#blocking-machine .github-link',
+        }),
+        this.updateProjectDisplay('greigh', 'danielhipskind.com', {
+          description: 'portfolio-description',
+          techStack: 'portfolio-tech-stack',
+          workflowInfo: 'portfolio-workflow-info',
+          githubLink: '#portfolio .github-link',
+        }),
+      ]);
+    } catch (error) {
+      console.error('Failed to initialize projects:', error);
+    }
   },
 };
