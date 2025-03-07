@@ -258,8 +258,14 @@ export const projectManager = {
           .map(
             (lang) => `
             <span class="tech-badge">
-              ${lang.icon ? `<span class="icon">${lang.icon}</span>` : ''}
-              ${lang.name}
+              ${
+                lang.icon
+                  ? `<span class="icon" aria-hidden="true" style="display: inline-flex; align-items: center; width: 20px; height: 20px;">
+                  ${lang.icon}
+                 </span>`
+                  : ''
+              }
+              <span>${lang.name}</span>
             </span>
           `
           )
@@ -273,10 +279,12 @@ export const projectManager = {
             <span class="workflow-badge">
               ${
                 workflow.icon
-                  ? `<span class="icon">${workflow.icon}</span>`
+                  ? `<span class="icon" aria-hidden="true" style="display: inline-flex; align-items: center; width: 20px; height: 20px;">
+                  ${workflow.icon}
+                 </span>`
                   : ''
               }
-              ${workflow.name}
+              <span>${workflow.name}</span>
             </span>
           `
           )

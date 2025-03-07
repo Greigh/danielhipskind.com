@@ -7,9 +7,6 @@ class NavigationManager {
   }
 
   initialize() {
-    console.log('Initializing NavigationManager');
-
-    // Get navigation elements
     this.menuToggle = document.querySelector('.mobile-menu-toggle');
     this.navLinks = document.querySelector('.nav-links');
 
@@ -25,16 +22,10 @@ class NavigationManager {
     this.updateNavigationState();
     this.setupEventListeners();
 
-    console.log('NavigationManager initialized');
     return true;
   }
 
   updateNavigationState() {
-    console.log('Updating navigation state:', {
-      isMobile: this.isMobile,
-      isMenuOpen: this.isMenuOpen,
-    });
-
     if (this.isMobile) {
       this.navLinks.style.display = this.isMenuOpen ? 'block' : 'none';
       this.menuToggle.style.display = 'flex';
@@ -54,7 +45,6 @@ class NavigationManager {
     if (e) e.stopPropagation();
 
     this.isMenuOpen = !this.isMenuOpen;
-    console.log('Menu state:', this.isMenuOpen);
     this.updateNavigationState();
   }
 

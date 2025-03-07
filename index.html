@@ -35,7 +35,8 @@
           "/assets/js/skillManager.js": "/assets/js/skillManager.js",
           "/assets/js/theme.js": "/assets/js/theme.js",
           "/assets/js/index.js": "/assets/js/index.js",
-          "/assets/js/observerManager.js": "/assets/js/observerManager.js"
+          "/assets/js/observerManager.js": "/assets/js/observerManager.js",
+          "/assets/js/cacheManager.js": "/assets/js/cacheManager.js"
         }
       }
     </script>
@@ -56,21 +57,27 @@
     <header class="header">
       <nav class="nav-container">
         <!-- Mobile menu toggle -->
-        <button class="mobile-menu-toggle" aria-label="Toggle menu"></button>
-        <!-- Theme toggle -->
+        <button
+          class="mobile-menu-toggle"
+          aria-label="Toggle menu"
+          aria-expanded="false"
+        >
+          <!-- Icon will be injected by JS -->
+        </button>
         <button
           id="theme-toggle"
           class="theme-toggle"
           aria-label="Toggle theme"
-        ></button>
+        >
+          <!-- Theme icon injected by ThemeManager -->
+        </button>
         <!-- Navigation links -->
         <div class="nav-links">
-          <div class="nav-items">
-            <a href="/">Home</a>
-            <a href="#about">About</a>
-            <a href="#projects">Projects</a>
-            <a href="#skills">Skills</a>
-          </div>
+          <ul class="nav-items">
+            <li><a href="#about">About</a></li>
+            <li><a href="#projects">Projects</a></li>
+            <li><a href="#skills">Skills</a></li>
+          </ul>
         </div>
       </nav>
     </header>

@@ -118,22 +118,119 @@ export const cacheManager = {
     try {
       this.updateStatusIndicator('updating');
 
-      const response = await fetch('https://api.github.com/rate_limit');
-      const limits = await response.json();
+      // Check rate limits first
+      const rateResponse = await fetch('https://api.github.com/rate_limit');
+      const limits = await rateResponse.json();
 
       // Update rate limit info
       this.rateLimitConfig.remaining = limits.rate.remaining;
-      this.rateLimitConfig.reset = limits.rate.reset * 1000; // Convert to milliseconds
+      this.rateLimitConfig.reset = limits.rate.reset * 1000;
 
-      // ... existing refresh logic ...
-
-      this.updateStatusIndicator('fresh');
-    } catch (error) {
-      if (retryCount < this.rateLimitConfig.maxRetries) {
-        await this.handleRetry(error, retryCount);
-      } else {
-        this.handleError(error);
+      // If we're rate limited, handle it
+      if (this.isRateLimited()) {
+        this.handleRateLimit();
+        return;
       }
+
+      // Define your repositories
+      const repositories = [
+        { owner: 'greigh', name: 'blockingmachine' },
+        { owner: 'greigh', name: 'danielhipskind.com' },
+      ];
+
+      const freshData = {};
+
+      // Fetch data for each repository
+      for (const repo of repositories) {
+        const repoData = await this.fetchRepoData(repo.owner, repo.name);
+        if (!repoData) continue; // Skip if fetch failed
+
+        freshData[repo.name] = {
+          description: repoData.description,
+          languages: await this.fetchLanguages(repo.owner, repo.name),
+          workflows: await this.fetchWorkflows(repo.owner, repo.name),
+          html_url: repoData.html_url,
+          stars: repoData.stargazers_count,
+        };
+      }
+
+      // Validate the fresh data
+      if (!this.validateCache(freshData)) {
+        throw new Error('Invalid data structure received');
+      }
+
+      // Store in cache with metadata
+      const cacheData = {
+        version: this.currentVersion,
+        timestamp: Date.now(),
+        data: freshData,
+      };
+
+      localStorage.setItem('github-data-cache', JSON.stringify(cacheData));
+      this.updateStatusIndicator('fresh');
+
+      return freshData;
+    } catch (error) {
+      console.error('Cache refresh failed:', error);
+      if (retryCount < this.rateLimitConfig.maxRetries) {
+        return this.handleRetry(error, retryCount);
+      }
+      return this.handleError(error);
+    }
+  },
+
+  async fetchRepoData(owner, repo) {
+    try {
+      const response = await fetch(
+        `https://api.github.com/repos/${owner}/${repo}`
+      );
+      if (!response.ok)
+        throw new Error(`HTTP error! status: ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      console.error(`Failed to fetch repo data for ${owner}/${repo}:`, error);
+      return null;
+    }
+  },
+
+  async fetchLanguages(owner, repo) {
+    try {
+      const response = await fetch(
+        `https://api.github.com/repos/${owner}/${repo}/languages`
+      );
+      if (!response.ok)
+        throw new Error(`HTTP error! status: ${response.status}`);
+      const languages = await response.json();
+
+      return Object.keys(languages).map((lang) => ({
+        name: lang,
+        percentage:
+          (languages[lang] / Object.values(languages).reduce((a, b) => a + b)) *
+          100,
+      }));
+    } catch (error) {
+      console.error(`Failed to fetch languages for ${owner}/${repo}:`, error);
+      return [];
+    }
+  },
+
+  async fetchWorkflows(owner, repo) {
+    try {
+      const response = await fetch(
+        `https://api.github.com/repos/${owner}/${repo}/actions/workflows`
+      );
+      if (!response.ok)
+        throw new Error(`HTTP error! status: ${response.status}`);
+      const data = await response.json();
+
+      return data.workflows.map((workflow) => ({
+        name: workflow.name,
+        state: workflow.state,
+        path: workflow.path,
+      }));
+    } catch (error) {
+      console.error(`Failed to fetch workflows for ${owner}/${repo}:`, error);
+      return [];
     }
   },
 
@@ -192,5 +289,24 @@ export const cacheManager = {
     return Object.entries(schema).every(([key, type]) => {
       return data[key] && data[key].constructor === type;
     });
+  },
+
+  validateCache(data) {
+    if (!data || typeof data !== 'object') return false;
+
+    const requiredFields = [
+      'description',
+      'languages',
+      'workflows',
+      'html_url',
+      'stars',
+    ];
+
+    return Object.values(data).every(
+      (repo) =>
+        requiredFields.every((field) => repo.hasOwnProperty(field)) &&
+        Array.isArray(repo.languages) &&
+        Array.isArray(repo.workflows)
+    );
   },
 };
