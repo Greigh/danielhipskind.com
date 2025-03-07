@@ -54,3 +54,31 @@ export const icons = {
     </svg>`,
   },
 };
+
+export const menuIcon = `
+  <svg viewBox="0 0 24 24" width="24" height="24">
+    <path fill="currentColor" d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+  </svg>
+`;
+
+export const sunIcon = `
+  <svg class="sun-icon" viewBox="0 0 24 24" width="24" height="24">
+    <circle cx="12" cy="12" r="5" fill="currentColor"/>
+    <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <line x1="12" y1="1" x2="12" y2="3"/>
+      <line x1="12" y1="21" x2="12" y2="23"/>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+      <line x1="1" y1="12" x2="3" y2="12"/>
+      <line x1="21" y1="12" x2="23" y2="12"/>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+    </g>
+  </svg>
+`;
+
+export const moonIcon = `
+  <svg viewBox="0 0 24 24" width="24" height="24">
+    <path fill="currentColor" d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-3.03 0-5.5-2.47-5.5-5.5 0-1.82.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/>
+  </svg>
+`;

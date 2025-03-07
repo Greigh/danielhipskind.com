@@ -1,97 +1,102 @@
+import { menuIcon } from './icons.js';
+
 class NavigationManager {
   constructor() {
     this.isMenuOpen = false;
+    this.isMobile = window.innerWidth <= 640;
   }
 
   initialize() {
-    console.group('Navigation Debug');
+    console.log('Initializing NavigationManager');
 
     // Get navigation elements
     this.menuToggle = document.querySelector('.mobile-menu-toggle');
-    console.log('Mobile Menu Toggle:', {
-      found: !!this.menuToggle,
-      element: this.menuToggle,
-      display: this.menuToggle
-        ? window.getComputedStyle(this.menuToggle).display
-        : 'N/A',
-    });
-
-    // Check viewport width
-    console.log('Viewport width:', window.innerWidth);
-    console.log(
-      'Media query active:',
-      window.matchMedia('(max-width: 640px)').matches
-    );
-
     this.navLinks = document.querySelector('.nav-links');
-    this.navItems = document.querySelector('.nav-items');
 
-    if (!this.menuToggle) {
-      console.error('Mobile menu toggle not found in DOM');
+    if (!this.menuToggle || !this.navLinks) {
+      console.error('Critical navigation elements missing');
       return false;
     }
 
-    // Verify mobile menu HTML structure
-    this.menuToggle.innerHTML = `
-      <svg viewBox="0 0 24 24" width="24" height="24">
-        <path fill="currentColor" d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
-      </svg>
-    `;
+    // Set menu icon
+    this.menuToggle.innerHTML = menuIcon;
 
+    // Set initial state
+    this.updateNavigationState();
     this.setupEventListeners();
-    console.groupEnd();
+
+    console.log('NavigationManager initialized');
     return true;
   }
 
-  setupEventListeners() {
-    if (this.menuToggle) {
-      console.log('Setting up mobile menu click listener');
-      this.menuToggle.addEventListener('click', (e) => {
-        console.log('Mobile menu clicked');
-        e.stopPropagation();
-        this.toggleMenu();
-      });
+  updateNavigationState() {
+    console.log('Updating navigation state:', {
+      isMobile: this.isMobile,
+      isMenuOpen: this.isMenuOpen,
+    });
+
+    if (this.isMobile) {
+      this.navLinks.style.display = this.isMenuOpen ? 'block' : 'none';
+      this.menuToggle.style.display = 'flex';
+      this.menuToggle.setAttribute('aria-expanded', String(this.isMenuOpen));
+      this.navLinks.classList.toggle('active', this.isMenuOpen);
+    } else {
+      this.navLinks.style.display = 'flex';
+      this.menuToggle.style.display = 'none';
+      this.navLinks.classList.remove('active');
     }
+  }
+
+  toggleMenu(e) {
+    if (!this.isMobile) return;
+
+    // Prevent event bubbling
+    if (e) e.stopPropagation();
+
+    this.isMenuOpen = !this.isMenuOpen;
+    console.log('Menu state:', this.isMenuOpen);
+    this.updateNavigationState();
+  }
+
+  closeMenu() {
+    if (!this.isMobile) return;
+    this.isMenuOpen = false;
+    this.updateNavigationState();
+  }
+
+  setupEventListeners() {
+    // Single click handler for menu toggle
+    this.menuToggle.addEventListener('click', (e) => this.toggleMenu(e));
 
     // Close menu when clicking outside
     document.addEventListener('click', (e) => {
       if (
+        this.isMobile &&
         this.isMenuOpen &&
-        !this.navLinks?.contains(e.target) &&
-        !this.menuToggle?.contains(e.target)
+        !this.navLinks.contains(e.target) &&
+        !this.menuToggle.contains(e.target)
       ) {
         this.closeMenu();
       }
     });
 
-    // Close on escape key
+    // Handle window resize
+    window.addEventListener('resize', () => {
+      const wasMobile = this.isMobile;
+      this.isMobile = window.innerWidth <= 640;
+
+      if (wasMobile !== this.isMobile) {
+        this.isMenuOpen = false;
+        this.updateNavigationState();
+      }
+    });
+
+    // Handle escape key press
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && this.isMenuOpen) {
+      if (this.isMobile && e.key === 'Escape' && this.isMenuOpen) {
         this.closeMenu();
       }
     });
-  }
-
-  toggleMenu() {
-    // Toggle state first
-    this.isMenuOpen = !this.isMenuOpen;
-    console.log('Toggling menu to:', this.isMenuOpen);
-
-    // Apply changes based on new state
-    if (this.isMenuOpen) {
-      this.navLinks?.classList.add('active');
-      this.menuToggle?.setAttribute('aria-expanded', 'true');
-    } else {
-      this.navLinks?.classList.remove('active');
-      this.menuToggle?.setAttribute('aria-expanded', 'false');
-    }
-  }
-
-  closeMenu() {
-    if (!this.isMenuOpen) return;
-    this.isMenuOpen = false;
-    this.navLinks?.classList.remove('active');
-    this.menuToggle?.setAttribute('aria-expanded', 'false');
   }
 }
 

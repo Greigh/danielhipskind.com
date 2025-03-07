@@ -1,29 +1,70 @@
-/* Media Queries */
+/**
+ * Media Queries and Responsive Design
+ *
+ * This file contains all responsive design rules, theme definitions,
+ * and accessibility considerations for the website.
+ */
 
-/* Theme Definitions */
-[data-theme='light'] {
-  --bg-primary: #ffffff;
-  --bg-secondary: #f8fafc;
-  --text-primary: #1e293b;
-  --text-secondary: #475569;
-  --accent: #3b82f6;
-  --card-border: rgba(0, 0, 0, 0.1);
-  --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05),
-    0 4px 6px -2px rgba(0, 0, 0, 0.025);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+/* Theme System
+-------------------------------------------------- */
+/**
+ * Root Theme Variables
+ * Defines base colors, system colors, and shadow values
+ * used throughout the application
+ */
+:root {
+  /* Base Colors - Color scale based on Tailwind's slate palette */
+  --slate-50: #f8fafc; /* Lightest background */
+  --slate-100: #f1f5f9; /* Light surface */
+  --slate-800: #1e293b; /* Dark surface */
+  --slate-900: #0f172a; /* Darkest background */
+  --blue-400: #60a5fa; /* Light accent */
+  --blue-500: #3b82f6; /* Primary accent */
+
+  /* System Feedback Colors */
+  --success: #22c55e; /* Success states */
+  --error: #ef4444; /* Error states */
+  --warning: #f59e0b; /* Warning states */
+  --info: #3b82f6; /* Info states */
+
+  /* Shadow Scale */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05); /* Subtle depth */
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1); /* Medium depth */
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1); /* Large depth */
+
+  /* Base Typography */
+  --font-size-sm: 0.875rem; /* 14px */
+  --font-size-base: 1rem; /* 16px */
+  --font-size-lg: 1.125rem; /* 18px */
+  --font-size-xl: 1.25rem; /* 20px */
 }
 
+/**
+ * Light Theme
+ * Default theme using light color scheme
+ */
+[data-theme='light'] {
+  --bg-primary: var(--slate-50);
+  --bg-secondary: white;
+  --text-primary: var(--slate-900);
+  --text-secondary: var(--slate-800);
+  --accent: var(--blue-500);
+  --card-border: rgb(0 0 0 / 0.1);
+  --card-shadow: var(--shadow-md);
+}
+
+/**
+ * Dark Theme
+ * Alternative theme using dark color scheme
+ */
 [data-theme='dark'] {
-  --bg-primary: #1e293b;
-  --bg-secondary: #0f172a;
-  --text-primary: #f8fafc;
-  --text-secondary: #cbd5e1;
-  --accent: #60a5fa;
-  --card-border: rgba(255, 255, 255, 0.1);
-  --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.1);
+  --bg-primary: var(--slate-900);
+  --bg-secondary: var(--slate-800);
+  --text-primary: var(--slate-50);
+  --text-secondary: var(--slate-100);
+  --accent: var(--blue-400);
+  --card-border: rgb(255 255 255 / 0.1);
+  --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.2);
 }
 
 /* Mobile First Media Queries */
@@ -147,10 +188,6 @@
     text-align: center;
   }
 
-  .theme-toggle {
-    margin-top: 0.5rem;
-  }
-
   .social-icon {
     padding: 0.25rem;
   }
@@ -225,8 +262,29 @@
   .about-content,
   .skills-grid,
   .projects-grid {
-    width: 90%;
+    width: 100%;
     max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+  }
+
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+
+  .project-card,
+  .skill-category {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
   }
 }
 
@@ -249,7 +307,7 @@
   }
 }
 
-/* Shared button styles */
+/* Base Navigation and Theme Toggle */
 .mobile-menu-toggle,
 .theme-toggle {
   width: 40px;
@@ -259,221 +317,420 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--bg-secondary);
+  border: 1px solid var(--card-border);
+  box-shadow: var(--shadow-sm);
+  color: var(--text-primary);
+  padding: 0.5rem;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Icon specific styles */
+.theme-toggle svg {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.3s ease;
+}
+
+.theme-toggle .sun-icon {
+  color: var(--text-primary);
+}
+
+.theme-toggle .moon-icon {
+  color: var(--text-primary);
+}
+
+.mobile-menu-toggle:hover,
+.theme-toggle:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.mobile-menu-toggle:active,
+.theme-toggle:active {
+  transform: translateY(0);
 }
 
 /* Mobile Navigation */
 @media (max-width: 640px) {
-  .nav-container {
-    background: transparent;
+  .header {
+    padding-top: 0.75rem; /* Increased for better spacing */
   }
 
-  .nav-content {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    padding: 0.75rem 1rem;
+  .nav-container {
     position: relative;
+    padding: 0.35rem; /* Slightly increased padding */
     display: flex;
     justify-content: space-between;
     align-items: center;
+    background: transparent !important;
   }
 
-  .mobile-menu-toggle {
-    display: flex !important;
-    position: relative;
-    left: 0;
-    margin-right: 1rem;
-    background: var(--bg-primary);
-    border: 1px solid var(--card-border);
+  .mobile-menu-toggle,
+  .theme-toggle {
+    width: 42px; /* Increased from 34px for better touch target */
+    height: 42px; /* Increased from 34px for better touch target */
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    padding: 0.4rem; /* Adjusted padding for larger size */
+    background: var(--bg-secondary);
+    border: 2px solid var(--card-border); /* Changed from white to var(--card-border) */
     box-shadow: var(--shadow-sm);
+    flex-shrink: 0;
+  }
+
+  /* Add a dark mode border color */
+  [data-theme='dark'] .mobile-menu-toggle,
+  [data-theme='dark'] .theme-toggle {
+    border-color: var(
+      --card-border
+    ); /* Using card-border variable instead of slate-800 */
+  }
+
+  /* Adjust icon sizes within buttons */
+  .mobile-menu-toggle svg,
+  .theme-toggle svg {
+    width: 50px; /* Increased from 20px */
+    height: 50px; /* Increased from 20px */
+  }
+
+  /* Adjust dropdown position for new button size */
+  .nav-links {
+    top: calc(90%); /* Adjusted for larger buttons */
+    left: 0.5rem; /* Adjusted for better alignment */
+    width: 160px; /* Increased from 140px */
+    padding: 0.2rem; /* Increased for better spacing */
+  }
+
+  .nav-items {
+    gap: 0.3rem; /* Reduced from 0.5rem */
+  }
+
+  .nav-items a {
+    padding: 0.8rem 1rem; /* Increased from 0.6rem 0.8rem for better spacing */
+    border-radius: 0.5rem; /* Reduced from 0.75rem */
   }
 
   .theme-toggle {
-    position: relative;
-    margin-left: auto;
-    background: var(--bg-primary);
-    border: 1px solid var(--card-border);
-    box-shadow: var(--shadow-sm);
+    position: relative; /* Changed from static */
+    top: auto;
+    right: auto;
+    transform: none;
   }
 
-  .mobile-menu-toggle:hover,
-  .theme-toggle:hover {
-    background: var(--bg-secondary);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-md);
+  /* Better touch feedback */
+  .mobile-menu-toggle:active,
+  .theme-toggle:active {
+    background: var(--accent);
+    transform: scale(0.95);
+    transition: all 0.1s ease;
   }
 
+  /* Dropdown Menu */
   .nav-links {
     display: none;
     position: absolute;
-    top: calc(100% + 0.5rem);
-    left: 0;
+    top: calc(95%);
+    left: 0.5rem;
+    right: 0rem;
     background: var(--bg-secondary);
-    width: 200px;
-    padding: 1rem;
-    border-radius: var(--border-radius);
+    width: 150px;
+    padding: 0.1rem 0.1rem;
+    border-radius: 1rem;
     border: 1px solid var(--card-border);
-    box-shadow: var(--shadow-md);
-    z-index: 100;
+    box-shadow: var(--shadow-lg);
+    z-index: 99;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.2s ease, transform 0.75s ease;
   }
 
   .nav-links.active {
-    display: flex;
-    flex-direction: column;
+    display: block !important;
+    opacity: 0.95;
+    transform: translateY(0);
   }
 
   .nav-items {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    width: 100%;
   }
 
   .nav-items a {
     display: block;
     padding: 0.75rem 1rem;
-    width: 100%;
-    text-align: left;
-    border-radius: var(--border-radius);
-    transition: all 0.3s ease;
+    border-radius: 0.75rem;
+    transition: all 0.2s ease;
+    color: var(--text-primary);
+    text-decoration: none;
   }
 
   .nav-items a:hover {
     background: var(--accent);
-    color: var(--bg-primary);
+    color: var(--bg-secondary);
+  }
+
+  .nav-items a {
+    font-size: var(--font-size-base);
+    padding: 0.6rem 0.8rem;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+    margin-bottom: 0.1rem; /* Reduced from 0.5rem */
+  }
+
+  /* Adjust subheading/description spacing */
+  h1 + p {
+    margin-top: 0.1rem; /* Reduced from 0.5rem */
+    margin-bottom: 1.5rem;
+    line-height: 1.25;
+  }
+
+  /* Container sizing consistency */
+  .about-content,
+  .project-card,
+  .skill-category {
+    padding: 1.5rem;
+    margin: 1rem auto;
+    width: 100%;
+    max-width: 800px; /* Match About container max-width */
+  }
+
+  /* Grid adjustments */
+  .projects-grid,
+  .skills-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+
+  /* Reset grid template */
+  .projects-grid,
+  .skills-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Consistent spacing */
+  .project-content,
+  .skill-category {
+    padding: 0.5rem;
+  }
+
+  /* Match hover effects */
+  .project-card:hover,
+  .skill-category:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--card-shadow);
+  }
+}
+
+/* Mobile Typography and Spacing */
+@media (max-width: 640px) {
+  h1 {
+    font-size: 1.5rem;
+    margin-bottom: 0.25rem; /* Reduced from 0.5rem */
+  }
+
+  /* Adjust subheading/description spacing */
+  h1 + p {
+    margin-top: 0.1rem; /* Reduced from 0.5rem */
+    margin-bottom: 1.5rem;
+    line-height: 1.25;
   }
 }
 
 /* Desktop Navigation */
 @media (min-width: 641px) {
-  .mobile-menu-toggle {
-    display: none !important;
-  }
-
-  .nav-content {
-    background: var(--bg-secondary);
-    border-radius: var(--border-radius);
-    border: 1px solid var(--card-border);
-    box-shadow: var(--card-shadow);
-    padding: 1rem;
-  }
-
-  .nav-links {
-    display: flex !important;
-    width: 100%;
-    position: static;
-    padding: 0;
-  }
-
-  .nav-items {
-    display: flex;
-    align-items: center;
-    gap: 2rem;
-  }
-
-  .theme-toggle {
-    margin-left: auto;
-    background: transparent;
-    border: none;
-    box-shadow: none;
-  }
-
-  .theme-toggle:hover {
-    transform: none;
-    background: transparent;
-    box-shadow: none;
-  }
-}
-
-/* Desktop Navigation - Always visible above 641px */
-@media (min-width: 641px) {
-  .mobile-menu-toggle {
-    display: none !important;
-  }
-
-  .nav-links {
-    display: flex !important;
-    position: static !important;
-    width: 100%;
-    background: none;
-    border: none;
-    box-shadow: none;
-    padding: 0;
-  }
-
-  .nav-items {
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center;
-    gap: 2rem;
-  }
-
-  .theme-toggle {
-    margin-left: auto;
-    width: auto;
-  }
-}
-
-/* Mobile Navigation - Hidden by default, shown when active */
-@media (max-width: 640px) {
-  .nav-content {
-    padding: 0.5rem 1rem;
+  .nav-container {
     position: relative;
+    max-width: var(--container-width);
+    margin: 0 auto;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem; /* Added gap between nav and theme toggle */
   }
 
-  .mobile-menu-toggle {
-    display: block !important;
-    position: absolute;
-    left: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    padding: 0.5rem;
-    color: var(--text-primary);
-    cursor: pointer;
-    z-index: 101;
-  }
-
-  /* Hide all navigation by default on mobile */
-  .nav-links {
-    display: none !important; /* Force hide by default */
-    position: absolute;
-    top: 100%;
-    left: 0;
-    background: var(--bg-secondary);
-    width: 200px;
-    padding: 1rem;
-    border-radius: 0 0 var(--border-radius) var (--border-radius);
+  .nav-content {
+    display: inline-flex;
+    justify-content: center;
+    border-radius: 20px;
     border: 1px solid var(--card-border);
-    box-shadow: var(--card-shadow);
+    box-shadow: var(--shadow-md);
+    padding: 0.75rem 2rem;
+    background: var(--bg-secondary);
   }
 
-  /* Show navigation only when active class is present */
-  .nav-links.active {
+  .nav-links {
     display: flex !important;
-    flex-direction: column;
+    justify-content: center;
   }
 
   .nav-items {
     display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    width: 100%;
-  }
-
-  .nav-items a {
-    display: block;
-    padding: 0.75rem 1rem;
-    width: 100%;
-    text-align: left;
+    gap: 2rem;
+    margin: 0;
+    padding: 0.5rem;
+    white-space: nowrap;
   }
 
   .theme-toggle {
-    margin-top: 1rem;
-    padding: 0.75rem;
-    width: 100%;
+    position: relative;
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
     justify-content: center;
+  }
+
+  .mobile-menu-toggle {
+    display: none !important;
+  }
+}
+
+/* Desktop Typography and Spacing */
+@media (min-width: 641px) {
+  h1 {
+    font-size: 1.75rem;
+    margin-bottom: 0.35rem; /* Reduced from 0.75rem */
+  }
+
+  /* Adjust subheading/description spacing */
+  h1 + p {
+    margin-top: 0.35rem; /* Reduced from 0.75rem */
+    margin-bottom: 2rem;
+    line-height: 1.6;
+  }
+}
+
+/* Desktop Navigation ONLY */
+@media (min-width: 641px) {
+  .nav-container {
+    position: relative;
+    max-width: var(--container-width);
+    margin: 0 auto;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nav-content {
+    display: inline-flex;
+    justify-content: center;
+    border-radius: 20px;
+    border: 1px solid var(--card-border);
+    box-shadow: var(--shadow-md);
+    padding: 0.75rem 2rem;
+    width: auto;
+    background: var(--bg-secondary);
+  }
+
+  .nav-links {
+    display: flex !important;
+    justify-content: center;
+  }
+
+  .nav-items {
+    display: flex;
+    gap: 2rem;
+    margin: 0;
+    padding: 0.5rem;
+    white-space: nowrap;
+    background: var(--bg-secondary);
+    border-radius: 15px;
+  }
+
+  .theme-toggle {
+    position: relative;
+    width: 42px;
+    height: 42px;
+    margin-left: 0.35rem; /* Reduced spacing */
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mobile-menu-toggle {
+    display: none !important;
+  }
+}
+
+@media (min-width: 1025px) {
+  .nav-items a {
+    font-size: var(--font-size-base);
+    padding: 0.75rem 1rem;
+  }
+
+  h1 {
+    font-size: 2rem;
+  }
+
+  h2 {
+    font-size: var(--font-size-xl);
+  }
+
+  h3 {
+    font-size: var(--font-size-lg);
+  }
+
+  p {
+    font-size: var(--font-size-base);
+  }
+}
+
+/* Base spacing for all devices */
+.skills-section {
+  margin-bottom: 1.2rem; /* Reduced from 2rem (60% of original) */
+}
+
+/* Mobile spacing */
+@media (max-width: 640px) {
+  .skills-section {
+    margin-bottom: 0.9rem; /* Reduced from 1.5rem */
+  }
+}
+
+/* Tablet spacing */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .skills-section {
+    margin-bottom: 1.05rem; /* Reduced from 1.75rem */
+  }
+}
+
+/* Desktop spacing */
+@media (min-width: 1025px) {
+  .skills-section {
+    margin-bottom: 1.2rem; /* Reduced from 2rem */
+  }
+}
+
+/* Spacing Fixes */
+.skills-section {
+  margin-bottom: 1.2rem !important; /* Force override */
+}
+
+footer {
+  margin-top: 0 !important; /* Reset any top margin on footer */
+  padding-top: 1.2rem; /* Add padding instead of margin */
+}
+
+/* Mobile adjustments */
+@media (max-width: 640px) {
+  .skills-section {
+    margin-bottom: 0.9rem !important;
+  }
+
+  footer {
+    padding-top: 0.9rem;
   }
 }

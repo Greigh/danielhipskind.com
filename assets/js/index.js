@@ -8,9 +8,13 @@ const initializeApp = async () => {
     const { config } = await import('./config.js');
     const { projectManager } = await import('./projectManager.js');
 
-    // Initialize managers
-    themeManager.initialize();
+    // Initialize navigation first
     navigationManager.initialize();
+
+    // Initialize theme manager
+    themeManager.initialize();
+
+    // Initialize managers
     await projectManager.initialize();
 
     // Initialize content and observers
