@@ -4,3 +4,9 @@ node_modules/
 *.log
 .backup
 assets/js/config.js
+.vscode
+.idea
+package-lock.json
+package.json
+yarn.lock
+CNAME

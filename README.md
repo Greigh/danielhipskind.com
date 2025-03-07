@@ -41,7 +41,8 @@ Visit [danielhipskind.com](https://danielhipskind.com)
 danielhipskind.com/
 ├── assets/
 │   ├── css/
-│   │   └── style.css
+│   │   ├── style.css
+│   │   └── media-queries.css
 │   ├── images/
 │   │   └── selfedited2.jpg
 │   └── js/
@@ -51,7 +52,9 @@ danielhipskind.com/
 │       ├── config.js
 │       └── icons.js
 ├── index.html
-└── README.md
+├── README.md
+└── LICENSE
+
 ```
 
 ## 🚀 Getting Started
@@ -97,7 +100,19 @@ The website automatically fetches and displays project information from GitHub:
 
 ## 📝 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under All Rights Reserved - see the [LICENSE](LICENSE) file for details.
+
+## 📦 Project Structure
+
+### Files Overview
+
+- `LICENSE`: License information for the project
+- `README.md`: Project documentation
+- `index.html`: Main HTML file for the portfolio
+- `assets/`: Collection of assets including CSS, images, and JavaScript files
+- `assets/css/style.css`: Styles for the website
+- `assets/images/selfedited2.jpg`: Image used in the portfolio
+- `assets/js/`: JavaScript files managing various functionalities
 
 ## 🤝 Contributing
 
