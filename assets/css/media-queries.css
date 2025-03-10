@@ -528,6 +528,18 @@
     transform: translateY(-2px);
     box-shadow: var(--card-shadow);
   }
+
+  .theme-toggle {
+    width: 48px;
+    height: 48px;
+    margin: 0;
+    padding: 12px;
+  }
+
+  .theme-toggle svg {
+    width: 24px;
+    height: 24px;
+  }
 }
 
 /* Mobile Typography and Spacing */
@@ -593,6 +605,12 @@
 
   .mobile-menu-toggle {
     display: none !important;
+  }
+
+  .theme-toggle {
+    width: 48px;
+    height: 48px;
+    margin-left: 1rem;
   }
 }
 
