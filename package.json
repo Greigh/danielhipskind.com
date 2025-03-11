@@ -14,9 +14,10 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:e2e": "cypress open",
-    "build": "webpack --mode production",
+    "build": "npm run optimize-images && webpack --mode production",
     "css": "postcss assets/css/style.css -o assets/css/style.min.css --verbose",
-    "css:watch": "postcss assets/css/style.css -o assets/css/style.min.css --watch"
+    "css:watch": "postcss assets/css/style.css -o assets/css/style.min.css --watch",
+    "optimize-images": "node scripts/optimizeImages.js"
   },
   "repository": {
     "type": "git",
@@ -47,7 +48,8 @@
     "jsonwebtoken": "^9.0.2",
     "node-cache": "^5.1.2",
     "node-cron": "^3.0.3",
-    "rss-parser": "^3.13.0"
+    "rss-parser": "^3.13.0",
+    "sharp": "^0.33.5"
   },
   "devDependencies": {
     "@babel/core": "^7.26.9",

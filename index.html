@@ -30,7 +30,12 @@
       name="msapplication-TileImage"
       content="assets/images/Icons/144.png"
     />
-
+    <link
+      rel="preload"
+      as="image"
+      href="assets/images/hero-1920.webp"
+      type="image/webp"
+    />
     <script type="importmap">
       {
         "imports": {
@@ -96,12 +101,29 @@
     <main class="container">
       <!-- Hero Section -->
       <section class="hero">
-        <img
-          src="./assets/images/danielportfolio.png"
-          alt="Daniel Hipskind"
-          class="profile-image"
-          loading="lazy"
-        />
+        <picture class="hero-image">
+          <source
+            type="image/webp"
+            srcset="
+              assets/images/hero-480.webp   480w,
+              assets/images/hero-768.webp   768w,
+              assets/images/hero-1024.webp 1024w,
+              assets/images/hero-1440.webp 1440w,
+              assets/images/hero-1920.webp 1920w
+            "
+            sizes="(max-width: 480px) 480px,
+                   (max-width: 768px) 768px,
+                   (max-width: 1024px) 1024px,
+                   (max-width: 1440px) 1440px,
+                   1920px"
+          />
+          <img
+            src="assets/images/selfedited2.jpg"
+            alt="Daniel Hipskind"
+            loading="eager"
+            fetchpriority="high"
+          />
+        </picture>
         <h1>Daniel Hipskind</h1>
         <p class="tagline">Software Developer & Problem Solver</p>
       </section>

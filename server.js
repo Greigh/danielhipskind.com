@@ -157,6 +157,19 @@ app.use(
   express.static('projects/visual-rss-feed/public')
 );
 
+// Serve images with specific cache control
+app.use(
+  '/assets/images',
+  express.static('assets/images', {
+    maxAge: '1y',
+    setHeaders: (res, path) => {
+      if (path.endsWith('.webp')) {
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      }
+    },
+  })
+);
+
 // Routes
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
