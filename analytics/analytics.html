@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Analytics Dashboard</title>
+    <link rel="stylesheet" href="../assets/css/style.css" type="text/css" />
+    <link rel="stylesheet" href="./css/analytics.css" type="text/css" />
+  </head>
+  <body>
+    <div class="analytics-container">
+      <header>
+        <h1>Analytics Dashboard</h1>
+        <div class="summary">
+          <div class="stat-card">
+            <h3>Total Visits</h3>
+            <p id="totalVisits">0</p>
+          </div>
+          <div class="stat-card">
+            <h3>Unique Visitors</h3>
+            <p id="uniqueVisitors">0</p>
+          </div>
+          <div class="stat-card">
+            <h3>VPN Usage</h3>
+            <p id="vpnUsage">0%</p>
+          </div>
+        </div>
+      </header>
+
+      <div class="charts-grid">
+        <div class="chart-container">
+          <canvas id="deviceChart"></canvas>
+        </div>
+        <div class="chart-container">
+          <canvas id="browserChart"></canvas>
+        </div>
+        <div class="chart-container wide">
+          <canvas id="hoursChart"></canvas>
+        </div>
+      </div>
+
+      <div class="projects-section">
+        <h2>Projects</h2>
+        <div class="projects-grid">
+          <div class="project-card">
+            <div class="project-header">
+              <h3>Test Automation Framework</h3>
+              <span class="project-status active">Active</span>
+            </div>
+            <div class="project-info">
+              <p>Automated testing framework built with Playwright</p>
+              <div class="project-tech">
+                <span class="tech-tag">Node.js</span>
+                <span class="tech-tag">Playwright</span>
+                <span class="tech-tag">Testing</span>
+              </div>
+            </div>
+            <div class="project-links">
+              <a href="/projects/test-automation" class="btn">View Project</a>
+              <a href="/projects/test-automation/docs" class="btn btn-secondary"
+                >Documentation</a
+              >
+            </div>
+          </div>
+          <div class="project-card">
+            <div class="project-header">
+              <h3>Visual RSS Feed</h3>
+              <span class="project-status active">Active</span>
+            </div>
+            <div class="project-info">
+              <p>
+                A modern RSS feed reader with visual enhancements, optimized for
+                Hacker News content
+              </p>
+              <div class="project-tech">
+                <span class="tech-tag">Node.js</span>
+                <span class="tech-tag">Express</span>
+                <span class="tech-tag">RSS</span>
+                <span class="tech-tag">HN API</span>
+              </div>
+            </div>
+            <div class="project-links">
+              <a href="/projects/visual-rss-feed" class="btn">View Project</a>
+              <a href="/projects/visual-rss-feed/docs" class="btn btn-secondary"
+                >Documentation</a
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="../dist/analytics.bundle.js"></script>
+  </body>
+</html>

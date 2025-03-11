@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="<%= typeof theme !== 'undefined' ? theme : 'light' %>">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= pageTitle %></title>
+    
+    <!-- Favicon configuration -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/demos/visual-rss-feed/images/apple-touch-icon.png">
+    <link rel="icon" type="image/svg+xml" href="<%= FAVICON_PATH %>">
+    <link rel="icon" type="image/png" sizes="32x32" href="/demos/visual-rss-feed/images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/demos/visual-rss-feed/images/favicon-16x16.png">
+    <link rel="manifest" href="/demos/visual-rss-feed/manifest.json">
+    
+    <link rel="stylesheet" href="/demos/visual-rss-feed/css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+    <%# Safely encode data attributes with fallbacks %>
+    <meta id="app-initial-data" 
+          data-total-articles="<%- typeof totalArticles !== 'undefined' ? totalArticles : 0 %>" 
+          data-articles-per-page="<%- typeof ARTICLES_PER_PAGE !== 'undefined' ? ARTICLES_PER_PAGE : 10 %>"
+          data-current-page="<%- typeof currentPage !== 'undefined' ? currentPage : 1 %>"
+          data-articles="<%- encodeURIComponent(JSON.stringify(typeof initialArticles !== 'undefined' ? initialArticles : [])) %>">
+    <script src="/demos/visual-rss-feed/js/theme.js" defer></script>
+</head>
+<body>
+    <header>
+        <h1><%= typeof pageTitle !== 'undefined' ? pageTitle : 'HackerNews Feed' %></h1>
+        <nav>
+            <a href="/demos/visual-rss-feed/">Newest</a>
+            <a href="/demos/visual-rss-feed/top">Top</a>
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+                <span id="theme-toggle-icon">🌙</span>
+            </button>
+        </nav>
+    </header>
+
+    <main>
+        <div id="app-data" 
+             data-total-articles="<%= totalArticles %>" 
+             data-articles-per-page="<%= ARTICLES_PER_PAGE %>">
+        </div>
+
+        <div id="articles-container" class="articles-container">
+            <% if (typeof initialArticles !== 'undefined' && initialArticles.length > 0) { %>
+                <% initialArticles.forEach(function(article) { %>
+                    <div class="article">
+                        <div class="article-image-container">
+                            <img 
+                                src="<%- article.imageUrl || (typeof DEFAULT_IMAGE !== 'undefined' ? DEFAULT_IMAGE : '/demos/visual-rss-feed/public/noimagehere-shubham-dhage-unsplash.jpg') %>"
+                                alt="<%- article.title || 'Article image' %>"
+                                class="article-image"
+                                loading="lazy"
+                                onerror='this.onerror=null;this.src="<%- typeof DEFAULT_IMAGE !== `undefined` ? DEFAULT_IMAGE : `/demos/visual-rss-feed/public/noimagehere-shubham-dhage-unsplash.jpg` %>"'
+                            />
+                        </div>
+                        <div class="article-content">
+                            <h2>
+                                <a href="<%= article.link %>" target="_blank" rel="noopener noreferrer">
+                                    <%= article.title || 'Untitled Article' %>
+                                </a>
+                            </h2>
+                            <p class="article-time"><%= article.formattedTime || 'No date available' %></p>
+                        </div>
+                    </div>
+                <% }); %>
+            <% } else { %>
+                <div class="no-articles">
+                    <p>No articles available at the moment.</p>
+                </div>
+            <% } %>
+        </div>
+
+        <div id="loading-indicator" style="display: none;">
+            Loading more articles...
+        </div>
+        <div id="end-message" style="display: none;">
+            You've reached the end of the first 100 articles. Use pagination below to see more.
+        </div>
+        <div id="error-message" style="display: none; text-align: center; padding: 20px; color: red;">
+        </div>
+        
+        <%# Pagination with error checking %>
+        <div id="pagination" 
+             class="pagination <%= (typeof totalArticles !== 'undefined' && totalArticles > 0) ? 'pagination--visible' : 'pagination--hidden' %>">
+            <button id="prevPage" 
+                    aria-label="Previous page" 
+                    <%= (typeof currentPage === 'undefined' || currentPage <= 1) ? 'disabled' : '' %>>
+                Previous
+            </button>
+            <span id="currentPage">
+                Page <%= typeof currentPage !== 'undefined' ? currentPage : 1 %> of 
+                <%= typeof totalArticles !== 'undefined' && typeof ARTICLES_PER_PAGE !== 'undefined' ? 
+                    Math.ceil(totalArticles / ARTICLES_PER_PAGE) : 1 %>
+            </span>
+            <button id="nextPage" 
+                    aria-label="Next page" 
+                    <%= (typeof currentPage === 'undefined' || typeof totalArticles === 'undefined' || 
+                        typeof ARTICLES_PER_PAGE === 'undefined' || 
+                        currentPage >= Math.ceil(totalArticles / ARTICLES_PER_PAGE)) ? 'disabled' : '' %>>
+                Next
+            </button>
+        </div>
+    </main>
+    <script src="/demos/visual-rss-feed/js/infiniteScroll.js" defer></script>
+    <script src="/demos/visual-rss-feed/js/theme.js" defer></script>
+</body>
+</html>

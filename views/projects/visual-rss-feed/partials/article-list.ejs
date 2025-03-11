@@ -1,0 +1,45 @@
+<% articles.forEach(function(article) { %>
+    <li class="article-item">
+        <article>
+            <div class="article-image-container">
+                <img
+                    src="<%= article.imageUrl || '/demos/visual-rss-feed/images/noimagehere-shubham-dhage-unsplash.jpg' %>"
+                    alt="<%= article.title %>"
+                    class="article-image"
+                    loading="lazy"
+                    onerror="this.onerror=null; this.src='/demos/visual-rss-feed/images/noimagehere-shubham-dhage-unsplash.jpg'"
+                    width="300"
+                    height="200"
+                />
+            </div>
+            <div class="article-content">
+                <h2 class="article-title">
+                    <a 
+                        href="<%= article.link %>" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        aria-label="Read <%= article.title %> (opens in new tab)"
+                    ><%= article.title %></a>
+                </h2>
+                <div class="meta" aria-label="Article metadata">
+                    <% if (article.sourceName) { %>
+                        <span class="website">
+                            <svg aria-hidden="true" class="icon"><use href="#website-icon"/></svg>
+                            <%= article.sourceName %>
+                        </span>
+                    <% } %>
+                    <% if (article.author) { %>
+                        <span class="author">
+                            <svg aria-hidden="true" class="icon"><use href="#author-icon"/></svg>
+                            by <%= article.author %>
+                        </span>
+                    <% } %>
+                    <time class="time" datetime="<%= article.timestamp %>">
+                        <svg aria-hidden="true" class="icon"><use href="#time-icon"/></svg>
+                        <%= article.formattedTime %>
+                    </time>
+                </div>
+            </div>
+        </article>
+    </li>
+<% }); %>

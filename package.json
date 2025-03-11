@@ -1,0 +1,77 @@
+{
+  "name": "danielwebsite",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "My personal portfolio website showcasing my projects and skills.",
+  "main": "./assets/index.js",
+  "scripts": {
+    "start": "node server.js",
+    "ngrok": "ngrok http --url=tender-randomly-skunk.ngrok-free.app 3000",
+    "dev": "nodemon server.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:e2e": "cypress open",
+    "build": "webpack --mode production",
+    "css": "postcss assets/css/style.css -o assets/css/style.min.css --verbose",
+    "css:watch": "postcss assets/css/style.css -o assets/css/style.min.css --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Greigh/DanielNewWebsite.git"
+  },
+  "author": "Daniel Hipskind aka Greigh",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Greigh/DanielNewWebsite/issues"
+  },
+  "homepage": "https://github.com/Greigh/DanielNewWebsite#readme",
+  "dependencies": {
+    "@octokit/core": "^6.1.4",
+    "axios": "^1.8.2",
+    "bcryptjs": "^3.0.2",
+    "bottleneck": "^2.19.5",
+    "chart.js": "^4.4.8",
+    "cheerio": "^1.0.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "date-fns": "^4.1.0",
+    "date-fns-tz": "^3.2.0",
+    "debug": "^4.4.0",
+    "dotenv": "^16.4.7",
+    "ejs": "^3.1.9",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "jsonwebtoken": "^9.0.2",
+    "node-cache": "^5.1.2",
+    "node-cron": "^3.0.3",
+    "rss-parser": "^3.13.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.26.9",
+    "@babel/preset-env": "^7.26.9",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "autoprefixer": "^10.4.20",
+    "babel-loader": "^10.0.0",
+    "cssnano": "^7.0.6",
+    "cypress": "^13.6.6",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "jest": "^29.7.0",
+    "mocha": "^10.3.0",
+    "nodemon": "^3.0.3",
+    "postcss": "^8.5.3",
+    "postcss-cli": "^11.0.0",
+    "postcss-import": "^16.1.0",
+    "postcss-preset-env": "^10.1.5",
+    "typescript": "^5.3.3",
+    "webpack": "^5.98.0",
+    "webpack-cli": "^6.0.1"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

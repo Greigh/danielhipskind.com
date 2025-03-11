@@ -846,3 +846,11 @@ footer p:hover {
   font-style: italic;
   opacity: 0.8;
 }
+
+.adsbox {
+  height: 1px;
+  width: 1px;
+  position: absolute;
+  left: -999px;
+  top: -999px;
+}

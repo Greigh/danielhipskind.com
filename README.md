@@ -91,6 +91,20 @@ The website automatically fetches and displays project information from GitHub:
 - Workflow information
 - Project links
 
+## 📂 Projects
+
+### Visual RSS Feed for Hacker News
+
+A modern, accessible web application that displays Hacker News articles in a visual grid layout. [Learn more](./projects/visual-rss-feed/README.md)
+
+Features:
+
+- Visual Grid Layout
+- Dark Mode Support
+- Infinite Scroll
+- Image Previews
+- Accessibility Focus
+
 ## 🎨 Customization
 
 1. Update project data in `projectManager.js`
