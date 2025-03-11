@@ -83,32 +83,6 @@ export const projectManager = {
     }
   },
 
-  async initialize() {
-    document.addEventListener('retryProjectLoad', async (event) => {
-      const { owner, repo, elementIds } = event.detail;
-      await this.updateProjectDisplay(owner, repo, elementIds);
-    });
-
-    try {
-      await Promise.all([
-        this.updateProjectDisplay('greigh', 'blockingmachine', {
-          description: 'project-description',
-          techStack: 'tech-stack',
-          workflowInfo: 'workflow-info',
-          githubLink: '#blocking-machine .github-link',
-        }),
-        this.updateProjectDisplay('greigh', 'danielhipskind.com', {
-          description: 'portfolio-description',
-          techStack: 'portfolio-tech-stack',
-          workflowInfo: 'portfolio-workflow-info',
-          githubLink: '#portfolio .github-link',
-        }),
-      ]);
-    } catch (error) {
-      console.error('Failed to initialize projects:', error);
-    }
-  },
-
   async fetchGitHubData(owner, repo) {
     try {
       // Check cache first

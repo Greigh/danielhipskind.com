@@ -706,6 +706,7 @@
   }
 }
 
+/* Remove these duplicate spacing rules */
 /* Base spacing for all devices */
 .skills-section {
   margin-bottom: 1.2rem; /* Reduced from 2rem (60% of original) */
@@ -715,6 +716,10 @@
 @media (max-width: 640px) {
   .skills-section {
     margin-bottom: 0.9rem; /* Reduced from 1.5rem */
+  }
+
+  footer {
+    padding-top: 0.9rem;
   }
 }
 
@@ -733,22 +738,33 @@
 }
 
 /* Spacing Fixes */
-.skills-section {
-  margin-bottom: 1.2rem !important; /* Force override */
-}
-
 footer {
   margin-top: 0 !important; /* Reset any top margin on footer */
   padding-top: 1.2rem; /* Add padding instead of margin */
 }
 
-/* Mobile adjustments */
+/* Spacing System */
+.skills-section {
+  margin-bottom: 1.2rem; /* Base spacing */
+}
+
+footer {
+  padding-top: 1.2rem; /* Base spacing */
+}
+
+/* Responsive spacing adjustments */
 @media (max-width: 640px) {
   .skills-section {
-    margin-bottom: 0.9rem !important;
+    margin-bottom: 0.9rem;
   }
 
   footer {
     padding-top: 0.9rem;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .skills-section {
+    margin-bottom: 1.05rem;
   }
 }

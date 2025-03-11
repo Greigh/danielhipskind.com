@@ -44,7 +44,7 @@ danielhipskind.com/
 │   │   ├── style.css
 │   │   └── media-queries.css
 │   ├── images/
-│   │   └── selfedited2.jpg
+│   │   └── danielportfolio.jpg
 │   └── js/
 │       ├── projectManager.js
 │       ├── iconManager.js
@@ -52,9 +52,8 @@ danielhipskind.com/
 │       ├── config.js
 │       └── icons.js
 ├── index.html
-├── README.md
-└── LICENSE
-
+├── LICENSE
+└── README.md
 ```
 
 ## 🚀 Getting Started
