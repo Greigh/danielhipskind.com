@@ -11,7 +11,7 @@ import {
   FAVICON_PATH,
 } from '../../api/config/constants.js';
 
-// Consolidate service imports - removed unused ones
+// Consolidate service imports
 import { browserService } from '../../api/services/browserService.js';
 import { cacheService } from '../../api/services/cacheService.js';
 import { memoryService } from '../../api/services/memoryService.js';
@@ -22,12 +22,12 @@ import {
 import { fileService } from '../../api/services/fileService.js';
 import { serviceManager } from '../../api/services/ServiceManager.js';
 
-// Consolidate utility imports - removed unused ones
+// Consolidate utility imports
 import { debug } from '../../api/utils/debug.js';
-import { trimArticleData } from '../../.api/utils/formatters.js';
+import { trimArticleData } from '../../api/utils/formatters.js';
 
-// Import routes
-import healthRoutes from '../../.api/routes/health.js';
+// Import routes - Fix the path here
+import healthRoutes from '../../api/routes/health.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const router = express.Router();

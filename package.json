@@ -6,17 +6,11 @@
   "main": "./assets/index.js",
   "scripts": {
     "start": "node server.js",
-    "ngrok": "ngrok http --url=tender-randomly-skunk.ngrok-free.app 3000",
-    "dev": "nodemon server.js",
+    "dev": "DEBUG=rss:* nodemon server.js",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
     "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
-    "test:e2e": "cypress open",
     "build": "npm run optimize-images && webpack --mode production",
-    "css": "postcss assets/css/style.css -o assets/css/style.min.css --verbose",
-    "css:watch": "postcss assets/css/style.css -o assets/css/style.min.css --watch",
+    "css": "postcss assets/css/style.css -o assets/css/style.min.css",
     "optimize-images": "node scripts/optimizeImages.js"
   },
   "repository": {

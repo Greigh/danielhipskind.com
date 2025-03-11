@@ -17,6 +17,7 @@ import rssRouter from './api/routes/rss.js';
 import { initializeRSSFeed } from './projects/visual-rss-feed/index.js';
 import { debug } from './api/utils/debug.js';
 import { rssService } from './api/services/rssService.js';
+import { checkAuth } from './api/middleware/auth.js';
 
 // Initialize dotenv before any environment variable usage
 dotenv.config();
@@ -99,6 +100,22 @@ app.get('/projects/visual-rss-feed/docs', (req, res) => {
 app.use('/analytics/analytics.html', protectRoute);
 app.use('/api/analytics', protectRoute, analyticsRouter);
 
+// Protect analytics routes
+app.use('/analytics', express.static('analytics'));
+app.get('/analytics/*', checkAuth, (req, res, next) => {
+  if (req.path === '/analytics/login.html') {
+    next();
+  } else {
+    const token =
+      req.cookies.analyticsToken || req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      res.redirect('/analytics/login.html');
+    } else {
+      next();
+    }
+  }
+});
+
 // Login endpoint with better error handling
 app.post('/api/auth/login', async (req, res) => {
   try {
@@ -150,12 +167,13 @@ app.get('/analytics', (req, res) => res.redirect('/analytics/login.html'));
 
 // RSS Feed routes
 app.use('/api/rss', rssRouter);
-
-// Serve RSS Feed static files
 app.use(
   '/projects/visual-rss-feed',
   express.static('projects/visual-rss-feed/public')
 );
+app.get('/projects/visual-rss-feed/docs', (req, res) => {
+  res.sendFile(path.join(__dirname, 'projects/visual-rss-feed/README.md'));
+});
 
 // Serve images with specific cache control
 app.use(

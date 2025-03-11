@@ -44,7 +44,9 @@ export function trimArticleData(article) {
     id: article.id,
     title: article.title,
     link: article.link,
-    formattedTime: article.formattedTime,
+    domain: article.domain,
+    timestamp: article.timestamp,
+    preview: article.preview,
   };
 }
 
@@ -68,14 +70,8 @@ function extractImageFromContent(content) {
   }
 }
 
-function getTimeZone() {
-  try {
-    // Try to get user's timezone
-    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    return timeZone || 'America/New_York'; // Default to EST
-  } catch (error) {
-    return 'America/New_York'; // Default to EST
-  }
+export function getTimeZone() {
+  return Intl.DateTimeFormat().resolvedOptions().timeZone;
 }
 
 export function validateAndFormatDate(date) {
@@ -88,6 +84,17 @@ export function validateAndFormatDate(date) {
     timestamp: validDate.getTime(),
     formattedTime: format(validDate, 'MMM d, yyyy h:mm a'),
   };
+}
+
+export function formatTime(timestamp) {
+  return new Date(timestamp).toLocaleString('en-US', {
+    timeZone: 'America/Los_Angeles',
+    hour12: true,
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
 }
 
 module.exports = {

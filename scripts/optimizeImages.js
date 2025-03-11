@@ -2,7 +2,7 @@ import sharp from 'sharp';
 import path from 'path';
 import { promises as fs } from 'fs';
 
-const INPUT_PATH = 'assets/images/selfedited2.jpg';
+const INPUT_PATH = 'assets/images/danielportfolio.png';
 const OUTPUT_DIR = 'assets/images';
 
 async function ensureOutputDir() {
@@ -18,21 +18,19 @@ async function optimizeHeroImage() {
   try {
     await ensureOutputDir();
 
-    // Create WebP versions
-    await sharp(INPUT_PATH)
-      .webp({ quality: 80 })
-      .resize(1920, null, { withoutEnlargement: true })
-      .toFile(path.join(OUTPUT_DIR, 'hero-1920.webp'));
-
-    console.log('✅ Created hero-1920.webp');
-
-    // Create responsive sizes
-    const sizes = [1440, 1024, 768, 480];
+    // Create WebP versions with proper quality for PNG source
+    const sizes = [1920, 1440, 1024, 768, 480];
 
     for (const width of sizes) {
       await sharp(INPUT_PATH)
-        .webp({ quality: 80 })
-        .resize(width, null, { withoutEnlargement: true })
+        .webp({
+          quality: 90, // Higher quality for PNG source
+          lossless: true, // Preserve PNG quality
+        })
+        .resize(width, null, {
+          withoutEnlargement: true,
+          kernel: sharp.kernel.lanczos3, // Better for text/UI elements
+        })
         .toFile(path.join(OUTPUT_DIR, `hero-${width}.webp`));
 
       console.log(`✅ Created hero-${width}.webp`);

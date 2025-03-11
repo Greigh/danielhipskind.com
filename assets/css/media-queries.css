@@ -197,6 +197,15 @@
     width: 20px;
     height: 20px;
   }
+
+  .hero-image {
+    max-height: 60vh;
+  }
+
+  .hero {
+    padding: 0.5rem 0;
+    margin: 0.5rem 0;
+  }
 }
 
 @media (min-width: 481px) and (max-width: 768px) {
@@ -217,6 +226,15 @@
     width: 22px;
     height: 22px;
   }
+
+  .hero-image {
+    max-height: 70vh;
+  }
+
+  .hero {
+    padding: 1rem 0;
+    margin: 1rem 0;
+  }
 }
 
 @media (min-width: 769px) and (max-width: 1024px) {
@@ -226,6 +244,10 @@
 
   .skill-category {
     padding: 2rem;
+  }
+
+  .hero-image {
+    max-height: 80vh;
   }
 }
 
@@ -304,6 +326,12 @@
 @media (min-width: 1280px) {
   .container {
     max-width: var(--container-width);
+  }
+}
+
+@media (max-width: 1440px) {
+  .hero-image {
+    max-height: 90vh;
   }
 }
 

@@ -10,8 +10,8 @@ yarn.lock
 !.env.example
 
 # Build outputs
-dist/
-build/
+/dist/
+/build/
 *.bundle.js
 *.bundle.js.map
 
@@ -22,21 +22,28 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# IDE
+# IDE - VSCode
 .vscode/*
 !.vscode/settings.json
+!.vscode/tasks.json
 !.vscode/launch.json
+!.vscode/extensions.json
+
+# IDE - Other
 .idea/
 *.swp
 *.swo
 *~
 
-# OS
+# macOS
 .DS_Store
-.DS_Store?
+.AppleDouble
+.LSOverride
 ._*
 .Spotlight-V100
 .Trashes
+
+# Windows
 ehthumbs.db
 Thumbs.db
 
@@ -44,12 +51,14 @@ Thumbs.db
 .cache/
 .npm/
 .eslintcache
+lib-cov/
 
 # Testing
 coverage/
 test-results/
 playwright-report/
 /playwright/.cache/
+test.js
 
 # Debug
 *.debug
@@ -62,8 +71,10 @@ playwright-report/
 
 # Config
 deploy.config.js
+deploy.config.yml
 deploy.sh
 ecosystem.config.js
+*.conf
 
 # Runtime data
 pids/
@@ -73,4 +84,5 @@ pids/
 
 # Project specific
 assets/js/config.js
-public/projects/visual-rss-feed/data/
+projects/visual-rss-feed/data/
+projects/visual-rss-feed/logs/

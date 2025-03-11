@@ -49,6 +49,7 @@
 
             if (data.token) {
               localStorage.setItem('analyticsToken', data.token);
+              document.cookie = `analyticsToken=${data.token}; path=/; secure; samesite=Strict`;
               window.location.href = '/analytics/analytics.html';
             }
           } catch (error) {
