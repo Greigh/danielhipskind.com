@@ -1,75 +1,81 @@
-const { MEMORY_LIMIT, MEMORY_CHECK_INTERVAL } = require('../config/constants');
-const { debug } = require('../utils/debug');
+import { debug } from '../utils/debug.js';
 
 class MemoryService {
-    constructor() {
-        this.monitorInterval = null;
-        this.warningThreshold = MEMORY_LIMIT * 0.8; // 80% of limit
-        this.criticalThreshold = MEMORY_LIMIT * 0.95; // 95% of limit
+  constructor() {
+    this.initialized = false;
+    this.monitoring = false;
+    this.interval = null;
+    this.memoryLimit = process.env.MEMORY_LIMIT || 1024; // MB
+  }
+
+  async init() {
+    try {
+      // Verify we can access process.memoryUsage()
+      process.memoryUsage();
+      this.initialized = true;
+      debug('Memory service initialized');
+      return true;
+    } catch (error) {
+      debug(`Memory service initialization failed: ${error.message}`);
+      return false;
+    }
+  }
+
+  startMonitoring(interval = 60000) {
+    // Default 1 minute interval
+    if (!this.initialized) {
+      throw new Error('Memory service not initialized');
     }
 
-    checkMemoryUsage() {
-        try {
-            const memoryUsage = process.memoryUsage();
-            const used = memoryUsage.heapUsed / 1024 / 1024;
-            const total = memoryUsage.heapTotal / 1024 / 1024;
-            const percentUsed = (used / total) * 100;
-
-            // Log different severity levels
-            if (used > this.criticalThreshold) {
-                debug(`CRITICAL: Memory usage at ${Math.round(percentUsed)}% (${Math.round(used)} MB)`);
-                this.forceGC();
-            } else if (used > this.warningThreshold) {
-                debug(`WARNING: High memory usage: ${Math.round(used)} MB`);
-                this.forceGC();
-            } else {
-                debug(`Memory usage normal: ${Math.round(used)} MB`);
-            }
-
-            return {
-                used,
-                total,
-                percentUsed,
-                external: memoryUsage.external / 1024 / 1024,
-                arrayBuffers: memoryUsage.arrayBuffers / 1024 / 1024
-            };
-        } catch (error) {
-            debug(`Error checking memory: ${error.message}`);
-            return null;
-        }
+    if (this.monitoring) {
+      return;
     }
 
-    forceGC() {
-        if (global.gc) {
-            try {
-                global.gc();
-                debug('Manual garbage collection triggered');
-            } catch (error) {
-                debug(`GC error: ${error.message}`);
-            }
-        }
+    this.monitoring = true;
+    this.interval = setInterval(() => {
+      this.checkMemoryUsage();
+    }, interval);
+
+    debug('Memory monitoring started');
+  }
+
+  stopMonitoring() {
+    if (this.interval) {
+      clearInterval(this.interval);
+      this.interval = null;
+      this.monitoring = false;
+      debug('Memory monitoring stopped');
     }
+  }
 
-    startMonitoring(interval = MEMORY_CHECK_INTERVAL) {
-        if (this.monitorInterval) {
-            debug('Memory monitoring already active');
-            return;
-        }
+  checkMemoryUsage() {
+    try {
+      const used = process.memoryUsage();
+      const heapUsed = Math.round(used.heapUsed / 1024 / 1024);
+      const heapTotal = Math.round(used.heapTotal / 1024 / 1024);
+      const external = Math.round(used.external / 1024 / 1024);
 
-        this.monitorInterval = setInterval(() => {
-            this.checkMemoryUsage();
-        }, interval);
+      if (heapUsed > this.memoryLimit) {
+        debug(
+          `Memory warning: ${heapUsed}MB used of ${this.memoryLimit}MB limit`
+        );
+      }
 
-        debug(`Memory monitoring started (interval: ${interval}ms)`);
+      debug(
+        `Memory stats - Heap: ${heapUsed}/${heapTotal}MB, External: ${external}MB`
+      );
+      return { heapUsed, heapTotal, external };
+    } catch (error) {
+      debug(`Memory check failed: ${error.message}`);
+      throw error;
     }
+  }
 
-    stopMonitoring() {
-        if (this.monitorInterval) {
-            clearInterval(this.monitorInterval);
-            this.monitorInterval = null;
-            debug('Memory monitoring stopped');
-        }
-    }
+  async cleanup() {
+    this.stopMonitoring();
+    this.initialized = false;
+    debug('Memory service cleaned up');
+  }
 }
 
-module.exports = new MemoryService();
+export default new MemoryService();

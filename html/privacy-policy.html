@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Privacy Policy - Daniel Hipskind</title>
+
+    <!-- Meta tags -->
+    <meta
+      name="description"
+      content="Privacy Policy for Daniel Hipskind's Portfolio"
+    />
+    <meta
+      name="keywords"
+      content="privacy policy, data protection, analytics"
+    />
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="/assets/css/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+    />
+
+    <!-- Icons -->
+    <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="container">
+          <a href="/" class="nav-logo">Daniel Hipskind</a>
+          <button
+            id="theme-toggle"
+            class="theme-toggle"
+            aria-label="Toggle theme"
+          ></button>
+        </nav>
+      </header>
+
+      <main class="container">
+        <section class="privacy-section">
+          <h1>Privacy Policy</h1>
+
+          <div class="card">
+            <h2>Analytics & Data Collection</h2>
+            <p>
+              This website uses minimal analytics to understand visitor
+              interactions. Your privacy is important to me.
+            </p>
+
+            <div class="grid privacy-grid">
+              <div class="card">
+                <h3>What I Collect</h3>
+                <ul>
+                  <li>Page views</li>
+                  <li>Time on site</li>
+                  <li>Browser type</li>
+                  <li>Screen size</li>
+                  <li>Country (not specific location)</li>
+                </ul>
+              </div>
+
+              <div class="card">
+                <h3>What I Don't Collect</h3>
+                <ul>
+                  <li>Personal information</li>
+                  <li>Email addresses</li>
+                  <li>IP addresses</li>
+                  <li>Exact location</li>
+                  <li>Device IDs</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>Your Controls</h2>
+            <div class="button-group">
+              <button id="opt-out-btn" class="button">
+                Opt Out of Analytics
+              </button>
+              <button id="export-data" class="button button-outline">
+                Export My Data
+              </button>
+              <button id="delete-data" class="button button-outline">
+                Delete My Data
+              </button>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Questions?</h3>
+            <p>
+              Feel free to
+              <a href="mailto:me@danielhipskind.com">contact me</a> with any
+              privacy-related questions.
+            </p>
+            <p>
+              <a href="/" class="button button-outline">Return to Homepage</a>
+            </p>
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <div class="container">
+          <p>Built with ❤️ using modern web technologies</p>
+        </div>
+      </footer>
+    </div>
+
+    <script>
+      // Check for required elements
+      function checkRequiredElements() {
+        const required = {
+          'theme-toggle': 'Theme toggle button',
+          'opt-out-btn': 'Opt-out button',
+          'export-data': 'Export data button',
+          'delete-data': 'Delete data button',
+        };
+
+        let missingElements = [];
+
+        for (const [id, name] of Object.entries(required)) {
+          if (!document.getElementById(id)) {
+            missingElements.push(name);
+            console.error(`Required element missing: ${name} (id: ${id})`);
+          }
+        }
+
+        if (missingElements.length > 0) {
+          console.warn(
+            'Missing required elements:',
+            missingElements.join(', ')
+          );
+        }
+
+        return missingElements.length === 0;
+      }
+
+      // Run check when DOM is loaded
+      document.addEventListener('DOMContentLoaded', checkRequiredElements);
+    </script>
+
+    <!-- Import Map -->
+    <script type="importmap">
+      {
+        "imports": {
+          "/assets/js/theme.js": "/assets/js/theme.js",
+          "/assets/js/privacy.js": "/assets/js/privacy.js"
+        }
+      }
+    </script>
+
+    <!-- Scripts -->
+    <script type="module">
+      import ThemeManager from '/assets/js/theme.js';
+      // Only initialize if elements exist
+      if (checkRequiredElements()) {
+        ThemeManager.initialize();
+      }
+    </script>
+    <script type="module" src="/assets/js/privacy.js"></script>
+  </body>
+</html>

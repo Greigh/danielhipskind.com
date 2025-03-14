@@ -1,44 +1,68 @@
-import express from 'express';
-import bcrypt from 'bcryptjs';
+import { Router } from 'express';
 import jwt from 'jsonwebtoken';
+import { verifyPassword, authenticate } from '../middleware/authMiddleware.js';
+import { debug } from '../utils/debug.js';
 import rateLimit from 'express-rate-limit';
-import dotenv from 'dotenv';
 
-dotenv.config();
-const router = express.Router();
+const router = Router();
 
-// Rate limiting
+// Rate limiting for login attempts
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 5, // 5 attempts
-  message: { message: 'Too many login attempts. Please try again later.' },
+  message: 'Too many login attempts, please try again later',
 });
 
 router.post('/login', loginLimiter, async (req, res) => {
+  const { password } = req.body;
+
   try {
-    const { password } = req.body;
+    const isValid = await verifyPassword(password);
 
-    if (!password) {
-      return res.status(400).json({ message: 'Password is required' });
+    if (isValid) {
+      const token = jwt.sign({ authorized: true }, process.env.JWT_SECRET, {
+        expiresIn: '24h',
+      });
+
+      res.cookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      });
+
+      res.json({ success: true });
+    } else {
+      debug('Invalid login attempt');
+      res.status(401).json({ success: false });
     }
+  } catch (error) {
+    debug('Login error:', error);
+    res.status(500).json({ success: false });
+  }
+});
 
-    const isValid = await bcrypt.compare(password, process.env.HASHED_PASSWORD);
+router.post('/logout', (req, res) => {
+  res.clearCookie('token');
+  res.json({ success: true });
+});
 
-    if (!isValid) {
-      return res.status(401).json({ message: 'Invalid password' });
-    }
-
-    const token = jwt.sign({ authorized: true }, process.env.JWT_SECRET, {
-      expiresIn: process.env.JWT_EXPIRE,
-    });
+router.get('/verify', authenticate, (req, res) => {
+  try {
+    // If authenticate middleware passed, token is valid
+    const token = req.cookies.token;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     res.json({
-      token,
-      expiresIn: process.env.JWT_EXPIRE,
+      authenticated: true,
+      expires: new Date(decoded.exp * 1000).toISOString(),
     });
   } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    debug('Token verification failed:', error);
+    res.status(401).json({
+      authenticated: false,
+      message: 'Invalid or expired token',
+    });
   }
 });
 

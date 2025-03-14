@@ -89,8 +89,8 @@
     --bg-secondary: #1e293b;
     --text-primary: #f8fafc;
     --text-secondary: #94a3b8;
-    --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2),
-      0 2px 4px -1px rgba(0, 0, 0, 0.1);
+    --card-shadow:
+      0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
   }
 }
 
@@ -197,15 +197,6 @@
     width: 20px;
     height: 20px;
   }
-
-  .hero-image {
-    max-height: 60vh;
-  }
-
-  .hero {
-    padding: 0.5rem 0;
-    margin: 0.5rem 0;
-  }
 }
 
 @media (min-width: 481px) and (max-width: 768px) {
@@ -226,15 +217,6 @@
     width: 22px;
     height: 22px;
   }
-
-  .hero-image {
-    max-height: 70vh;
-  }
-
-  .hero {
-    padding: 1rem 0;
-    margin: 1rem 0;
-  }
 }
 
 @media (min-width: 769px) and (max-width: 1024px) {
@@ -244,10 +226,6 @@
 
   .skill-category {
     padding: 2rem;
-  }
-
-  .hero-image {
-    max-height: 80vh;
   }
 }
 
@@ -308,6 +286,29 @@
     display: flex;
     flex-direction: column;
   }
+
+  .privacy-banner {
+    max-width: 900px;
+    width: calc(100% - 4rem); /* Add width calculation */
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 2rem;
+    right: auto; /* Remove right property */
+  }
+
+  .privacy-content {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .privacy-actions {
+    justify-content: flex-end;
+    gap: 1rem;
+  }
+
+  .privacy-actions .button {
+    min-width: 120px; /* Add minimum width for buttons */
+  }
 }
 
 @media (min-width: 1200px) {
@@ -326,12 +327,6 @@
 @media (min-width: 1280px) {
   .container {
     max-width: var(--container-width);
-  }
-}
-
-@media (max-width: 1440px) {
-  .hero-image {
-    max-height: 90vh;
   }
 }
 
@@ -473,7 +468,9 @@
     z-index: 99;
     opacity: 0;
     transform: translateY(-10px);
-    transition: opacity 0.2s ease, transform 0.75s ease;
+    transition:
+      opacity 0.2s ease,
+      transform 0.75s ease;
   }
 
   .nav-links.active {
@@ -794,5 +791,83 @@ footer {
 @media (min-width: 641px) and (max-width: 1024px) {
   .skills-section {
     margin-bottom: 1.05rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .privacy-content {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+/* Privacy Banner Responsive Styles */
+@media (max-width: 640px) {
+  .privacy-banner {
+    bottom: 1rem;
+    left: 1rem;
+    right: 1rem;
+    padding: 1.5rem;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+
+  .privacy-content {
+    gap: 1rem;
+  }
+
+  .privacy-content p {
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+
+  .privacy-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  .privacy-actions .button {
+    width: 100%;
+    padding: 0.6rem 1.5rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .privacy-banner {
+    bottom: 1.5rem;
+    left: 1.5rem;
+    right: 1.5rem;
+    padding: 1.75rem;
+  }
+
+  .privacy-content {
+    max-width: 600px;
+  }
+}
+
+@media (min-width: 1025px) {
+  .privacy-banner {
+    max-width: 900px;
+    width: calc(100% - 4rem); /* Add width calculation */
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 2rem;
+    right: auto; /* Remove right property */
+  }
+
+  .privacy-content {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .privacy-actions {
+    justify-content: flex-end;
+    gap: 1rem;
+  }
+
+  .privacy-actions .button {
+    min-width: 120px; /* Add minimum width for buttons */
   }
 }

@@ -32,7 +32,7 @@ Visit [danielhipskind.com](https://danielhipskind.com)
   - GitHub REST API
   - localStorage API
 - **Deployment**:
-  - GitHub Pages
+  - VPS Hosting
   - Custom Domain
 
 ## 📦 Project Structure
@@ -111,6 +111,139 @@ Features:
 2. Modify styles in `style.css`
 3. Edit content in `index.html`
 
+## 📊 Analytics Implementation
+
+### Overview
+
+Built-in analytics system that respects user privacy while providing valuable insights.
+
+### Features
+
+- **Privacy-First Analytics**
+
+  - No third-party tracking
+  - Zero cookies implementation
+  - GDPR & CCPA compliant by design
+  - Full transparency on data collection
+
+- **Real-Time Monitoring**
+
+  - Active visitor tracking
+  - Page performance metrics
+  - User interaction patterns
+  - Session flow analysis
+
+- **Performance Insights**
+  - Load time monitoring
+  - Resource usage tracking
+  - API performance stats
+  - Error rate analysis
+
+### Implementation Architecture
+
+```text
+danielhipskind.com/
+├── api/
+│   ├── routes/
+│   │   └── analytics.js      # Analytics endpoints
+│   ├── middleware/
+│   │   ├── clientInfo.js     # Client data collection
+│   │   └── rateLimit.js      # Request throttling
+│   └── services/
+│       └── analyticsService.js
+├── html/
+│   └── analytics/
+│       └── js/
+│           ├── auth.js       # Core tracking
+│           └── events.js     # Event handlers
+└── server.js                 # Main server config
+```
+
+### Data Collection
+
+| Category    | Details                  | Storage Duration |
+| ----------- | ------------------------ | ---------------- |
+| Performance | Load times, API latency  | 30 days          |
+| Usage       | Page views, interactions | 7 days           |
+| System      | Browser, OS (anonymized) | Session only     |
+| Location    | Country code only        | Aggregated only  |
+
+### Security Measures
+
+- **Rate Limiting**
+
+  ```javascript
+  Requests: 100/minute/IP
+  Burst: 200/minute max
+  Block Duration: 15 minutes
+  ```
+
+- **Data Protection**
+  ```javascript
+  IP Anonymization: Last octet removed
+  Storage: Encrypted at rest
+  Transmission: HTTPS only
+  Access: JWT authentication
+  ```
+
+### Local Development
+
+```bash
+# Start analytics server
+npm run dev:analytics
+
+# View real-time dashboard
+open http://localhost:3002/analytics
+
+# Test data collection
+npm run test:analytics
+```
+
+### Production Dashboard
+
+Access the analytics dashboard at:
+
+- URL: `https://danielhipskind.com/analytics`
+- Auth: Admin credentials required
+- Data: Real-time + historical views
+
+### Privacy Controls
+
+1. **Opt-Out Methods**
+
+   - URL: `/analytics/opt-out`
+   - LocalStorage: `analytics_optout`
+   - DoNotTrack header support
+
+2. **Data Access**
+   - Request: `/analytics/data`
+   - Delete: `/analytics/data/delete`
+   - Export: `/analytics/data/export`
+
+## 🔒 Compliance
+
+- **GDPR**: Article 6(1)(f) legitimate interests
+- **CCPA**: Section 1798.100 compliance
+- **PECR**: Cookie-free implementation
+
+## 🔒 Privacy Statement
+
+This implementation adheres to:
+
+- GDPR Article 6(1)(f)
+- CCPA Section 1798.100
+- PECR Regulation 6
+
+## 🔒 Privacy Considerations
+
+The analytics implementation follows these principles:
+
+- No personal data collection
+- Anonymous usage statistics
+- GDPR-compliant tracking
+- Transparent data handling
+- User privacy protection
+
 ## 📝 License
 
 This project is licensed under All Rights Reserved - see the [LICENSE](LICENSE) file for details.
@@ -124,7 +257,7 @@ This project is licensed under All Rights Reserved - see the [LICENSE](LICENSE) 
 - `index.html`: Main HTML file for the portfolio
 - `assets/`: Collection of assets including CSS, images, and JavaScript files
 - `assets/css/style.css`: Styles for the website
-- `assets/images/selfedited2.jpg`: Image used in the portfolio
+- `assets/images/danielportfolio.jpg`: Image used in the portfolio
 - `assets/js/`: JavaScript files managing various functionalities
 
 ## 🤝 Contributing

@@ -1,69 +1,70 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" data-theme="dark">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="/assets/css/style.css" type="text/css" />
-    <link rel="icon" href="/assets/images/favicon.ico" />
     <meta http-equiv="cache-control" content="no-cache" />
     <meta http-equiv="pragma" content="no-cache" />
     <meta http-equiv="expires" content="0" />
     <meta name="keywords" content="Web Developer" />
     <meta name="description" content="Daniel Hipskind Portfolio" />
-    <meta property="og:title" content="Daniel Hipskind" />
+
+    <!-- Open Graph Tags -->
+    <meta property="og:title" content="Daniel Hipskind | Software Developer" />
     <meta property="og:description" content="Daniel Hipskind Portfolio" />
-    <meta property="og:image" content="assets/images/danielportfolio.png" />
+    <meta property="og:image" content="/assets/images/danielportfolio.png" />
     <meta property="og:url" content="https://danielhipskind.com/" />
+    <meta property="og:type" content="website" />
+
+    <!-- Theme -->
+    <meta name="theme-color" content="#243b56" />
+    <meta name="msapplication-TileColor" content="#ffffff" />
+    <meta
+      name="msapplication-TileImage"
+      content="/assets/images/Icons/144.png"
+    />
+
     <title>Daniel Hipskind | Software Developer</title>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="/assets/css/style.css" />
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
     />
-    <meta name="theme-color" content="#243b56" />
-    <meta property="og:type" content="website" />
-    <link rel="stylesheet" href="assets/css/style.css" type="text/css" />
 
-    <!-- Browser Theme -->
-    <meta name="theme-color" content="#ffffff" />
-    <meta name="msapplication-TileColor" content="#ffffff" />
-    <meta
-      name="msapplication-TileImage"
-      content="assets/images/Icons/144.png"
-    />
-    <link
-      rel="preload"
-      as="image"
-      href="assets/images/hero-1920.webp"
-      type="image/webp"
-    />
+    <!-- Icons -->
+    <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+
+    <!-- Import Map must come before any module scripts -->
     <script type="importmap">
       {
         "imports": {
           "@octokit/core": "https://esm.sh/@octokit/core",
+          "chart.js": "https://cdn.jsdelivr.net/npm/chart.js@4.4.8/auto/auto.js",
           "/assets/js/config.js": "/assets/js/config.js",
           "/assets/js/icons.js": "/assets/js/icons.js",
           "/assets/js/iconManager.js": "/assets/js/iconManager.js",
           "/assets/js/projectManager.js": "/assets/js/projectManager.js",
           "/assets/js/contentManager.js": "/assets/js/contentManager.js",
           "/assets/js/skillManager.js": "/assets/js/skillManager.js",
-          "/assets/js/theme.js": "/assets/js/theme.js",
-          "/assets/js/index.js": "/assets/js/index.js",
-          "/assets/js/observerManager.js": "/assets/js/observerManager.js",
-          "/assets/js/cacheManager.js": "/assets/js/cacheManager.js"
+          "/assets/js/theme.js": "/assets/js/theme.js"
         }
       }
     </script>
 
-    <!-- Only load the main entry point -->
-    <script type="module" src="assets/js/index.js"></script>
+    <!-- Module Preloads after import map -->
+    <link
+      rel="modulepreload"
+      href="/assets/js/index.js"
+      crossorigin="anonymous"
+    />
 
-    <!-- Cloudflare Web Analytics -->
-    <script
-      defer
-      src="https://static.cloudflareinsights.com/beacon.min.js"
-      data-cf-beacon='{"token": "201fc8a690104fd298a4e92d4de0cf0a"}'
-    ></script>
-    <!-- End Cloudflare Web Analytics -->
+    <!-- Update image preload path -->
+    <link rel="preload" href="/assets/images/danielportfolio.png" as="image" />
+
+    <!-- Scripts -->
+    <script type="module" src="/assets/js/index.js"></script>
   </head>
   <body>
     <!-- Header -->
@@ -101,29 +102,12 @@
     <main class="container">
       <!-- Hero Section -->
       <section class="hero">
-        <picture class="hero-image">
-          <source
-            type="image/webp"
-            srcset="
-              assets/images/hero-480.webp   480w,
-              assets/images/hero-768.webp   768w,
-              assets/images/hero-1024.webp 1024w,
-              assets/images/hero-1440.webp 1440w,
-              assets/images/hero-1920.webp 1920w
-            "
-            sizes="(max-width: 480px) 480px,
-                   (max-width: 768px) 768px,
-                   (max-width: 1024px) 1024px,
-                   (max-width: 1440px) 1440px,
-                   1920px"
-          />
-          <img
-            src="assets/images/danielportfolio.png"
-            alt="Daniel Hipskind"
-            loading="eager"
-            fetchpriority="high"
-          />
-        </picture>
+        <img
+          src="/assets/images/danielportfolio.png"
+          alt="Daniel Hipskind"
+          class="profile-image"
+          loading="lazy"
+        />
         <h1>Daniel Hipskind</h1>
         <p class="tagline">Software Developer & Problem Solver</p>
       </section>
@@ -256,5 +240,25 @@
         </div>
       </div>
     </footer>
+    <!-- Your content here -->
+
+    <div id="privacy-banner" class="privacy-banner">
+      <div class="privacy-content">
+        <p>
+          This website uses minimal analytics to understand how visitors
+          interact with its content. No personal data is collected or shared
+          with third parties.
+          <a href="privacy-policy.html" class="button button-outline"
+            >Learn more or opt out</a
+          >
+        </p>
+        <div class="privacy-actions">
+          <button id="accept-privacy" class="button">Accept</button>
+          <button id="reject-privacy" class="button button-outline">
+            Reject
+          </button>
+        </div>
+      </div>
+    </div>
   </body>
 </html>

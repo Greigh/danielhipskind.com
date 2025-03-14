@@ -1,5 +1,11 @@
-import Chart from 'https://cdn.skypack.dev/chart.js';
+import { Chart } from 'chart.js';
 import { TokenManager } from './tokenManager.js';
+import auth from './auth.js';
+
+// Check authentication before loading analytics
+if (!auth.isAuthenticated()) {
+  window.location.href = '/analytics/login.html';
+}
 
 class AnalyticsDashboard {
   constructor() {
@@ -32,15 +38,13 @@ class AnalyticsDashboard {
 
     const vpnCount = data.filter((visit) => visit.vpnDetected).length;
     const vpnPercentage = ((vpnCount / data.length) * 100).toFixed(1);
-    document.querySelector(
-      '#vpnUsers .stat-number'
-    ).textContent = `${vpnPercentage}%`;
+    document.querySelector('#vpnUsers .stat-number').textContent =
+      `${vpnPercentage}%`;
 
     const adBlockCount = data.filter((visit) => visit.adBlocker).length;
     const adBlockPercentage = ((adBlockCount / data.length) * 100).toFixed(1);
-    document.querySelector(
-      '#adBlockUsers .stat-number'
-    ).textContent = `${adBlockPercentage}%`;
+    document.querySelector('#adBlockUsers .stat-number').textContent =
+      `${adBlockPercentage}%`;
   }
 
   updateCharts(data) {
@@ -130,104 +134,129 @@ class AnalyticsDashboard {
 
 class Analytics {
   constructor() {
-    this.token = localStorage.getItem('analyticsToken');
-    if (!this.token) {
-      window.location.href = '/analytics/login.html';
-      return;
-    }
+    this.tokenManager = new TokenManager();
+    this.data = [];
     this.init();
   }
 
   async init() {
-    await this.loadData();
-    this.updateUI();
-    this.setupEventListeners();
+    try {
+      const isAuthenticated = await this.tokenManager.isAuthenticated();
+      if (!isAuthenticated) {
+        window.location.href = '/analytics/login.html';
+        return;
+      }
+
+      await this.loadData();
+      this.updateUI();
+      this.setupEventListeners();
+    } catch (error) {
+      console.error('Initialization failed:', error);
+    }
   }
 
   async loadData() {
     try {
-      const [logs, stats] = await Promise.all([
-        fetch('/api/analytics/logs', {
-          headers: {
-            Authorization: `Bearer ${this.token}`,
-          },
-        }).then((r) => {
-          if (r.status === 401) {
-            this.handleUnauthorized();
-            throw new Error('Unauthorized');
-          }
-          return r.json();
-        }),
-        fetch('/api/analytics/stats', {
-          headers: {
-            Authorization: `Bearer ${this.token}`,
-          },
-        }).then((r) => r.json()),
-      ]);
+      const response = await fetch('/api/logs');
+      const jsonData = await response.json();
 
-      this.data = logs;
-      this.stats = stats;
+      // Ensure data is an array
+      this.data = Array.isArray(jsonData) ? jsonData : [];
+
+      console.log('Loaded data:', this.data); // Debug log
     } catch (error) {
-      console.error('Error loading analytics:', error);
+      console.error('Failed to load analytics data:', error);
+      this.data = [];
     }
   }
 
-  handleUnauthorized() {
-    localStorage.removeItem('analyticsToken');
-    window.location.href = '/analytics/login.html';
-  }
-
-  logout() {
-    this.tokenManager.clearToken();
-    this.showLoginForm();
-  }
-
-  showLoginForm() {
-    const form = document.createElement('div');
-    form.className = 'login-form';
-    form.innerHTML = `
-      <h2>Login Required</h2>
-      <input type="password" id="password" placeholder="Enter password">
-      <button id="loginBtn">Login</button>
-    `;
-
-    document.querySelector('main').innerHTML = '';
-    document.querySelector('main').appendChild(form);
-
-    document.getElementById('loginBtn').onclick = () => {
-      const password = document.getElementById('password').value;
-      this.login(password);
-    };
-  }
-
-  hideLoginForm() {
-    document.querySelector('.login-form')?.remove();
-  }
-
   updateUI() {
+    if (!Array.isArray(this.data)) {
+      console.error('Invalid data format:', this.data);
+      return;
+    }
+
     this.updateStats();
+    this.updateCharts();
     this.updateTable();
   }
 
   updateStats() {
-    const total = this.data.length;
-    const vpnUsers = this.data.filter((v) => v.vpnDetected).length;
-    const adBlockUsers = this.data.filter((v) => v.adBlocker).length;
-    const darkMode = this.data.filter((v) => v.currentTheme === 'dark').length;
+    const startDate = document.getElementById('startDate')?.value;
+    const endDate = document.getElementById('endDate')?.value;
 
-    document.getElementById('totalVisits').textContent = total;
-    document.getElementById('vpnPercentage').textContent = `${(
-      (vpnUsers / total) *
-      100
-    ).toFixed(1)}%`;
-    document.getElementById('adBlockPercentage').textContent = `${(
-      (adBlockUsers / total) *
-      100
-    ).toFixed(1)}%`;
-    document.getElementById('darkModePercentage').textContent = `${(
-      (darkMode / total) *
-      100
-    ).toFixed(1)}%`;
+    // Filter data by date range if dates are selected
+    const filteredData =
+      startDate && endDate
+        ? this.data.filter((item) => {
+            const date = new Date(item.timestamp);
+            return date >= new Date(startDate) && date <= new Date(endDate);
+          })
+        : this.data;
+
+    // Update statistics
+    document.getElementById('totalVisits').textContent = filteredData.length;
+
+    const uniqueIPs = new Set(filteredData.map((item) => item.ip)).size;
+    document.getElementById('uniqueVisitors').textContent = uniqueIPs;
+
+    const vpnCount = filteredData.filter((item) => item.vpnDetected).length;
+    const vpnPercentage =
+      filteredData.length > 0
+        ? ((vpnCount / filteredData.length) * 100).toFixed(1)
+        : '0';
+    document.getElementById('vpnUsage').textContent = `${vpnPercentage}%`;
+  }
+
+  updateCharts() {
+    this.createPlatformChart(this.data);
+    this.createThemeChart(this.data);
+  }
+
+  createPlatformChart(data) {
+    const platforms = data.reduce((acc, visit) => {
+      acc[visit.platform] = (acc[visit.platform] || 0) + 1;
+      return acc;
+    }, {});
+
+    new Chart(document.getElementById('platformChart'), {
+      type: 'pie',
+      data: {
+        labels: Object.keys(platforms),
+        datasets: [
+          {
+            data: Object.values(platforms),
+            backgroundColor: [
+              '#3b82f6',
+              '#60a5fa',
+              '#93c5fd',
+              '#bfdbfe',
+              '#dbeafe',
+            ],
+          },
+        ],
+      },
+    });
+  }
+
+  createThemeChart(data) {
+    const themes = data.reduce((acc, visit) => {
+      acc[visit.currentTheme] = (acc[visit.currentTheme] || 0) + 1;
+      return acc;
+    }, {});
+
+    new Chart(document.getElementById('themeChart'), {
+      type: 'pie',
+      data: {
+        labels: Object.keys(themes),
+        datasets: [
+          {
+            data: Object.values(themes),
+            backgroundColor: ['#1e293b', '#f8fafc'],
+          },
+        ],
+      },
+    });
   }
 
   updateTable() {
@@ -251,8 +280,15 @@ class Analytics {
   }
 
   setupEventListeners() {
-    document.getElementById('refreshStats').onclick = () => this.init();
-    document.getElementById('clearStats').onclick = () => this.clearData();
+    document
+      .getElementById('refreshStats')
+      ?.addEventListener('click', () => this.init());
+    document
+      .getElementById('clearStats')
+      ?.addEventListener('click', () => this.clearData());
+    document
+      .getElementById('logoutBtn')
+      ?.addEventListener('click', () => this.tokenManager.logout());
   }
 
   async clearData() {
@@ -272,9 +308,25 @@ class Analytics {
       console.error('Error clearing data:', error);
     }
   }
+
+  initializeDatePickers() {
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - 30);
+
+    const startPicker = document.getElementById('startDate');
+    const endPicker = document.getElementById('endDate');
+
+    if (startPicker && endPicker) {
+      startPicker.valueAsDate = startDate;
+      endPicker.valueAsDate = endDate;
+
+      document.getElementById('filterDates')?.addEventListener('click', () => {
+        this.loadVisitorData();
+      });
+    }
+  }
 }
 
-// Initialize analytics
+// Single initialization
 document.addEventListener('DOMContentLoaded', () => new Analytics());
-
-new AnalyticsDashboard();

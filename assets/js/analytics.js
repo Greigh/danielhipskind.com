@@ -46,14 +46,101 @@ function detectDevice() {
 
 class Analytics {
   constructor() {
-    this.charts = {};
+    this.enabled = false;
     this.init();
   }
 
-  async init() {
-    const data = await this.collectVisitorData();
-    await this.logVisit(data);
-    await this.loadStats();
+  init() {
+    // Check for Do Not Track setting
+    if (navigator.doNotTrack === '1') {
+      console.log('Analytics disabled: Do Not Track is enabled');
+      return;
+    }
+
+    this.enabled = true;
+    this.setupEventListeners();
+  }
+
+  setupEventListeners() {
+    if (!this.enabled) return;
+
+    // Page view tracking
+    document.addEventListener('DOMContentLoaded', () => {
+      this.trackPageView();
+    });
+
+    // Click tracking
+    document.addEventListener('click', (e) => {
+      const target = e.target.closest('a, button');
+      if (target) {
+        this.trackEvent('click', {
+          type: target.tagName.toLowerCase(),
+          id: target.id || 'unnamed',
+          text: target.innerText || 'no-text',
+        });
+      }
+    });
+  }
+
+  trackPageView() {
+    if (!this.enabled) return;
+
+    const data = {
+      page: window.location.pathname,
+      referrer: document.referrer,
+      timestamp: new Date().toISOString(),
+    };
+
+    this.sendAnalytics('pageview', data);
+  }
+
+  trackEvent(eventName, data = {}) {
+    if (!this.enabled) return;
+
+    this.sendAnalytics('event', {
+      event: eventName,
+      ...data,
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  async sendAnalytics(type, data) {
+    try {
+      const response = await fetch('/api/analytics', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type,
+          data,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Analytics error: ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error('Analytics error:', error);
+    }
+  }
+
+  async loadStats() {
+    try {
+      const response = await fetch('/api/analytics/stats', {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('analyticsToken')}`,
+        },
+      });
+
+      if (!response.ok) throw new Error('Failed to load stats');
+
+      const { stats } = await response.json();
+      this.createCharts(stats);
+      this.updateSummary(stats);
+    } catch (error) {
+      console.error('Error loading stats:', error);
+    }
   }
 
   createCharts(stats) {
@@ -130,24 +217,6 @@ class Analytics {
     });
   }
 
-  async loadStats() {
-    try {
-      const response = await fetch('/api/analytics/stats', {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('analyticsToken')}`,
-        },
-      });
-
-      if (!response.ok) throw new Error('Failed to load stats');
-
-      const { stats } = await response.json();
-      this.createCharts(stats);
-      this.updateSummary(stats);
-    } catch (error) {
-      console.error('Error loading stats:', error);
-    }
-  }
-
   updateSummary(stats) {
     document.getElementById('totalVisits').textContent = stats.totalVisits;
     document.getElementById('uniqueVisitors').textContent =
@@ -158,5 +227,4 @@ class Analytics {
   }
 }
 
-// Initialize analytics when DOM is ready
-document.addEventListener('DOMContentLoaded', () => new Analytics());
+export default new Analytics();

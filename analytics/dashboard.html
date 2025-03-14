@@ -1,11 +1,20 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" data-theme="dark">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Analytics Dashboard</title>
+    <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico" />
     <link rel="stylesheet" href="../assets/css/style.css" type="text/css" />
-    <link rel="stylesheet" href="./css/analytics.css" type="text/css" />
+    <link rel="stylesheet" href="/analytics/css/analytics.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "chart.js": "/node_modules/chart.js/dist/chart.js",
+          "@kurkle/color": "/node_modules/@kurkle/color/dist/color.js"
+        }
+      }
+    </script>
   </head>
   <body>
     <div class="analytics-container">
@@ -26,6 +35,18 @@
           </div>
         </div>
       </header>
+
+      <div class="date-filters">
+        <input type="date" id="startDate" />
+        <input type="date" id="endDate" />
+        <button id="filterDates" class="btn">Filter</button>
+      </div>
+
+      <div class="controls">
+        <button id="refreshStats" class="btn">Refresh</button>
+        <button id="clearStats" class="btn btn-danger">Clear Data</button>
+        <button id="logoutBtn" class="btn">Logout</button>
+      </div>
 
       <div class="charts-grid">
         <div class="chart-container">
@@ -89,6 +110,39 @@
         </div>
       </div>
     </div>
-    <script src="../dist/analytics.bundle.js"></script>
+    <!-- Move scripts to end of body -->
+    <script type="module">
+      import auth from '/analytics/js/auth.js';
+
+      // Check authentication before loading analytics
+      async function init() {
+        const isAuthenticated = await auth.isAuthenticated();
+        if (!isAuthenticated) {
+          window.location.href = '/analytics/login.html';
+          return;
+        }
+
+        // Set up logout handler
+        document
+          .getElementById('logoutBtn')
+          .addEventListener('click', () => auth.logout());
+      }
+
+      init();
+    </script>
+    <script type="module" src="/analytics/js/analytics.js"></script>
+    <script>
+      // Initialize charts and analytics data here
+      // Placeholder for chart rendering logic
+      function fetchAnalyticsData() {
+        // Fetch data from an API or analytics service
+        // Update the DOM with the fetched data
+        totalVisits.textContent = '1000'; // Example data
+        uniqueVisitors.textContent = '800'; // Example data
+        vpnUsage.textContent = '30%'; // Example data
+      }
+
+      fetchAnalyticsData(); // Call the function to fetch data
+    </script>
   </body>
 </html>

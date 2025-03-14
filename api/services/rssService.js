@@ -1,15 +1,16 @@
 import { fetchAndParseRSS } from '../utils/rss.js';
-import { browserService } from './browserService.js';
-import { cacheService } from './cacheService.js';
-import { fileService } from './fileService.js';
+import browserService from './browserService.js';
+import cacheService from './cacheService.js';
+import fileService from './fileService.js';
 import { debug } from '../utils/debug.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import Parser from 'rss-parser';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = path.resolve(__dirname, '../..');
 
-export class RSSService {
+class RSSService {
   constructor() {
     this.sources = {
       hackerNews: 'https://news.ycombinator.com/rss',
@@ -20,6 +21,8 @@ export class RSSService {
       PROJECT_ROOT,
       'public/projects/visual-rss-feed/data'
     );
+    this.parser = new Parser();
+    this.initialized = false;
 
     // Ensure data directory exists on service initialization
     this.initializeDirectory();
@@ -32,6 +35,17 @@ export class RSSService {
     } catch (error) {
       debug(`Failed to initialize articles directory: ${error.message}`);
       throw error;
+    }
+  }
+
+  async init() {
+    try {
+      this.initialized = true;
+      debug('RSS service initialized');
+      return true;
+    } catch (error) {
+      debug(`RSS service initialization failed: ${error.message}`);
+      return false;
     }
   }
 
@@ -90,6 +104,11 @@ export class RSSService {
       throw error;
     }
   }
+
+  async cleanup() {
+    this.initialized = false;
+    debug('RSS service cleaned up');
+  }
 }
 
-export const rssService = new RSSService();
+export default new RSSService();

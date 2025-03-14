@@ -2,6 +2,11 @@ import express from 'express';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { debug } from '../utils/debug.js';
+import ApiResponse from '../utils/apiResponse.js';
+import { getClientInfo } from '../middleware/clientInfo.js';
+import { authenticate, requireAdmin } from '../middleware/authMiddleware.js';
+import analyticsService from '../services/analyticsService.js';
 
 const router = express.Router();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -85,42 +90,40 @@ async function initializeLogs() {
 // Initialize logs before setting up routes
 await initializeLogs();
 
-// Get all visitor logs
-router.get('/logs', async (req, res) => {
+// Public Routes
+router.post('/track', getClientInfo, async (req, res) => {
   try {
-    const logPath = path.join(__dirname, '../../logs/visitors.json');
-    const data = await fs.readFile(logPath, 'utf8');
-    const logs = JSON.parse(data);
-    res.json(logs);
+    const clientInfo = req.clientInfo;
+    const { type, data } = req.body;
+
+    const event = {
+      type,
+      data,
+      timestamp: new Date().toISOString(),
+      client: clientInfo,
+      path: req.headers.referer || 'direct',
+    };
+
+    debug(`Analytics event: ${type}`, event);
+    await analyticsService.storeEvent(event);
+
+    res.json(ApiResponse.success());
   } catch (error) {
-    res.status(500).json({ error: 'Failed to retrieve logs' });
+    debug(`Analytics error: ${error.message}`);
+    res.status(500).json(ApiResponse.error('Failed to track analytics'));
   }
 });
 
-// Enhanced visitor log entry
-router.post('/logs', async (req, res) => {
+router.post('/logs', getClientInfo, async (req, res) => {
   try {
     const logPath = path.join(process.cwd(), 'logs/visitors.json');
     let logs = await loadLogs(logPath);
 
     const visitorData = {
       timestamp: new Date().toISOString(),
-      ip: req.ip,
-      userAgent: req.headers['user-agent'],
-      referrer: req.headers.referer || 'direct',
+      ...req.clientInfo, // Use middleware data instead of manual extraction
       path: req.body.path,
       theme: req.body.theme,
-      screenSize: {
-        width: req.body.screenWidth,
-        height: req.body.screenHeight,
-      },
-      vpnDetected: req.body.vpnDetected,
-      browser: req.body.browser,
-      os: req.body.os,
-      device: req.body.device,
-      country: req.body.country,
-      language: req.headers['accept-language'],
-      connectionType: req.body.connectionType,
       sessionDuration: req.body.sessionDuration,
     };
 
@@ -132,8 +135,50 @@ router.post('/logs', async (req, res) => {
     await fs.writeFile(logPath, JSON.stringify(logs, null, 2));
     res.json({ success: true });
   } catch (error) {
-    console.error('Log error:', error);
+    debug('Log error:', error);
     res.status(500).json({ error: 'Failed to log visitor' });
+  }
+});
+
+// Protected Routes (require authentication)
+router.use(authenticate);
+
+// Admin Routes (require admin role)
+router.get('/stats', requireAdmin, async (req, res) => {
+  try {
+    const stats = await analyticsService.getStats();
+    res.json({ success: true, data: stats });
+  } catch (error) {
+    debug(`Stats error: ${error.message}`);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get analytics stats',
+    });
+  }
+});
+
+router.get('/events', requireAdmin, async (req, res) => {
+  try {
+    const events = await analyticsService.getEvents();
+    res.json({ success: true, data: events });
+  } catch (error) {
+    debug(`Events error: ${error.message}`);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get analytics events',
+    });
+  }
+});
+
+// Get all visitor logs
+router.get('/logs', async (req, res) => {
+  try {
+    const logPath = path.join(__dirname, '../../logs/visitors.json');
+    const data = await fs.readFile(logPath, 'utf8');
+    const logs = JSON.parse(data);
+    res.json(logs);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to retrieve logs' });
   }
 });
 
@@ -227,5 +272,32 @@ async function loadLogs(logPath) {
     return createInitialLogs();
   }
 }
+
+router.post('/opt-out', async (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.cookie('analytics_optout', 'true', {
+    maxAge: 365 * 24 * 60 * 60 * 1000, // 1 year
+    httpOnly: true,
+    secure: true,
+    sameSite: 'strict',
+  });
+  res.status(200).json({ success: true, message: 'Analytics opted out' });
+});
+
+router.get('/data', authenticate, async (req, res) => {
+  const clientIP = req.ip;
+  const hashedIP = crypto.createHash('sha256').update(clientIP).digest('hex');
+
+  const data = await analyticsService.getUserData(hashedIP);
+  res.json(data);
+});
+
+router.delete('/data', authenticate, async (req, res) => {
+  const clientIP = req.ip;
+  const hashedIP = crypto.createHash('sha256').update(clientIP).digest('hex');
+
+  await analyticsService.deleteUserData(hashedIP);
+  res.status(200).json({ success: true });
+});
 
 export default router;

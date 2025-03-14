@@ -1,62 +1,35 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" data-theme="dark">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Analytics Login | Daniel Hipskind</title>
-    <link rel="stylesheet" href="../assets/css/style.css" type="text/css" />
-    <link rel="stylesheet" href="./css/analytics.css" type="text/css" />
+    <title>Analytics Login</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="stylesheet" href="/analytics/css/analytics.css" />
   </head>
   <body>
     <div class="login-container">
-      <form class="login-form" id="loginForm">
-        <h2>Analytics Login</h2>
-        <div class="password-input">
+      <form
+        class="login-form"
+        id="loginForm"
+        method="POST"
+        onsubmit="return false"
+      >
+        <h2>Analytics Dashboard</h2>
+        <div class="form-group">
           <input
             type="password"
             id="password"
+            name="password"
             placeholder="Enter password"
             required
             autocomplete="current-password"
           />
         </div>
-        <button type="submit">Login</button>
-        <div class="login-error" id="loginError" style="display: none"></div>
+        <button type="submit" class="btn btn-primary">Access Dashboard</button>
+        <div id="error-message" class="login-error"></div>
       </form>
     </div>
-    <script>
-      document
-        .getElementById('loginForm')
-        .addEventListener('submit', async (e) => {
-          e.preventDefault();
-          const password = document.getElementById('password').value;
-          const errorDiv = document.getElementById('loginError');
-
-          try {
-            const response = await fetch('/api/auth/login', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ password }),
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-              throw new Error(data.message || 'Login failed');
-            }
-
-            if (data.token) {
-              localStorage.setItem('analyticsToken', data.token);
-              document.cookie = `analyticsToken=${data.token}; path=/; secure; samesite=Strict`;
-              window.location.href = '/analytics/analytics.html';
-            }
-          } catch (error) {
-            errorDiv.textContent = error.message;
-            errorDiv.style.display = 'block';
-          }
-        });
-    </script>
+    <script type="module" src="/analytics/js/auth.js"></script>
   </body>
 </html>
