@@ -1,0 +1,144 @@
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+bower_components/
+
+# Environment & Secrets
+.env
+.env.local
+.env.*
+!.env.example
+.env.production
+.env.development
+.env.test
+secrets.json
+
+# Build & Distribution
+/dist/
+/build/
+*.bundle.js
+*.bundle.js.map
+*.min.js
+*.min.css
+*.chunk.js
+/public/assets/css/*.min.css
+
+# Development
+.cache/
+.npm/
+.eslintcache
+lib-cov/
+*.tmp
+*.temp
+.tmp/
+.temp/
+tmp/
+.cache/
+
+# Logs & Debug
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+debug.log
+*.debug
+.debug
+
+# Testing & Coverage
+coverage/
+test-results/
+playwright-report/
+/playwright/.cache/
+test.js
+.nyc_output/
+reports/
+mochawesome-report/
+.test-results/
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# IDE - Other
+.idea/
+*.swp
+*.swo
+*~
+
+# System Files
+## macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+## Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# SSL & Security
+*.pem
+*.key
+*.crt
+*.cert
+*.der
+*.p12
+*.pfx
+
+# Configuration
+deploy.config.js
+deploy.config.yml
+deploy.sh
+ecosystem.config.js
+*.conf
+.prettierrc
+.babelrc
+.eslintrc*
+.eslintignore
+.mocharc.json
+jest.config.js
+
+# Project Specific
+assets/js/config.js
+projects/visual-rss-feed/data/
+projects/visual-rss-feed/logs/
+
+# Analytics
+analytics/css/*.min.css
+analytics/js/*.min.js
+.analytics-cache/
+analytics/dist/
+analytics/coverage/
+analytics/reports/
+analytics-*.log
+analytics.json
+
+# Database
+*.mongodb
+mongodb.log
+mongod.lock
+/data/db/
+/data/backups/
+dump/
+*.bson
+*.dump
+*.gz
+
+# Documentation
+docs/_site/
+docs/.jekyll-cache/
+docs/.sass-cache/
+
+# Runtime
+pids/
+*.pid
+*.seed
+*.pid.lock

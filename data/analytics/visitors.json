@@ -1,0 +1,26 @@
+{
+  "visits": [],
+  "stats": {
+    "totalVisits": 0,
+    "uniqueVisitors": 0,
+    "vpnUsage": 0,
+    "themes": {
+      "dark": 0,
+      "light": 0
+    }
+  },
+  "lastUpdated": "2025-03-11T01:48:28.397Z",
+  "2025-03-11": [
+    {
+      "path": "/",
+      "theme": "dark",
+      "screenWidth": 1920,
+      "screenHeight": 1080,
+      "browser": "Chrome",
+      "os": "macOS",
+      "device": "desktop",
+      "country": "US",
+      "serverTimestamp": "2025-03-11T01:53:45.978Z"
+    }
+  ]
+}

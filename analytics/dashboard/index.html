@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Analytics Dashboard</title>
+    <!-- Updated favicon path -->
+    <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+    <!-- Updated CSS paths -->
+    <link rel="stylesheet" href="/assets/css/style.css" type="text/css" />
+    <link rel="stylesheet" href="/analytics/css/dashboard.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "chart.js": "/node_modules/chart.js/dist/chart.js",
+          "@kurkle/color": "/node_modules/@kurkle/color/dist/color.js"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div class="analytics-container">
+      <header>
+        <h1>Analytics Dashboard</h1>
+        <div class="summary">
+          <div class="stat-card">
+            <h3>Total Visits</h3>
+            <p id="totalVisits">0</p>
+          </div>
+          <div class="stat-card">
+            <h3>Unique Visitors</h3>
+            <p id="uniqueVisitors">0</p>
+          </div>
+          <div class="stat-card">
+            <h3>VPN Usage</h3>
+            <p id="vpnUsage">0%</p>
+          </div>
+        </div>
+      </header>
+
+      <div class="date-filters">
+        <input type="date" id="startDate" />
+        <input type="date" id="endDate" />
+        <button id="filterDates" class="btn">Filter</button>
+      </div>
+
+      <div class="controls">
+        <button id="refreshStats" class="btn">Refresh</button>
+        <button id="clearStats" class="btn btn-danger">Clear Data</button>
+        <button id="logoutBtn" class="btn">Logout</button>
+      </div>
+
+      <div class="charts-grid">
+        <div class="chart-container">
+          <canvas id="deviceChart" height="300"></canvas>
+        </div>
+        <div class="chart-container">
+          <canvas id="browserChart" height="300"></canvas>
+        </div>
+        <div class="chart-container">
+          <canvas id="themeChart" height="300"></canvas>
+        </div>
+        <div class="chart-container wide">
+          <canvas id="hoursChart" height="200"></canvas>
+        </div>
+        <div class="chart-container wide">
+          <canvas id="visitsChart" height="200"></canvas>
+        </div>
+      </div>
+
+      <div class="analytics-grid">
+        <!-- Performance Section -->
+        <div class="chart-container">
+          <canvas id="performanceChart"></canvas>
+        </div>
+
+        <!-- Sessions Section -->
+        <div class="chart-container">
+          <canvas id="sessionChart"></canvas>
+        </div>
+
+        <!-- Realtime Section -->
+        <div class="chart-container wide">
+          <canvas id="realtimeChart"></canvas>
+        </div>
+      </div>
+
+      <div class="projects-section">
+        <h2>Projects</h2>
+        <div class="projects-grid">
+          <div class="project-card">
+            <div class="project-header">
+              <h3>Test Automation Framework</h3>
+              <span class="project-status active">Active</span>
+            </div>
+            <div class="project-info">
+              <p>Automated testing framework built with Playwright</p>
+              <div class="project-tech">
+                <span class="tech-tag">Node.js</span>
+                <span class="tech-tag">Playwright</span>
+                <span class="tech-tag">Testing</span>
+              </div>
+            </div>
+            <div class="project-links">
+              <a href="/projects/test-automation" class="btn">View Project</a>
+              <a href="/projects/test-automation/docs" class="btn btn-secondary"
+                >Documentation</a
+              >
+            </div>
+          </div>
+          <div class="project-card">
+            <div class="project-header">
+              <h3>Visual RSS Feed</h3>
+              <span class="project-status active">Active</span>
+            </div>
+            <div class="project-info">
+              <p>
+                A modern RSS feed reader with visual enhancements, optimized for
+                Hacker News content
+              </p>
+              <div class="project-tech">
+                <span class="tech-tag">Node.js</span>
+                <span class="tech-tag">Express</span>
+                <span class="tech-tag">RSS</span>
+                <span class="tech-tag">HN API</span>
+              </div>
+            </div>
+            <div class="project-links">
+              <a href="/projects/visual-rss-feed" class="btn">View Project</a>
+              <a href="/projects/visual-rss-feed/docs" class="btn btn-secondary"
+                >Documentation</a
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Move scripts to end of body -->
+    <script type="module">
+      import auth from '../js/core/auth.js';
+      import analyticsViz from '../js/core/analyticsViz.js';
+
+      // Check authentication before loading analytics
+      async function init() {
+        const isAuthenticated = await auth.isAuthenticated();
+        if (!isAuthenticated) {
+          window.location.href = '/analytics/login.html';
+          return;
+        }
+      }
+
+      init();
+    </script>
+    <script type="module" src="/analytics/js/analytics.js"></script>
+    <script>
+      // Initialize charts and analytics data here
+      // Placeholder for chart rendering logic
+      function fetchAnalyticsData() {
+        // Fetch data from an API or analytics service
+        // Update the DOM with the fetched data
+        totalVisits.textContent = '1000'; // Example data
+        uniqueVisitors.textContent = '800'; // Example data
+        vpnUsage.textContent = '30%'; // Example data
+      }
+
+      fetchAnalyticsData(); // Call the function to fetch data
+    </script>
+    <script type="module">
+      import { AnalyticsCharts } from '../js/charts/analyticsCharts.js';
+
+      const charts = new AnalyticsCharts();
+
+      async function initializeCharts() {
+        try {
+          const response = await fetch('/api/analytics/metrics');
+          const data = await response.json();
+
+          charts.createPerformanceChart('performanceChart', data.performance);
+          charts.createSessionChart('sessionChart', data.engagement);
+          charts.createRealtimeChart('realtimeChart');
+        } catch (error) {
+          console.error('Failed to initialize charts:', error);
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', initializeCharts);
+    </script>
+  </body>
+</html>
