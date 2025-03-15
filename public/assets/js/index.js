@@ -5,6 +5,7 @@ import skillManager from './core/skillManager.js';
 import iconManager from './core/iconManager.js';
 import navigationManager from './core/navigationManager.js';
 import { content } from './config/content.js';
+import privacyManager from './core/privacyManager.js';
 
 class App {
   constructor() {
@@ -14,6 +15,9 @@ class App {
   async init() {
     try {
       debug('Starting application initialization');
+
+      // Initialize privacy manager first
+      await privacyManager.initialize();
 
       const initResults = await Promise.all([
         contentManager.initialize(),

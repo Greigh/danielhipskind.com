@@ -1,0 +1,18 @@
+.loading {
+  opacity: 0.6;
+  animation: pulse 1.5s infinite;
+}
+
+.loading-text {
+  color: var(--text-secondary);
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}

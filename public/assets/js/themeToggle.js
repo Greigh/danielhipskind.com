@@ -1,5 +1,4 @@
-import { icons } from './icons.js';
-import { debug } from '../utils/debug.js';
+import { sunIcon, moonIcon } from './core/icons.js';
 
 class ThemeManager {
   static instance = null;
@@ -27,18 +26,11 @@ class ThemeManager {
       return this.userPreference;
     }
 
-    const platform = this.detectPlatform();
-    if (platform === 'iOS' || platform === 'Android') {
-      return this.getMobileAutoTheme();
-    }
-
     return this.getSystemTheme();
   }
 
   async initialize() {
     try {
-      debug('Initializing theme manager');
-
       if (!this.themeToggle) {
         throw new Error('Theme toggle button not found');
       }
@@ -50,10 +42,9 @@ class ThemeManager {
       this.attachEventListeners();
 
       this.initialized = true;
-      debug('Theme manager initialized');
       return true;
     } catch (error) {
-      debug('Error initializing theme manager:', error);
+      console.error('Error initializing theme manager:', error);
       return false;
     }
   }
@@ -69,19 +60,6 @@ class ThemeManager {
     this.systemThemeQuery.addEventListener('change', (e) => {
       if (!this.userPreference) {
         this.setTheme(e.matches ? 'dark' : 'light', false);
-      }
-    });
-
-    // Handle visibility change for mobile
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') {
-        const platform = this.detectPlatform();
-        if (
-          (platform === 'iOS' || platform === 'Android') &&
-          !this.userPreference
-        ) {
-          this.setTheme(this.getMobileAutoTheme(), false);
-        }
       }
     });
   }
@@ -104,8 +82,7 @@ class ThemeManager {
   updateIcon() {
     if (!this.themeToggle) return;
 
-    const icon =
-      this.currentTheme === 'dark' ? icons.theme.light : icons.theme.dark;
+    const icon = this.currentTheme === 'dark' ? sunIcon : moonIcon;
     this.themeToggle.innerHTML = icon;
     this.themeToggle.setAttribute(
       'aria-label',
@@ -113,30 +90,14 @@ class ThemeManager {
     );
   }
 
-  detectPlatform() {
-    const ua = navigator.userAgent.toLowerCase();
-    if (ua.includes('iphone') || ua.includes('ipad') || ua.includes('ipod')) {
-      return 'iOS';
-    } else if (ua.includes('mac os x')) {
-      return 'macOS';
-    } else if (ua.includes('android')) {
-      return 'Android';
-    } else if (ua.includes('windows')) {
-      return 'Windows';
-    } else if (ua.includes('linux')) {
-      return 'Linux';
-    }
-    return 'Unknown';
-  }
-
   getSystemTheme() {
     return this.systemThemeQuery.matches ? 'dark' : 'light';
   }
-
-  getMobileAutoTheme() {
-    const hour = new Date().getHours();
-    return hour >= 19 || hour < 7 ? 'dark' : 'light';
-  }
 }
 
-export default new ThemeManager();
+document.addEventListener('DOMContentLoaded', () => {
+  const themeManager = new ThemeManager();
+  themeManager.initialize();
+});
+
+export default ThemeManager;

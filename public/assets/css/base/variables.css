@@ -1,0 +1,54 @@
+:root {
+  /* Typography Scale */
+  --font-size-base: 16px;
+  --h1-size: clamp(2rem, 5vw + 1rem, 3.5rem);
+  --h2-size: clamp(1.5rem, 3vw + 1rem, 2.5rem);
+  --h3-size: clamp(1.25rem, 2vw + 1rem, 1.75rem);
+  --body-size: clamp(1rem, 1vw + 0.75rem, 1.125rem);
+  --small-size: 0.875rem;
+
+  /* Spacing Scale */
+  --space-xs: clamp(0.5rem, 1vw, 0.75rem);
+  --space-sm: clamp(1rem, 2vw, 1.5rem);
+  --space-md: clamp(2rem, 4vw, 3rem);
+  --space-lg: clamp(3rem, 6vw, 4.5rem);
+  --space-xl: clamp(4rem, 8vw, 6rem);
+
+  /* Layout */
+  --container-width: 1200px;
+  --border-radius: 1.25rem;
+  --border-radius-sm: 0.5rem;
+  --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --card-shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --nav-height: 4rem;
+
+  /* Colors - Light Theme */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --text-primary: #1e293b;
+  --text-secondary: #475569;
+  --accent: #3b82f6;
+  --accent-hover: #60a5fa;
+  --card-border: rgba(0, 0, 0, 0.1);
+  --error: #ef4444;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --bg-rgb: 255, 255, 255;
+
+  /* Transitions */
+  --transition-base: 0.3s ease;
+  --transition-smooth: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  --animation-timing: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-theme='dark'] {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --card-border: rgba(255, 255, 255, 0.1);
+  --error: #f87171;
+  --success: #4ade80;
+  --warning: #fbbf24;
+  --bg-rgb: 17, 24, 39;
+}

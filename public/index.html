@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -27,13 +27,13 @@
     <title>Daniel Hipskind | Software Developer</title>
 
     <!-- Styles -->
-    <link rel="stylesheet" href="/assets/css/style.css" />
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
       media="print"
       onload="this.media='all'"
     />
+    <link rel="stylesheet" href="/assets/css/style.css" />
 
     <!-- Icons -->
     <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
@@ -53,6 +53,7 @@
 
     <!-- Single Module Script -->
     <script type="module" src="/assets/js/index.js"></script>
+    <script type="module" src="/assets/js/themeToggle.js" defer></script>
   </head>
   <body>
     <!-- Header -->
@@ -75,7 +76,11 @@
           aria-label="Toggle theme"
           title="Toggle light/dark theme"
         >
-          <!-- Theme icon injected by ThemeManager -->
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M12 3.1a9 9 0 1 0 9 9 9 9 0 0 0-9-9zm0 16.8a7.8 7.8 0 1 1 7.8-7.8 7.8 7.8 0 0 1-7.8 7.8z"
+            ></path>
+          </svg>
         </button>
 
         <!-- Social icons using data attributes -->

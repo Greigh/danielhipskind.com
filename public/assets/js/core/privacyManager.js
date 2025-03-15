@@ -1,189 +1,136 @@
+import { debug } from '../utils/debug.js';
+import { analytics } from '../analytics/core/tracker.js';
+
 class PrivacyManager {
   constructor() {
-    this.privacyKey = 'privacy_preference';
-    this.optOutKey = 'analytics_optout';
-    this.elements = this.initializeElements();
-
-    if (this.elements.banner) {
-      this.init();
-    }
-
-    if (this.hasPrivacyControls()) {
-      this.initializeControls();
-    }
-  }
-
-  initializeElements() {
-    return {
-      banner: document.getElementById('privacy-banner'),
-      acceptBtn: document.getElementById('accept-privacy'),
-      rejectBtn: document.getElementById('reject-privacy'),
-      optOutBtn: document.getElementById('opt-out-btn'),
-      exportBtn: document.getElementById('export-data'),
-      deleteBtn: document.getElementById('delete-data'),
+    this.initialized = false;
+    this.storageKey = 'privacy-preferences';
+    this.preferences = {
+      analytics: false,
+      marketing: false,
+    };
+    this.elements = {
+      banner: null,
+      controls: null,
+      toggles: new Map(),
     };
   }
 
-  hasPrivacyControls() {
-    return (
-      this.elements.optOutBtn ||
-      this.elements.exportBtn ||
-      this.elements.deleteBtn
-    );
-  }
+  async initialize() {
+    try {
+      debug('Initializing privacy manager');
 
-  init() {
-    if (!this.hasPreference()) {
-      this.showBanner();
+      // Load saved preferences
+      this.loadPreferences();
+
+      // Cache DOM elements
+      this.elements.banner = document.getElementById('privacy-banner');
+      this.elements.controls = document.getElementById('privacy-controls');
+
+      // Set up event listeners
+      this.setupEventListeners();
+
+      // Show banner if first visit
+      if (!this.hasPreferences()) {
+        this.showBanner();
+      }
+
+      // Apply saved preferences
+      this.applyPreferences();
+
+      this.initialized = true;
+      debug('Privacy manager initialized');
+      return true;
+    } catch (error) {
+      debug('Failed to initialize privacy manager:', error);
+      return false;
     }
-    this.setupListeners();
   }
 
-  hasPreference() {
-    return localStorage.getItem(this.privacyKey) !== null;
+  setupEventListeners() {
+    // Banner actions
+    document.querySelectorAll('[data-privacy-action]').forEach((button) => {
+      button.addEventListener('click', (e) => {
+        const action = e.currentTarget.dataset.privacyAction;
+        if (action === 'accept') {
+          this.acceptAll();
+        } else if (action === 'customize') {
+          this.showCustomizeModal();
+        }
+      });
+    });
+
+    // Toggle switches
+    document.querySelectorAll('[data-privacy-toggle]').forEach((toggle) => {
+      const key = toggle.dataset.privacyToggle;
+      this.elements.toggles.set(key, toggle);
+
+      toggle.addEventListener('change', (e) => {
+        this.updatePreference(key, e.target.checked);
+      });
+    });
+  }
+
+  loadPreferences() {
+    try {
+      const saved = localStorage.getItem(this.storageKey);
+      if (saved) {
+        this.preferences = JSON.parse(saved);
+      }
+    } catch (error) {
+      debug('Error loading privacy preferences:', error);
+    }
+  }
+
+  savePreferences() {
+    try {
+      localStorage.setItem(this.storageKey, JSON.stringify(this.preferences));
+      this.applyPreferences();
+    } catch (error) {
+      debug('Error saving privacy preferences:', error);
+    }
+  }
+
+  updatePreference(key, value) {
+    this.preferences[key] = value;
+    this.savePreferences();
+  }
+
+  applyPreferences() {
+    // Update UI
+    for (const [key, toggle] of this.elements.toggles) {
+      toggle.checked = this.preferences[key];
+    }
+
+    // Apply analytics preference
+    if (this.preferences.analytics) {
+      analytics.enable();
+    } else {
+      analytics.disable();
+    }
   }
 
   showBanner() {
-    this.elements.banner?.classList.remove('hidden');
+    if (this.elements.banner) {
+      requestAnimationFrame(() => {
+        this.elements.banner.classList.add('visible');
+      });
+    }
   }
 
   hideBanner() {
-    this.elements.banner?.classList.add('hidden');
+    if (this.elements.banner) {
+      this.elements.banner.classList.remove('visible');
+    }
   }
 
-  setupListeners() {
-    this.elements.acceptBtn?.addEventListener('click', () => {
-      localStorage.setItem(this.privacyKey, 'accepted');
-      this.hideBanner();
+  acceptAll() {
+    Object.keys(this.preferences).forEach((key) => {
+      this.preferences[key] = true;
     });
-
-    this.elements.rejectBtn?.addEventListener('click', () => {
-      localStorage.setItem(this.privacyKey, 'rejected');
-      localStorage.setItem('analytics_optout', 'true');
-      this.hideBanner();
-    });
-  }
-
-  isTrackingAllowed() {
-    // Check Do Not Track setting first
-    if (navigator.doNotTrack === '1') {
-      return false;
-    }
-
-    // Check local opt-out
-    if (localStorage.getItem(this.optOutKey) === 'true') {
-      return false;
-    }
-
-    // Check privacy preference
-    return localStorage.getItem(this.privacyKey) === 'accepted';
-  }
-
-  getAnonymizedData() {
-    return {
-      screen: {
-        width: window.screen.width,
-        height: window.screen.height,
-      },
-      language: navigator.language,
-      theme: document.documentElement.getAttribute('data-theme'),
-      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    };
-  }
-
-  anonymizeIP(ip) {
-    return ip.split('.').slice(0, 3).concat(['0']).join('.');
-  }
-
-  initializeControls() {
-    if (this.elements.optOutBtn) {
-      // Check if already opted out
-      if (localStorage.getItem('analytics_optout') === 'true') {
-        this.elements.optOutBtn.textContent = 'Opted Out';
-        this.elements.optOutBtn.disabled = true;
-      }
-
-      this.elements.optOutBtn.addEventListener('click', () =>
-        this.handleOptOut()
-      );
-    }
-
-    this.elements.exportBtn?.addEventListener('click', () =>
-      this.handleExport()
-    );
-    this.elements.deleteBtn?.addEventListener('click', () =>
-      this.handleDelete()
-    );
-  }
-
-  handleOptOut() {
-    try {
-      localStorage.setItem('analytics_optout', 'true');
-      if (this.elements.optOutBtn) {
-        this.elements.optOutBtn.textContent = 'Opted Out';
-        this.elements.optOutBtn.disabled = true;
-      }
-      this.showMessage('Successfully opted out of analytics');
-    } catch (error) {
-      this.showMessage('Failed to opt out', 'error');
-    }
-  }
-
-  handleExport() {
-    try {
-      const data = {
-        preferences: {
-          theme: localStorage.getItem('theme-preference'),
-          analytics: localStorage.getItem('analytics_optout'),
-        },
-        timestamp: new Date().toISOString(),
-      };
-      this.downloadJson(data, 'privacy-data.json');
-      this.showMessage('Data exported successfully');
-    } catch (error) {
-      this.showMessage('Failed to export data', 'error');
-    }
-  }
-
-  handleDelete() {
-    if (
-      confirm(
-        'Are you sure you want to delete your data? This will reset all preferences.'
-      )
-    ) {
-      try {
-        localStorage.clear();
-        if (this.elements.optOutBtn) {
-          this.elements.optOutBtn.textContent = 'Opt Out of Analytics';
-          this.elements.optOutBtn.disabled = false;
-        }
-        this.showMessage('Your data has been deleted');
-      } catch (error) {
-        this.showMessage('Failed to delete data', 'error');
-      }
-    }
-  }
-
-  downloadJson(data, filename) {
-    const blob = new Blob([JSON.stringify(data, null, 2)], {
-      type: 'application/json',
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }
-
-  showMessage(message) {
-    alert(message); // Simple alert for now, can be enhanced with custom toast later
+    this.savePreferences();
+    this.hideBanner();
   }
 }
 
-// Initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-  new PrivacyManager();
-});
+export default new PrivacyManager();
