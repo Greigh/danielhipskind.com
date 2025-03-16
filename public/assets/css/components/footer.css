@@ -1,0 +1,38 @@
+footer {
+  background: var(--bg-secondary);
+  border: 1px solid var(--card-border);
+  border-radius: var(--border-radius) var(--border-radius) 0 0;
+  box-shadow: var(--card-shadow);
+  padding: var(--space-md) 0;
+  margin-top: auto;
+  width: min(100% - 2rem, var(--container-width));
+  margin-inline: auto;
+}
+
+footer .container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: var(--space-md);
+}
+
+.social-links {
+  display: flex;
+  gap: var(--space-md);
+}
+
+.social-icon {
+  color: var(--text-secondary);
+  font-size: 1.5rem;
+  transition: color 0.3s ease;
+}
+
+.social-icon:hover {
+  color: var(--accent);
+}
+
+@media (max-width: 768px) {
+  footer {
+    width: min(100% - 1rem, var(--container-width));
+  }
+}

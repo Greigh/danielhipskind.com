@@ -1,35 +1,182 @@
-.nav {
+header {
+  align-self: center;
   position: sticky;
-  top: 0;
+  top: 1rem;
   z-index: 100;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: var(--space-lg) var(--space-sm);
   background: var(--bg-primary);
-  padding: var(--space-sm) 0;
-  border-bottom: 1px solid var(--card-border);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.nav {
+  position: fixed; /* Change from sticky to fixed */
+  top: 0;
+  left: 0;
 }
 
 .nav-container {
-  display: flex;
-  justify-content: space-between;
+  position: fixed;
+  display: inline-flex;
   align-items: center;
-  max-width: var(--container-width);
+  justify-content: center;
+  gap: var(--space-md);
+  background: var(--bg-secondary);
+  border: 1px solid var(--card-border);
+  border-radius: 24px;
+  padding: var(--space-sm) var(--space-md);
+  box-shadow: var(--card-shadow);
+  width: auto;
   margin: 0 auto;
-  padding: 0 var(--space-sm);
 }
 
 .nav-links {
   display: flex;
-  gap: var(--space-md);
   align-items: center;
 }
 
+.nav-items {
+  display: flex;
+  gap: var(--space-md);
+  align-items: center;
+  padding: 0;
+  margin: 0;
+  justify-content: center;
+  position: relative;
+}
+
 .nav-item {
+  background: var(--bg-secondary);
+  border: none;
+  border-radius: 20px;
   color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px 16px;
+  margin: 0 8px;
+  transition: all 0.3s ease;
+  height: 36px;
+  min-width: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  -webkit-tap-highlight-color: transparent;
   text-decoration: none;
-  transition: color 0.3s ease;
+  font-size: 15px;
+  letter-spacing: 0.2px;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  font-weight: 500; /* Changed from default (400) to medium weight */
 }
 
 .nav-item:hover {
   color: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Dark mode specific styles */
+[data-theme='dark'] .nav-item {
+  background: rgb(30, 41, 59);
+  color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  font-weight: 500;
+}
+
+[data-theme='dark'] .nav-item:hover {
+  color: var(--accent);
+  background: rgb(30, 41, 59);
+}
+
+/* Focus state for accessibility */
+.nav-item:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Remove the underline effect since we're using iOS-style buttons */
+.nav-item::after {
+  display: none;
+}
+
+/* Nav items hover effect */
+.nav-item {
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-item::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: var(--accent);
+  opacity: 0.1;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition:
+    width 0.4s ease,
+    height 0.4s ease;
+}
+
+.nav-item:hover::before {
+  width: 200%;
+  height: 200%;
+}
+
+/* Theme Toggle */
+
+.theme-toggle {
+  background: var(--bg-secondary);
+  border: none;
+  border-radius: 20px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px 16px;
+  transition: all 0.3s ease;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.theme-toggle:hover {
+  color: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Dark mode specific styles */
+[data-theme='dark'] .theme-toggle {
+  background: rgb(30, 41, 59);
+  color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme='dark'] .theme-toggle:hover {
+  color: var(--accent);
+  background: rgba(30, 41, 59, 1); /* Fully solid on hover */
+}
+
+/* Focus state for accessibility */
+.theme-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Icon size adjustment */
+.theme-toggle svg {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.3s ease;
 }
 
 /* Mobile Navigation */
@@ -48,5 +195,17 @@
 
   .nav-links.active {
     display: flex;
+  }
+
+  .nav-container {
+    width: min(100% - 2rem, var(--container-width));
+    flex-direction: column;
+    gap: var(--space-sm);
+    padding: var(--space-sm);
+  }
+
+  .theme-toggle {
+    margin-left: 0;
+    margin-top: var(--space-sm);
   }
 }

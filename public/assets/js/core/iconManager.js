@@ -1,4 +1,5 @@
-import { icons } from './icons.js';
+import * as icons from './icons.js';
+import { debug } from './utils.js';
 
 class IconManager {
   constructor() {
@@ -117,20 +118,13 @@ class IconManager {
 
   async attachAllIcons() {
     try {
-      debug('Attaching icons');
+      const iconElements = document.querySelectorAll('[data-icon]');
+      if (!iconElements.length) return true;
 
-      // Attach all icon types
-      await Promise.all([
-        this.attachThemeIcon(),
-        this.attachSocialIcons(),
-        this.attachAnalyticsIcons(),
-        this.attachPreferencesIcons(),
-      ]);
-
-      debug('Icons attached successfully');
+      // Your icon attachment logic here
       return true;
     } catch (error) {
-      debug('Error attaching icons:', error);
+      console.error('Icon attachment failed:', error);
       return false;
     }
   }

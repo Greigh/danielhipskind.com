@@ -6,31 +6,49 @@ import analyticsPrivacyManager from './privacyManager.js';
 class AnalyticsTracker {
   constructor() {
     this.initialized = false;
-    this.enabled = false;
-    this.privacyManager = new analyticsPrivacyManager();
+    this.canTrack = false;
     this.init();
   }
 
-  async initialize() {
+  init() {
     try {
-      debug('Initializing analytics tracker');
-      this.enabled = analyticsPreferences.isEnabled();
+      // Check for existing privacy consent
+      const privacyConsent = localStorage.getItem('privacy-consent');
+      this.canTrack = privacyConsent === 'accepted';
       this.initialized = true;
-      return true;
+
+      // Listen for privacy preference changes
+      window.addEventListener('privacy-preference-changed', (event) => {
+        this.canTrack = event.detail.accepted;
+      });
     } catch (error) {
-      debug('Failed to initialize analytics tracker:', error);
-      return false;
+      console.error('Analytics initialization failed');
+      this.canTrack = false;
     }
   }
 
-  init() {
-    if (!this.privacyManager.isTrackingAllowed()) {
-      debug('Analytics disabled: Privacy settings');
-      return;
-    }
+  track(eventName, data = {}) {
+    if (!this.canTrack) return;
 
-    this.enabled = true;
-    this.setupEventListeners();
+    try {
+      const event = {
+        timestamp: new Date().toISOString(),
+        event: eventName,
+        page: window.location.pathname,
+        ...data,
+      };
+
+      // Send to your analytics endpoint
+      fetch('/api/analytics/event', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(event),
+      }).catch(() => {
+        /* Silently fail */
+      });
+    } catch {
+      // Fail silently in production
+    }
   }
 
   async trackPageView() {
@@ -132,6 +150,11 @@ class AnalyticsTracker {
     };
   }
 }
+
+// Create instance only after DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  window.analyticsTracker = new AnalyticsTracker();
+});
 
 export const analytics = new AnalyticsTracker();
 export const trackEvent = (name, data) => analytics.trackEvent(name, data);

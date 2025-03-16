@@ -13,8 +13,6 @@ class ContentManager {
 
   async initialize() {
     try {
-      debug('Initializing content manager');
-
       // Initialize DOM references
       this.contentTargets.about = document.querySelector(
         '[data-content="about"]'
@@ -33,7 +31,6 @@ class ContentManager {
       await this.populateAboutSection();
 
       this.initialized = true;
-      debug('Content manager initialized successfully');
       return true;
     } catch (error) {
       debug('Failed to initialize content manager:', error);
@@ -44,39 +41,40 @@ class ContentManager {
 
   async populateAboutSection() {
     try {
-      const { intro, paragraphs } = content.about;
+      const aboutContainer = document.querySelector('[data-content="about"]');
 
-      // Build content HTML
-      const aboutContent = `
-        <div class="about-content">
-          <p class="intro">${intro}</p>
-          ${paragraphs.map((p) => `<p class="about-paragraph">${p}</p>`).join('')}
-        </div>
-      `;
-
-      // Insert content with animation
-      this.contentTargets.about.innerHTML = aboutContent;
-
-      // Trigger animation
-      requestAnimationFrame(() => {
-        const section = this.contentTargets.about.closest('.section');
-        if (section) {
-          section.classList.add('visible');
-        }
-      });
-
-      // Track content load if analytics enabled
-      if (analyticsPreferences.isEnabled()) {
-        trackEvent('content_loaded', {
-          section: 'about',
-          paragraphs: paragraphs.length,
-        });
+      if (!aboutContainer) {
+        debug('ContentManager: About container not found!');
+        return false;
       }
 
+      const { intro, paragraphs } = content.about;
+
+      // Clear existing content
+      aboutContainer.innerHTML = '';
+
+      // Add intro paragraph
+      const introP = document.createElement('p');
+      introP.className = 'about-intro';
+      introP.textContent = intro;
+      aboutContainer.appendChild(introP);
+
+      // Create content wrapper for paragraphs
+      const contentWrapper = document.createElement('div');
+      contentWrapper.className = 'about-content';
+
+      // Add content paragraphs
+      paragraphs.forEach((text) => {
+        const p = document.createElement('p');
+        p.className = 'about-paragraph';
+        p.textContent = text;
+        contentWrapper.appendChild(p);
+      });
+
+      aboutContainer.appendChild(contentWrapper);
       return true;
     } catch (error) {
-      debug('Error populating about section:', error);
-      this.handleError(error);
+      debug('ContentManager: Error populating about section', error);
       return false;
     }
   }

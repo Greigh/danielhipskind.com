@@ -10,8 +10,6 @@ class NavigationManager {
 
   async initialize() {
     try {
-      debug('Initializing navigation manager');
-
       this.menuToggle = document.querySelector('.mobile-menu-toggle');
       this.navLinks = document.querySelector('.nav-links');
       this.navItems = document.querySelectorAll('.nav-item');
@@ -20,7 +18,7 @@ class NavigationManager {
         throw new Error('Critical navigation elements missing');
       }
 
-      // Set menu icon and initial ARIA states
+      //Set menu icon and initial ARIA states
       this.menuToggle.innerHTML = menuIcon;
       this.menuToggle.setAttribute('aria-label', 'Toggle navigation menu');
       this.menuToggle.setAttribute('aria-controls', 'nav-links');

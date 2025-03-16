@@ -1,5 +1,18 @@
 import { sunIcon, moonIcon } from './core/icons.js';
 
+// Move this to the top of the file, before the class definition
+if (localStorage.getItem('theme-preference')) {
+  document.documentElement.setAttribute(
+    'data-theme',
+    localStorage.getItem('theme-preference')
+  );
+} else {
+  document.documentElement.setAttribute(
+    'data-theme',
+    window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  );
+}
+
 class ThemeManager {
   static instance = null;
 
@@ -13,19 +26,18 @@ class ThemeManager {
     this.themeToggle = document.getElementById('theme-toggle');
     this.THEME_KEY = 'theme-preference';
     this.systemThemeQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    this.initialized = false;
 
-    // Initialize state
-    this.userPreference = localStorage.getItem(this.THEME_KEY);
-    this.currentTheme = this.determineInitialTheme();
+    // Get the theme that was set in the inline script
+    this.currentTheme = this.html.getAttribute('data-theme');
+
+    // Update the toggle button icon immediately
+    this.updateIcon();
   }
 
   determineInitialTheme() {
-    // Priority: User Preference > System Theme > Default Dark
     if (this.userPreference) {
       return this.userPreference;
     }
-
     return this.getSystemTheme();
   }
 
@@ -35,13 +47,8 @@ class ThemeManager {
         throw new Error('Theme toggle button not found');
       }
 
-      // Set initial theme
-      this.setTheme(this.currentTheme, false);
-
-      // Attach event listeners
+      // Only attach event listeners, theme is already set
       this.attachEventListeners();
-
-      this.initialized = true;
       return true;
     } catch (error) {
       console.error('Error initializing theme manager:', error);

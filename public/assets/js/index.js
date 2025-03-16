@@ -1,48 +1,43 @@
-import { debug } from './utils/debug.js';
-import themeManager from './core/themeManager.js';
+import { debug } from './core/utils.js';
+import { ReadMore } from './components/readMore.js';
 import contentManager from './core/contentManager.js';
-import skillManager from './core/skillManager.js';
 import iconManager from './core/iconManager.js';
 import navigationManager from './core/navigationManager.js';
-import { content } from './config/content.js';
-import privacyManager from './core/privacyManager.js';
 
 class App {
   constructor() {
-    this.init();
+    this.readMore = null;
+    this.initialize();
   }
 
-  async init() {
+  async initialize() {
     try {
-      debug('Starting application initialization');
+      // Initialize content
+      await contentManager.initialize();
 
-      // Initialize privacy manager first
-      await privacyManager.initialize();
+      // Wait for DOM update
+      await new Promise((resolve) => requestAnimationFrame(resolve));
 
-      const initResults = await Promise.all([
-        contentManager.initialize(),
-        themeManager.initialize(),
-        skillManager.initialize(content.skills),
+      // Initialize ReadMore
+      this.readMore = new ReadMore();
+
+      // Initialize other components
+      await Promise.all([
+        iconManager.attachAllIcons(),
+        navigationManager.initialize(),
       ]);
 
-      if (initResults.every(Boolean)) {
-        debug('All managers initialized successfully');
-      } else {
-        debug('Some managers failed to initialize');
-      }
-
-      await iconManager.attachAllIcons();
-      await navigationManager.initialize();
-
-      debug('Application initialized successfully');
+      return true;
     } catch (error) {
-      console.error('Initialization failed:', error);
+      console.error('App: Initialization failed:', error);
+      return false;
     }
   }
 }
 
+// Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-  new App();
+  window.app = new App();
 });
 
 export default App;

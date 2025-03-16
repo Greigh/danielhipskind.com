@@ -7,9 +7,13 @@ export const content = {
       "I'm Daniel Hipskind, a passionate and dedicated software developer with a focus on creating responsive and user-friendly web applications.",
     paragraphs: [
       'My journey into the world of programming began with a curiosity about how technology shapes our daily lives, and it has since evolved into a deep-seated passion for crafting elegant solutions to complex problems.',
-      'With a solid foundation in front-end technologies like HTML, CSS, and JavaScript, as well as experience with modern frameworks like React, I strive to build intuitive and engaging user interfaces.',
-      "I'm currently pursuing an Associate's degree in Computer Programming at Grand Rapids Community College, where I'm constantly expanding my knowledge and honing my skills.",
-      "When I'm not coding, you can find me exploring new programming concepts, contributing to open-source projects, or enjoying the great outdoors. I believe in the power of technology to make a positive impact, and I'm eager to be part of that change.",
+      'With a solid foundation in front-end technologies like HTML, CSS, and JavaScript, as well as experience with modern frameworks like React and Express.js, I strive to build intuitive and engaging user interfaces. My approach to development is centered on creating clean, efficient code that not only meets functional requirements but also enhances user experience.',
+      "I'm currently pursuing an Associate's degree in Computer Programming at Grand Rapids Community College, where I'm constantly expanding my knowledge and honing my skills. This formal education, combined with my self-driven learning and practical projects, has given me a well-rounded understanding of software development principles and best practices.",
+      "My experience extends beyond front-end development. I've worked on several full-stack projects, utilizing technologies like Node.js and Express.js for backend development and MongoDB (Non-Relational Databases) and PostgreSQL (Relational Databases) for database management. This full-stack experience allows me to understand and contribute to all aspects of web application development.",
+      "I'm particularly interested in the intersection of technology and user experience. I believe that great software should not only function flawlessly but also be intuitive and accessible to all users. This philosophy guides my approach to every project I undertake.",
+      "When I'm not coding, I enjoy exploring new programming concepts and contributing to open-source projects that challenge me to grow as a developer. Outside of technology, I love spending time in the great outdoors, where I find inspiration and balance. I also appreciate unwinding with a good movie or TV show, and occasionally, I indulge in a video game. As an avid learner, I’m always eager to stay updated with the latest trends in web development.",
+      "I believe in the power of technology to make a positive impact, and I'm eager to be part of that change. Whether it's creating applications that simplify daily tasks or developing solutions that address larger societal challenges, I'm committed to using my skills to contribute meaningfully to the tech community and beyond.",
+      "I'm always open to new opportunities, collaborations, and challenges that allow me to grow as a developer, make a difference through technology, and make me think outside the box. If you're interested in working together or just want to connect, feel free to reach out. I look forward to hearing from you!",
     ],
   },
 
@@ -187,14 +191,46 @@ export const initContentTracking = () => {
   });
 };
 
-// Debug check for content structure
+// Simple validation
+const injectAboutContent = () => {
+  try {
+    const aboutContainer = document.querySelector('[data-content="about"]');
+    if (!aboutContainer) {
+      throw new Error('About section container not found');
+    }
+
+    // Create and append intro paragraph
+    const intro = document.createElement('p');
+    intro.className = 'about-intro';
+    intro.textContent = content.about.intro;
+    aboutContainer.appendChild(intro);
+
+    // Create and append other paragraphs
+    content.about.paragraphs.forEach((paragraph) => {
+      const p = document.createElement('p');
+      p.className = 'about-paragraph';
+      p.textContent = paragraph;
+      aboutContainer.appendChild(p);
+    });
+
+    return true;
+  } catch (error) {
+    console.error('Failed to inject about content:', error);
+    return false;
+  }
+};
+
+// Update validation function
 const validateContent = () => {
   try {
-    if (!content.about?.intro || !content.about?.paragraphs?.length) {
-      console.error('Invalid about content structure:', content.about);
-      return false;
+    // Validate about section
+    if (!content.about || !content.about.intro || !content.about.paragraphs) {
+      throw new Error('Invalid about section structure');
     }
-    debug('Content structure validated successfully');
+
+    // Inject content after validation
+    injectAboutContent();
+
     return true;
   } catch (error) {
     console.error('Content validation failed:', error);
@@ -202,10 +238,7 @@ const validateContent = () => {
   }
 };
 
-// Run validation only in development
-if (
-  window.location.hostname === 'localhost' ||
-  window.location.hostname === '127.0.0.1'
-) {
+// Initialize content
+document.addEventListener('DOMContentLoaded', () => {
   validateContent();
-}
+});

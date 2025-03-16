@@ -1,0 +1,167 @@
+.about-intro {
+  font-size: var(--text-md);
+  color: var(--text-primary);
+  line-height: 1.7;
+  font-weight: 600;
+  margin-bottom: var(--space-xxs); /* Added smaller margin */
+  animation: fadeInUp 0.6s ease-out;
+  text-align: center;
+}
+
+.about-paragraph {
+  color: var(--text-secondary);
+  line-height: 1.8;
+  margin-bottom: var(--space-xxxs); /* Reduced spacing between paragraphs */
+  opacity: 0;
+  animation: fadeInUp 0.6s ease-out forwards;
+  font-size: var(--text-sm);
+}
+
+/* Add paragraph styling */
+.about-paragraph:last-child {
+  margin-bottom: 0;
+}
+
+/* Stagger animations */
+.about-paragraph:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.about-paragraph:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.about-paragraph:nth-child(4) {
+  animation-delay: 0.4s;
+}
+
+/* Add hover effect to paragraphs */
+.about-paragraph:hover {
+  transform: translateX(4px);
+  transition: transform 0.3s ease;
+}
+
+/* Reset any inherited styles that might interfere */
+[data-content='about'] {
+  position: relative;
+  max-height: 300px;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  padding-bottom: calc(var(--space-xl) + 40px); /* Extra space for button */
+  margin: 0 auto var(--space-xl);
+  max-width: 90ch;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xxs);
+  animation: fadeIn 0.6s ease-out;
+}
+
+[data-content='about'].expanded {
+  max-height: 2000px;
+}
+
+[data-content='about']::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100px;
+  background: linear-gradient(to bottom, transparent, var(--bg-primary));
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.3s;
+  z-index: 1;
+}
+
+[data-content='about'].expanded::after {
+  opacity: 0;
+}
+
+.read-more-container {
+  position: absolute !important;
+  bottom: var(--space-md) !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  display: flex !important;
+  align-items: center;
+  gap: var(--space-xs);
+  z-index: 10 !important; /* Ensure it's above everything */
+  background: var(--bg-secondary);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: 20px;
+  border: 1px solid var(--card-border);
+  box-shadow: var(--card-shadow);
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+.read-more-container:hover {
+  transform: translateX(-50%) translateY(-2px);
+  box-shadow: var(--card-shadow-hover);
+}
+
+.read-more-text {
+  color: var(--accent);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  font-family: var(--font-primary);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.read-more-btn {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.read-more-btn:hover {
+  transform: translateX(-50%) translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.read-more-btn svg {
+  width: 16px;
+  height: 16px;
+  stroke: var(--accent);
+  transition: transform 0.3s ease;
+}
+
+[data-content='about'].expanded .read-more-btn svg {
+  transform: rotate(180deg);
+}
+
+/* Add responsive adjustments */
+@media (max-width: 768px) {
+  [data-content='about'] {
+    padding: var(--space-xs);
+    gap: var(--space-xs);
+  }
+
+  .about-intro {
+    font-size: calc(var(--text-lg) * 0.9);
+  }
+}
+
+/* Reduce motion if user prefers */
+@media (prefers-reduced-motion: reduce) {
+  [data-content='about'],
+  .about-intro,
+  .about-paragraph {
+    animation: none;
+    opacity: 1;
+  }
+  .read-more-container,
+  .read-more-btn svg {
+    transition: none;
+  }
+}
