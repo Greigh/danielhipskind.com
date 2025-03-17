@@ -17,6 +17,7 @@
 @import url('./utils/animations.css');
 @import url('./utils/loading.css');
 @import url('./utils/accessibility.css');
+@import url('./components/project-cards.css');
 
 /* Base Layout */
 body {

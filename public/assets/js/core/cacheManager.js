@@ -4,6 +4,7 @@ class CacheManager {
       cacheKey: 'github-projects',
       expirationTime: 3600000, // 1 hour
       retryDelay: 300000, // 5 minutes
+      version: '1.0.1', // Add version for cache busting
     };
   }
 
@@ -14,8 +15,9 @@ class CacheManager {
 
       if (!cached) return null;
 
-      const { data, timestamp } = JSON.parse(cached);
-      if (this.isExpired(timestamp)) {
+      const { data, timestamp, version } = JSON.parse(cached);
+      // Check both expiration and version
+      if (this.isExpired(timestamp) || version !== this.config.version) {
         this.clearCache(owner, repo);
         return null;
       }
@@ -33,6 +35,7 @@ class CacheManager {
       const cacheData = {
         data,
         timestamp: Date.now(),
+        version: this.config.version,
       };
       localStorage.setItem(key, JSON.stringify(cacheData));
     } catch (error) {
@@ -44,6 +47,13 @@ class CacheManager {
     const key = this.getCacheKey(owner, repo);
     localStorage.removeItem(key);
     localStorage.removeItem(`${key}-etag`);
+  }
+
+  clearAllCache() {
+    const keys = Object.keys(localStorage).filter((key) =>
+      key.startsWith(this.config.cacheKey)
+    );
+    keys.forEach((key) => localStorage.removeItem(key));
   }
 
   isExpired(timestamp) {

@@ -64,22 +64,6 @@
   align-items: center;
 }
 
-/* Technology stack tags */
-.tech-stack {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-xs);
-}
-
-.tech-tag {
-  background: var(--bg-secondary);
-  color: var(--text-secondary);
-  padding: var(--space-xxs) var(--space-xs);
-  border-radius: var(--border-radius-sm);
-  font-size: var(--text-sm);
-  border: 1px solid var(--border-color);
-}
-
 /* Staggered animation delays */
 .project-card:nth-child(2) {
   animation-delay: 0.2s;

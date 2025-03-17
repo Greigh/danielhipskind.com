@@ -23,24 +23,31 @@ export const content = {
       description:
         'An advanced discord bot that helps server owners manage their communities effectively with automated moderation tools and custom commands.',
       githubUrl: 'https://github.com/greigh/blockingmachine',
-      languages: [{ name: 'JavaScript', icon: 'JavaScript' }],
-      workflows: [
-        { type: 'Linting', icon: 'lint' },
-        { type: 'Testing', icon: 'test' },
-        { type: 'Error Webhook', icon: 'discord' },
-      ],
+      technologies: {
+        languages: [
+          { name: 'JavaScript', icon: 'JavaScript' },
+          { name: 'NodeJS', icon: 'NodeJS' },
+        ],
+        workflows: [
+          { name: 'Linting', type: 'linting', icon: 'lint' },
+          { name: 'Testing', type: 'testing', icon: 'test' },
+          { name: 'Error Webhook', type: 'error-webhook', icon: 'discord' },
+        ],
+      },
     },
     {
-      title: 'Portfolio Website (this website)',
+      title: 'Portfolio Website',
       description:
         'A responsive personal portfolio website built with modern web technologies, featuring dynamic theme switching and smooth animations.',
       githubUrl: 'https://github.com/greigh/danielhipskind.com',
-      languages: [
-        { name: 'HTML', icon: 'HTML' },
-        { name: 'CSS', icon: 'CSS' },
-        { name: 'JavaScript', icon: 'JavaScript' },
-      ],
-      workflows: [],
+      technologies: {
+        languages: [
+          { name: 'HTML', icon: 'HTML' },
+          { name: 'CSS', icon: 'CSS' },
+          { name: 'JavaScript', icon: 'JavaScript' },
+        ],
+        workflows: [{ name: 'Linting', type: 'linting', icon: 'lint' }],
+      },
     },
   ],
 
@@ -157,8 +164,8 @@ export const trackProjectView = (project) => {
   if (window.analyticsPreferences?.isEnabled()) {
     window.trackEvent('project_view', {
       title: project.title,
-      languages: project.languages.map((lang) => lang.name),
-      workflows: project.workflows.map((flow) => flow.type),
+      languages: project.technologies.languages.map((lang) => lang.name),
+      workflows: project.technologies.workflows.map((flow) => flow.type),
     });
   }
 };

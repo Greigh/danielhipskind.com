@@ -29,7 +29,13 @@ class IconManager {
   getLanguageIcon(name) {
     if (!name) return this.icons.workflow.github;
 
-    // Create a mapping of normalized names to their correct cases
+    const normalizedName = name.toLowerCase();
+
+    // Special case for EJS and Embedded JavaScript
+    if (normalizedName === 'ejs' || normalizedName === 'embedded javascript') {
+      return this.icons.languages.EJS.icon;
+    }
+
     const caseMap = {
       html: 'HTML',
       css: 'CSS',
@@ -46,17 +52,13 @@ class IconManager {
       php: 'PHP',
       swift: 'Swift',
       ejs: 'EJS',
+      shell: 'Shell',
+      bash: 'Shell',
+      zsh: 'Shell',
+      'shell-script': 'Shell',
     };
 
-    // Normalize the input name
-    const normalizedName = name.toLowerCase().replace(/[^a-z]/g, '');
-
-    // Get the correct casing from the map or capitalize first letter
-    const properName =
-      caseMap[normalizedName] ||
-      name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
-
-    // Look up the icon in our languages collection
+    const properName = caseMap[normalizedName] || name;
     const language = this.icons.languages[properName];
     return language ? language.icon : this.icons.workflow.github;
   }

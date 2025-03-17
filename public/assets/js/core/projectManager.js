@@ -77,26 +77,32 @@ class ProjectManager {
 
   async fetchFromGitHub(owner, repo) {
     try {
-      // Use GitHub API directly
       const headers = {
         Accept: 'application/vnd.github.v3+json',
         'User-Agent': 'danielhipskind-portfolio',
       };
 
-      const [repoResponse, languagesResponse] = await Promise.all([
-        fetch(`https://api.github.com/repos/${owner}/${repo}`, { headers }),
-        fetch(`https://api.github.com/repos/${owner}/${repo}/languages`, {
-          headers,
-        }),
-      ]);
+      // Fetch repo, languages, and workflows in parallel
+      const [repoResponse, languagesResponse, workflowsResponse] =
+        await Promise.all([
+          fetch(`https://api.github.com/repos/${owner}/${repo}`, { headers }),
+          fetch(`https://api.github.com/repos/${owner}/${repo}/languages`, {
+            headers,
+          }),
+          fetch(
+            `https://api.github.com/repos/${owner}/${repo}/actions/workflows`,
+            { headers }
+          ),
+        ]);
 
       if (!repoResponse.ok || !languagesResponse.ok) {
         throw new Error(`GitHub API error: ${repoResponse.status}`);
       }
 
-      const [repoData, languagesData] = await Promise.all([
+      const [repoData, languagesData, workflowsData] = await Promise.all([
         repoResponse.json(),
         languagesResponse.json(),
+        workflowsResponse.ok ? workflowsResponse.json() : { workflows: [] },
       ]);
 
       return {
@@ -105,6 +111,14 @@ class ProjectManager {
           name: lang,
           icon: iconManager.getLanguageIcon(lang),
         })),
+        workflows:
+          workflowsData.workflows?.map((workflow) => ({
+            name: workflow.name,
+            type: this.getWorkflowType(workflow.name),
+            icon: iconManager.getWorkflowIcon(
+              this.getWorkflowType(workflow.name)
+            ),
+          })) || [],
         html_url: repoData.html_url,
         stars: repoData.stargazers_count,
       };
@@ -306,11 +320,25 @@ class ProjectManager {
           icon: iconManager.getLanguageIcon(lang),
         })),
         workflows: [
-          { name: 'Linting', icon: iconManager.getWorkflowIcon('linting') },
-          { name: 'Testing', icon: iconManager.getWorkflowIcon('testing') },
+          {
+            name: 'CI/CD',
+            type: 'github',
+            icon: iconManager.getWorkflowIcon('github'),
+          },
+          {
+            name: 'Linting',
+            type: 'linting',
+            icon: iconManager.getWorkflowIcon('linting'),
+          },
+          {
+            name: 'Testing',
+            type: 'testing',
+            icon: iconManager.getWorkflowIcon('testing'),
+          },
           {
             name: 'Error Webhook',
-            icon: iconManager.getWorkflowIcon('error webhook'),
+            type: 'error-webhook',
+            icon: iconManager.getWorkflowIcon('error-webhook'),
           },
         ],
         html_url: `https://github.com/${owner}/${repo}`,
@@ -349,50 +377,52 @@ class ProjectManager {
     }
   }
 
-  async updateProjectDisplay(owner, repo, elementIds) {
+  async updateProjectDisplay(owner, repo, selectors) {
     try {
       const data = await this.getProjectData(owner, repo);
-      if (!data) throw new Error('No project data available');
+      if (!data) return false;
 
-      const elements = {
-        description: document.getElementById(elementIds.description),
-        techStack: document.getElementById(elementIds.techStack),
-        workflowInfo: document.getElementById(elementIds.workflowInfo),
-        githubLink: document.querySelector(elementIds.githubLink),
-      };
+      // Update description
+      const descEl = document.getElementById(selectors.description);
+      if (descEl) descEl.textContent = data.description;
 
-      // Validate all required elements exist
-      Object.entries(elements).forEach(([key, element]) => {
-        if (!element) {
-          throw new Error(`Element not found: ${elementIds[key]}`);
-        }
-      });
-
-      // Update elements with animation
-      this.animateElement(elements.description, () => {
-        elements.description.textContent = data.description;
-      });
-
-      this.animateElement(elements.techStack, () => {
-        elements.techStack.innerHTML = this.createTechStackHTML(data.languages);
-      });
-
-      if (data.workflows?.length) {
-        this.animateElement(elements.workflowInfo, () => {
-          elements.workflowInfo.innerHTML = this.createWorkflowHTML(
-            data.workflows
-          );
-        });
-      } else {
-        elements.workflowInfo.style.display = 'none';
+      // Update tech stack
+      const techEl = document.getElementById(selectors.techStack);
+      if (techEl && data.languages) {
+        techEl.innerHTML = data.languages
+          .map(
+            (lang) => `
+            <span class="tech-tag" data-lang="${lang.name}">
+              ${lang.icon ? `<span class="tech-icon">${lang.icon}</span>` : ''}
+              ${lang.name}
+            </span>
+          `
+          )
+          .join('');
       }
 
-      elements.githubLink.href = data.html_url;
+      // Update workflows
+      const workflowEl = document.getElementById(selectors.workflowInfo);
+      if (workflowEl && data.workflows) {
+        workflowEl.innerHTML = data.workflows
+          .map(
+            (flow) => `
+            <span class="workflow-tag">
+              ${flow.icon ? `<span class="workflow-icon" data-type="${flow.type}">${flow.icon}</span>` : ''}
+              ${flow.name}
+            </span>
+          `
+          )
+          .join('');
+      }
+
+      // Update GitHub link
+      const linkEl = document.querySelector(selectors.githubLink);
+      if (linkEl) linkEl.href = data.html_url;
 
       return true;
     } catch (error) {
-      debug(`Error updating project display for ${repo}:`, error);
-      this.handleProjectError(owner, repo, elementIds, error);
+      console.error('Failed to update project display:', error);
       return false;
     }
   }
@@ -447,18 +477,42 @@ class ProjectManager {
 
   async getWorkflows(owner, repo) {
     try {
-      const { data } = await this.octokit.actions.listRepoWorkflows({
-        owner,
-        repo,
-      });
+      const response = await this.fetchWithAuth(
+        `https://api.github.com/repos/${owner}/${repo}/actions/workflows`
+      );
+
+      if (!response.ok) {
+        debug(`Failed to fetch workflows for ${owner}/${repo}`);
+        return this.getFallbackWorkflows(repo);
+      }
+
+      const data = await response.json();
       return data.workflows.map((workflow) => ({
         name: workflow.name,
-        state: workflow.state,
+        type: this.getWorkflowType(workflow.name),
+        icon: iconManager.getWorkflowIcon(this.getWorkflowType(workflow.name)),
       }));
     } catch (error) {
-      debug(`No workflows found for ${repo}`);
-      return [];
+      debug('Error fetching workflows:', error);
+      return this.getFallbackWorkflows(repo);
     }
+  }
+
+  getWorkflowType(name) {
+    const normalized = name.toLowerCase();
+    if (normalized.includes('lint')) return 'linting';
+    if (normalized.includes('test')) return 'testing';
+    if (normalized.includes('ci') || normalized.includes('build'))
+      return 'github';
+    if (normalized.includes('error') || normalized.includes('discord'))
+      return 'error-webhook';
+    return 'github';
+  }
+
+  getFallbackWorkflows(repo) {
+    // Use content.js fallback data
+    const project = content.projects.find((p) => p.githubUrl.includes(repo));
+    return project?.technologies.workflows || [];
   }
 
   async fetchProjectData(owner, repo) {
@@ -573,10 +627,59 @@ class ProjectManager {
   createProjectCard(project) {
     const card = document.createElement('div');
     card.className = 'project-card';
+    card.id = project.id;
 
-    // ...existing project card creation code...
+    card.innerHTML = `
+      <div class="project-header">
+        <h3>${project.name}</h3>
+        <a href="https://github.com/${project.owner}/${project.repo}"
+           class="github-link"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="View ${project.name} on GitHub">
+          ${iconManager.getIcon('github')}
+        </a>
+      </div>
+      <p id="${project.id}-description" class="project-description">
+        Loading project details...
+      </p>
+      <div class="project-tech">
+        <h4>Technologies</h4>
+        <div id="${project.id}-tech-stack" class="tech-stack">
+          ${
+            project.languages
+              ?.map(
+                (lang) => `
+            <span class="tech-tag">
+              ${lang.icon ? `<span class="tech-icon">${lang.icon}</span>` : ''}
+              ${lang.name}
+            </span>
+          `
+              )
+              .join('') || 'Loading...'
+          }
+        </div>
+      </div>
+      <div class="project-workflows">
+        <h4>Workflows</h4>
+        <div id="${project.id}-workflow-info" class="workflow-info">
+          ${
+            project.workflows
+              ?.map(
+                (workflow) => `
+            <span class="workflow-tag">
+              ${workflow.icon ? `<span class="workflow-icon">${workflow.icon}</span>` : ''}
+              ${workflow.name}
+            </span>
+          `
+              )
+              .join('') || 'Loading workflow information...'
+          }
+        </div>
+      </div>
+    `;
 
-    // Track project views
+    // Add intersection observer for analytics
     if (window.analyticsPreferences?.isEnabled()) {
       const observer = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
@@ -609,14 +712,33 @@ class ProjectManager {
 
   createTechStackHTML(languages) {
     return languages
-      .map((lang) => `<span class="tech-tag">${lang.name}</span>`)
+      .map(
+        (lang) => `
+            <span class="tech-tag" data-lang="${lang.name}">
+                ${lang.icon ? `<span class="tech-icon">${lang.icon}</span>` : ''}
+                ${lang.name}
+            </span>
+        `
+      )
       .join('');
   }
 
   createWorkflowHTML(workflows) {
     return workflows
-      .map((flow) => `<span class="workflow-tag">${flow.name}</span>`)
+      .map(
+        (flow) => `
+            <span class="workflow-tag">
+                ${flow.icon ? `<span class="workflow-icon" data-type="${flow.name.toLowerCase().replace(/\s+/g, '-')}">${flow.icon}</span>` : ''}
+                ${flow.name}
+            </span>
+        `
+      )
       .join('');
+  }
+
+  async forceRefresh() {
+    cacheManager.clearAllCache();
+    await this.initialize();
   }
 }
 
