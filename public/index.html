@@ -1,14 +1,13 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
-    <meta charset="utf-8" />
+    <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="cache-control" content="no-cache" />
     <meta http-equiv="pragma" content="no-cache" />
     <meta http-equiv="expires" content="0" />
     <meta name="keywords" content="Web Developer" />
     <meta name="description" content="Daniel Hipskind Portfolio" />
-
     <!-- Open Graph Tags -->
     <meta property="og:title" content="Daniel Hipskind | Software Developer" />
     <meta property="og:description" content="Daniel Hipskind Portfolio" />
@@ -28,16 +27,19 @@
 
     <!-- Add this script before any other scripts or CSS -->
     <script>
-        (function() {
-            const theme = localStorage.getItem('theme-preference') ||
-                (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-            document.documentElement.setAttribute('data-theme', theme);
-        })();
+      (function () {
+        const theme =
+          localStorage.getItem('theme-preference') ||
+          (window.matchMedia('(prefers-color-scheme: dark)').matches
+            ? 'dark'
+            : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      })();
     </script>
 
     <!-- Add this before your other link tags -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
     <!-- Styles -->
     <link
@@ -63,8 +65,6 @@
     <!-- Preconnect to required origins -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-
-    <!-- Single Module Script -->
     <script type="module" src="/assets/js/index.js"></script>
     <script type="module" src="/assets/js/themeToggle.js" defer></script>
     <script type="module">
@@ -75,6 +75,10 @@
   <body>
     <!-- Header -->
     <header class="nav-container">
+      <nav class="main-nav" id="main-nav">
+        <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">
+          <!-- Menu icon will be injected -->
+        </button>
         <div class="nav-links">
           <ul class="nav-items">
             <li><a href="#about" class="nav-item">About</a></li>
@@ -88,6 +92,8 @@
           aria-label="Toggle theme"
         >
           <span><!-- SVG will be injected by themeToggle.js --></span>
+        </button>
+      </nav>
     </header>
 
     <!-- Main Content -->
@@ -121,24 +127,27 @@
       </section>
 
       <!-- Projects Section -->
-      <section id="projects" class="section" data-section="projects">
+      <section id="projects" class="section">
         <h2 class="section-header">Projects</h2>
         <div class="projects-grid">
-          <!-- Blocking Machine Project -->
+          <!-- BlockingMachine Project -->
           <article class="project-card" id="blocking-machine">
             <div class="project-content">
-              <h3>Blocking Machine</h3>
-              <p id="project-description">Loading project description...</p>
+              <h3>BlockingMachine</h3>
+              <p id="project-description">Loading project details...</p>
+
               <div class="project-meta">
-                <div id="tech-stack" class="tech-stack">
-                  <span class="loading">Loading technologies...</span>
+                <div class="tech-stack" id="tech-stack">
+                  <!-- Languages will be injected here -->
                 </div>
-                <div id="workflow-info" class="workflow-info"></div>
-              </div>
-              <div class="project-links">
-                <a class="github-link" href="#" target="_blank" rel="noopener"
-                  >View on GitHub</a
-                >
+                <div class="workflow-info" id="workflow-info">
+                  <!-- Workflows will be injected here -->
+                </div>
+                <div class="project-links">
+                  <a href="#" class="github-link" aria-label="View on GitHub">
+                    View Project
+                  </a>
+                </div>
               </div>
             </div>
           </article>
@@ -147,17 +156,20 @@
           <article class="project-card" id="portfolio">
             <div class="project-content">
               <h3>Portfolio Website</h3>
-              <p id="portfolio-description">Loading project description...</p>
+              <p id="portfolio-description">Loading project details...</p>
+
               <div class="project-meta">
-                <div id="portfolio-tech-stack" class="tech-stack">
-                  <span class="loading">Loading technologies...</span>
+                <div class="tech-stack" id="portfolio-tech-stack">
+                  <!-- Languages will be injected here -->
                 </div>
-                <div id="portfolio-workflow-info" class="workflow-info"></div>
-              </div>
-              <div class="project-links">
-                <a class="github-link" href="#" target="_blank" rel="noopener"
-                  >View on GitHub</a
-                >
+                <div class="workflow-info" id="portfolio-workflow-info">
+                  <!-- Workflows will be injected here -->
+                </div>
+                <div class="project-links">
+                  <a href="#" class="github-link" aria-label="View on GitHub">
+                    View Project
+                  </a>
+                </div>
               </div>
             </div>
           </article>

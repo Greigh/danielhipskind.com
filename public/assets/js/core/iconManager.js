@@ -3,7 +3,10 @@ import { debug } from './utils.js';
 
 class IconManager {
   constructor() {
-    this.icons = icons;
+    this.icons = {
+      ...icons,
+      language: icons.languages, // Add alias for consistency
+    };
   }
 
   getSocialIcon(name) {
@@ -26,30 +29,36 @@ class IconManager {
   getLanguageIcon(name) {
     if (!name) return this.icons.workflow.github;
 
-    // Handle special cases that need to be fully uppercase
-    const upperCaseLanguages = ['HTML', 'CSS'];
-    if (upperCaseLanguages.includes(name.toUpperCase())) {
-      const language = this.icons.language[name.toUpperCase()];
-      if (language) {
-        return language.icon.replace('currentColor', language.color);
-      }
-    }
+    // Create a mapping of normalized names to their correct cases
+    const caseMap = {
+      html: 'HTML',
+      css: 'CSS',
+      javascript: 'JavaScript',
+      typescript: 'TypeScript',
+      nodejs: 'NodeJS',
+      python: 'Python',
+      java: 'Java',
+      csharp: 'CSharp',
+      cpp: 'CPP',
+      ruby: 'Ruby',
+      go: 'Go',
+      rust: 'Rust',
+      php: 'PHP',
+      swift: 'Swift',
+      ejs: 'EJS',
+    };
 
-    // Special case for JavaScript (maintain camelCase)
-    if (name.toLowerCase() === 'javascript') {
-      const language = this.icons.language.JavaScript;
-      if (language) {
-        return language.icon.replace('currentColor', language.color);
-      }
-    }
+    // Normalize the input name
+    const normalizedName = name.toLowerCase().replace(/[^a-z]/g, '');
 
-    // For all other languages, capitalize first letter
+    // Get the correct casing from the map or capitalize first letter
     const properName =
+      caseMap[normalizedName] ||
       name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
-    const language = this.icons.language[properName];
-    return language
-      ? language.icon.replace('currentColor', language.color)
-      : this.icons.workflow.github;
+
+    // Look up the icon in our languages collection
+    const language = this.icons.languages[properName];
+    return language ? language.icon : this.icons.workflow.github;
   }
 
   attachSocialIcons() {

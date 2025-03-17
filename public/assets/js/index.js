@@ -3,6 +3,7 @@ import { ReadMore } from './components/readMore.js';
 import contentManager from './core/contentManager.js';
 import iconManager from './core/iconManager.js';
 import navigationManager from './core/navigationManager.js';
+import { projectManager } from './core/projectManager.js';
 
 class App {
   constructor() {
@@ -25,6 +26,7 @@ class App {
       await Promise.all([
         iconManager.attachAllIcons(),
         navigationManager.initialize(),
+        projectManager.initialize(),
       ]);
 
       return true;

@@ -11,6 +11,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import realtimeService from './server/services/analytics/realtimeService.js';
 import analyticsService from './server/services/analytics/analyticsService.js'; // Changed to default import
+import { cspMiddleware } from './server/middleware/cspMiddleware.js';
 
 dotenv.config();
 
@@ -32,14 +33,8 @@ app.use(
 );
 app.use(cookieParser()); // Add this before routes
 
-// Add CSP middleware
-app.use((req, res, next) => {
-  res.setHeader(
-    'Content-Security-Policy',
-    "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://esm.sh; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;"
-  );
-  next();
-});
+// Apply CSP middleware before other routes
+app.use(cspMiddleware);
 
 app.use((req, res, next) => {
   if (req.path.endsWith('.js')) {

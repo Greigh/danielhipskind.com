@@ -3,7 +3,7 @@ import { analyticsPreferences } from '../utils/preferences.js';
 import { deviceDetector } from '../utils/deviceDetector.js';
 import analyticsPrivacyManager from './privacyManager.js';
 
-class AnalyticsTracker {
+export default class Tracker {
   constructor() {
     this.initialized = false;
     this.canTrack = false;
@@ -153,8 +153,8 @@ class AnalyticsTracker {
 
 // Create instance only after DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-  window.analyticsTracker = new AnalyticsTracker();
+  window.analyticsTracker = new Tracker();
 });
 
-export const analytics = new AnalyticsTracker();
+export const analytics = new Tracker();
 export const trackEvent = (name, data) => analytics.trackEvent(name, data);

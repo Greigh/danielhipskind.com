@@ -1,22 +1,118 @@
 import { debug } from '../utils/debug.js';
 import iconManager from './iconManager.js';
 import { analytics } from '../services/analytics.js';
-
+import { cacheManager } from './cacheManager.js';
 class ProjectManager {
   constructor() {
-    this.projects = new Map();
+    this.projects = {
+      'blocking-machine': {
+        name: 'BlockingMachine',
+        owner: 'greigh',
+        repo: 'blockingmachine',
+      },
+      portfolio: {
+        name: 'Portfolio Website',
+        owner: 'greigh',
+        repo: 'danielhipskind.com',
+      },
+    };
+
     this.initialized = false;
-    this.observers = new Map();
     this.cacheConfig = {
       key: 'github-projects-cache',
       expirationTime: 3600000, // 1 hour
     };
   }
 
-  cacheConfig = {
-    key: 'github-projects-cache',
-    expirationTime: 3600000, // 1 hour
-  };
+  async initialize() {
+    try {
+      // Start cache auto-update system
+      cacheManager.startAutoUpdate();
+
+      // Initialize projects
+      await Promise.all([
+        this.updateProjectDisplay('greigh', 'blockingmachine', {
+          description: 'project-description',
+          techStack: 'tech-stack',
+          workflowInfo: 'workflow-info',
+          githubLink: '.github-link',
+        }),
+        this.updateProjectDisplay('greigh', 'danielhipskind.com', {
+          description: 'portfolio-description',
+          techStack: 'portfolio-tech-stack',
+          workflowInfo: 'portfolio-workflow-info',
+          githubLink: '.github-link',
+        }),
+      ]);
+
+      return true;
+    } catch (error) {
+      console.error('Failed to initialize projects:', error);
+      return false;
+    }
+  }
+
+  async getProjectData(owner, repo) {
+    try {
+      // Try cache first
+      const cached = await cacheManager.getCachedData(owner, repo);
+      if (cached) {
+        return cached;
+      }
+
+      // Fetch fresh data
+      const data = await this.fetchFromGitHub(owner, repo);
+      if (!data) {
+        return this.getFallbackData(owner, repo);
+      }
+
+      // Cache the new data
+      await cacheManager.cacheData(owner, repo, data);
+      return data;
+    } catch (error) {
+      console.warn(`Error getting project data: ${error.message}`);
+      return this.getFallbackData(owner, repo);
+    }
+  }
+
+  async fetchFromGitHub(owner, repo) {
+    try {
+      // Use GitHub API directly
+      const headers = {
+        Accept: 'application/vnd.github.v3+json',
+        'User-Agent': 'danielhipskind-portfolio',
+      };
+
+      const [repoResponse, languagesResponse] = await Promise.all([
+        fetch(`https://api.github.com/repos/${owner}/${repo}`, { headers }),
+        fetch(`https://api.github.com/repos/${owner}/${repo}/languages`, {
+          headers,
+        }),
+      ]);
+
+      if (!repoResponse.ok || !languagesResponse.ok) {
+        throw new Error(`GitHub API error: ${repoResponse.status}`);
+      }
+
+      const [repoData, languagesData] = await Promise.all([
+        repoResponse.json(),
+        languagesResponse.json(),
+      ]);
+
+      return {
+        description: repoData.description || 'No description available',
+        languages: Object.keys(languagesData).map((lang) => ({
+          name: lang,
+          icon: iconManager.getLanguageIcon(lang),
+        })),
+        html_url: repoData.html_url,
+        stars: repoData.stargazers_count,
+      };
+    } catch (error) {
+      debug(`GitHub fetch error: ${error.message}`);
+      return null;
+    }
+  }
 
   async getCache(owner, repo) {
     try {
@@ -91,6 +187,35 @@ class ProjectManager {
     } catch (error) {
       console.error('Error checking for updates:', error);
       return false;
+    }
+  }
+
+  async fetchWithAuth(url) {
+    const headers = {
+      Accept: 'application/vnd.github.v3+json',
+      'User-Agent': 'danielhipskind-portfolio',
+    };
+
+    // Try public API first
+    try {
+      const publicResponse = await fetch(url, { headers });
+      if (publicResponse.ok) return publicResponse.json();
+
+      // If we hit rate limit and haven't tried auth yet
+      if (publicResponse.status === 403 && !this.githubToken) {
+        const tokenResponse = await fetch('/api/github/token');
+        this.githubToken = await tokenResponse.text();
+
+        // Retry with auth token
+        headers.Authorization = `token ${this.githubToken}`;
+        const authResponse = await fetch(url, { headers });
+        if (authResponse.ok) return authResponse.json();
+      }
+
+      throw new Error(`GitHub API error: ${publicResponse.status}`);
+    } catch (error) {
+      console.error('GitHub API fetch error:', error);
+      return null;
     }
   }
 
@@ -238,7 +363,9 @@ class ProjectManager {
 
       // Validate all required elements exist
       Object.entries(elements).forEach(([key, element]) => {
-        if (!element) throw new Error(`Element not found: ${key}`);
+        if (!element) {
+          throw new Error(`Element not found: ${elementIds[key]}`);
+        }
       });
 
       // Update elements with animation
@@ -261,11 +388,6 @@ class ProjectManager {
       }
 
       elements.githubLink.href = data.html_url;
-
-      // Track view if analytics enabled
-      if (window.analyticsPreferences?.isEnabled()) {
-        this.trackProjectView({ owner, repo, ...data });
-      }
 
       return true;
     } catch (error) {
@@ -290,7 +412,6 @@ class ProjectManager {
 
   handleProjectError(owner, repo, elementIds, error) {
     const message = this.getErrorMessage(error);
-    const retryButton = this.createRetryButton(owner, repo, elementIds);
 
     const elements = [
       document.getElementById(elementIds.description),
@@ -300,166 +421,134 @@ class ProjectManager {
 
     elements.forEach((element) => {
       if (!element) return;
-      element.innerHTML = `
-        <div class="error-state">
-          <p>${message}</p>
-          ${retryButton}
-        </div>
-      `;
+      element.innerHTML = `<div class="error-state">${message}</div>`;
     });
+
+    // Automatically retry after delay if offline or rate limited
+    if (error.message?.includes('rate limit') || !navigator.onLine) {
+      setTimeout(() => {
+        this.updateProjectDisplay(owner, repo, elementIds);
+      }, 30000); // Retry after 30 seconds
+    }
   }
 
   getErrorMessage(error) {
     if (error.message?.includes('rate limit')) {
-      return 'GitHub API rate limit reached. Using cached data if available.';
+      return 'Temporarily unavailable. Retrying soon...';
     }
     if (error.response?.status === 404) {
-      return 'Project not found. Please check the repository details.';
+      return 'Project information unavailable.';
     }
     if (!navigator.onLine) {
-      return 'You appear to be offline. Using cached data if available.';
+      return 'Loading cached project data...';
     }
-    return 'Using locally stored project data.';
-  }
-
-  createRetryButton(owner, repo, elementIds) {
-    const retryFunction = async () => {
-      await this.updateProjectDisplay(owner, repo, elementIds);
-    };
-
-    return `
-      <button
-        class="retry-button"
-        onclick="document.dispatchEvent(new CustomEvent('retryProjectLoad', {
-          detail: {
-            owner: '${owner}',
-            repo: '${repo}',
-            elementIds: ${JSON.stringify(elementIds)}
-          }
-        }))">
-        Try Again
-      </button>
-    `;
-  }
-
-  async getProjectData(owner, repo) {
-    try {
-      // Try cache first
-      const cachedData = await this.getCache(owner, repo);
-      if (cachedData) return cachedData;
-
-      // Set up headers for GitHub API
-      const headers = {
-        Accept: 'application/vnd.github.v3+json',
-        'User-Agent': 'danielhipskind-portfolio',
-      };
-
-      // Fetch repository data
-      const repoResponse = await fetch(
-        `https://api.github.com/repos/${owner}/${repo}`,
-        { headers }
-      );
-      if (!repoResponse.ok) {
-        throw new Error(`GitHub API error: ${repoResponse.status}`);
-      }
-      const repoData = await repoResponse.json();
-
-      // Fetch languages data
-      const languagesResponse = await fetch(repoData.languages_url, {
-        headers,
-      });
-      const languagesData = await languagesResponse.json();
-
-      // Process the data
-      const data = {
-        description: repoData.description || 'No description available',
-        languages: Object.keys(languagesData).map((lang) => ({
-          name: lang,
-          icon: iconManager.getLanguageIcon(lang),
-        })),
-        workflows:
-          repo === 'blockingmachine'
-            ? [
-                {
-                  name: 'Linting',
-                  icon: iconManager.getWorkflowIcon('linting'),
-                },
-                {
-                  name: 'Testing',
-                  icon: iconManager.getWorkflowIcon('testing'),
-                },
-                {
-                  name: 'Error Webhook',
-                  icon: iconManager.getWorkflowIcon('error webhook'),
-                },
-              ]
-            : [], // Empty array for portfolio project
-        html_url: repoData.html_url,
-      };
-
-      // Cache the processed data
-      this.setCache(owner, repo, data);
-      return data;
-    } catch (error) {
-      console.error(`Error fetching project data for ${repo}:`, error);
-      return this.getFallbackData(owner, repo);
-    }
+    return 'Loading project information...';
   }
 
   async getWorkflows(owner, repo) {
     try {
-      const octokit = new window.Octokit();
-      const response = await octokit.request(
-        'GET /repos/{owner}/{repo}/actions/workflows',
-        {
-          owner,
-          repo,
-        }
-      );
-      return response.data.workflows.map((workflow) => ({
+      const { data } = await this.octokit.actions.listRepoWorkflows({
+        owner,
+        repo,
+      });
+      return data.workflows.map((workflow) => ({
         name: workflow.name,
         state: workflow.state,
       }));
     } catch (error) {
-      console.warn(`No workflows found for ${repo}`);
+      debug(`No workflows found for ${repo}`);
       return [];
     }
   }
 
-  async initialize() {
+  async fetchProjectData(owner, repo) {
     try {
-      debug('Initializing project manager');
+      const response = await fetch(`/api/github/repos/${owner}/${repo}`);
+      const data = await response.json();
 
-      // Set up retry event listener
-      this.setupRetryListener();
+      if (data.fallback) {
+        console.warn(`Using fallback data for ${owner}/${repo}`);
+      }
 
-      // Show loading state
-      this.setLoadingState(true);
+      return data;
+    } catch (error) {
+      console.error(
+        `Failed to fetch project data for ${owner}/${repo}:`,
+        error
+      );
+      return {
+        description: 'Project information temporarily unavailable',
+        languages: [],
+        html_url: `https://github.com/${owner}/${repo}`,
+      };
+    }
+  }
 
-      await Promise.all([
-        this.updateProjectDisplay('greigh', 'blockingmachine', {
-          description: 'project-description',
-          techStack: 'tech-stack',
-          workflowInfo: 'workflow-info',
-          githubLink: '#blocking-machine .github-link',
-        }),
-        this.updateProjectDisplay('greigh', 'danielhipskind.com', {
-          description: 'portfolio-description',
-          techStack: 'portfolio-tech-stack',
-          workflowInfo: 'portfolio-workflow-info',
-          githubLink: '#portfolio .github-link',
-        }),
+  async fetchProjectData(repo) {
+    try {
+      // Fetch repo data, languages, and workflows in parallel
+      const [repoData, languages, workflows] = await Promise.all([
+        fetch(`https://api.github.com/repos/${repo}`).then((r) => r.json()),
+        fetch(`https://api.github.com/repos/${repo}/languages`).then((r) =>
+          r.json()
+        ),
+        fetch(`https://api.github.com/repos/${repo}/actions/workflows`).then(
+          (r) => r.json()
+        ),
       ]);
 
-      this.initialized = true;
-      this.setLoadingState(false);
-      debug('Project manager initialized');
-      return true;
+      // Update project data
+      const project = Object.values(this.projects).find((p) => p.repo === repo);
+      if (project) {
+        project.description = repoData.description;
+        project.languages = Object.keys(languages);
+        project.workflows = workflows.workflows.map((w) => w.name);
+      }
     } catch (error) {
-      debug('Failed to initialize project manager:', error);
-      this.handleError(error);
-      return false;
+      console.error(`Failed to fetch data for ${repo}:`, error);
     }
+  }
+
+  updateProjectCards() {
+    Object.entries(this.projects).forEach(([id, project]) => {
+      const card = document.getElementById(id);
+      if (!card) return;
+
+      // Update description
+      const description = card.querySelector(
+        `#${id === 'blocking-machine' ? 'project' : id}-description`
+      );
+      if (description) {
+        description.textContent =
+          project.description || 'No description available';
+      }
+
+      // Update tech stack
+      const techStack = card.querySelector(
+        `#${id === 'blocking-machine' ? '' : id + '-'}tech-stack`
+      );
+      if (techStack && project.languages) {
+        techStack.innerHTML = project.languages
+          .map((lang) => `<span class="tech-tag">${lang}</span>`)
+          .join('');
+      }
+
+      // Update workflows
+      const workflowInfo = card.querySelector(
+        `#${id === 'blocking-machine' ? '' : id + '-'}workflow-info`
+      );
+      if (workflowInfo && project.workflows) {
+        workflowInfo.innerHTML = project.workflows
+          .map((workflow) => `<span class="workflow-tag">${workflow}</span>`)
+          .join('');
+      }
+
+      // Update GitHub link
+      const link = card.querySelector('.github-link');
+      if (link) {
+        link.href = `https://github.com/${project.repo}`;
+      }
+    });
   }
 
   setLoadingState(isLoading) {
@@ -516,6 +605,18 @@ class ProjectManager {
       console.error('Error loading project:', error);
       throw error;
     }
+  }
+
+  createTechStackHTML(languages) {
+    return languages
+      .map((lang) => `<span class="tech-tag">${lang.name}</span>`)
+      .join('');
+  }
+
+  createWorkflowHTML(workflows) {
+    return workflows
+      .map((flow) => `<span class="workflow-tag">${flow.name}</span>`)
+      .join('');
   }
 }
 

@@ -6,34 +6,82 @@ class NavigationManager {
     this.isMenuOpen = false;
     this.isMobile = window.innerWidth <= 768; // Increased breakpoint
     this.initialized = false;
+    this.nav = null;
+    this.navItems = null;
   }
 
   async initialize() {
     try {
-      this.menuToggle = document.querySelector('.mobile-menu-toggle');
-      this.navLinks = document.querySelector('.nav-links');
-      this.navItems = document.querySelectorAll('.nav-item');
-
-      if (!this.menuToggle || !this.navLinks) {
-        throw new Error('Critical navigation elements missing');
+      // Validate required dependencies
+      if (!menuIcon) {
+        throw new Error('Menu icon dependency missing');
       }
 
-      //Set menu icon and initial ARIA states
+      this.menuToggle = document.querySelector('.mobile-menu-toggle');
+      this.navLinks = document.querySelector('.nav-links');
+
+      // Create fallback navigation if elements are missing
+      if (!this.menuToggle || !this.navLinks) {
+        this.createFallbackNav();
+        this.menuToggle = document.querySelector('.mobile-menu-toggle');
+        this.navLinks = document.querySelector('.nav-links');
+
+        if (!this.menuToggle || !this.navLinks) {
+          throw new Error('Failed to create fallback navigation');
+        }
+      }
+
+      this.navItems = document.querySelectorAll('.nav-item');
+      if (!this.navItems?.length) {
+        debug('Warning: No navigation items found');
+      }
+
+      // Initialize UI state
       this.menuToggle.innerHTML = menuIcon;
       this.menuToggle.setAttribute('aria-label', 'Toggle navigation menu');
       this.menuToggle.setAttribute('aria-controls', 'nav-links');
+      this.menuToggle.setAttribute('aria-expanded', 'false');
 
-      // Initialize state and listeners
       this.updateNavigationState();
       this.setupEventListeners();
 
       this.initialized = true;
-      debug('Navigation manager initialized');
       return true;
     } catch (error) {
       debug('Navigation initialization failed:', error);
       return false;
     }
+  }
+
+  createFallbackNav() {
+    const nav = document.createElement('nav');
+    nav.id = 'main-nav';
+    nav.className = 'main-nav';
+
+    nav.innerHTML = `
+      <div class="nav-container">
+        <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">
+          <!-- Menu icon will be injected -->
+        </button>
+        <div class="nav-links">
+          <ul class="nav-items">
+            <li><a href="#about" class="nav-item">About</a></li>
+            <li><a href="#projects" class="nav-item">Projects</a></li>
+            <li><a href="#skills" class="nav-item">Skills</a></li>
+          </ul>
+        </div>
+        <button
+          id="theme-toggle"
+          class="theme-toggle btn"
+          aria-label="Toggle theme"
+        >
+          <span><!-- SVG will be injected by themeToggle.js --></span>
+        </button>
+      </div>
+    `;
+
+    document.body.insertBefore(nav, document.body.firstChild);
+    this.nav = nav;
   }
 
   updateNavigationState() {
@@ -108,6 +156,23 @@ class NavigationManager {
         this.closeMenu();
       }
     });
+
+    if (!this.navItems?.length) return;
+
+    this.navItems.forEach((item) => {
+      item.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = e.currentTarget.getAttribute('href').substring(1);
+        this.scrollToSection(target);
+      });
+    });
+  }
+
+  scrollToSection(sectionId) {
+    const section = document.getElementById(sectionId);
+    if (!section) return;
+
+    section.scrollIntoView({ behavior: 'smooth' });
   }
 
   toggleMenu() {

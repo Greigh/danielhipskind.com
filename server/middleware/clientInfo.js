@@ -46,9 +46,7 @@ function getClientIP(req) {
 
 function detectDevice(userAgent) {
   const isTablet = /tablet|ipad/i.test(userAgent);
-  const isMobile = /mobile|android|webos|iphone|ipod|blackberry/i.test(
-    userAgent
-  );
+  const isMobile = /mobile|android|webos|iphone|ipod|blackberry/i.test(userAgent);
 
   if (isTablet) return 'tablet';
   if (isMobile) return 'mobile';
@@ -121,9 +119,7 @@ function detectOS(userAgent) {
 
   for (const [name, regex] of Object.entries(os)) {
     if (regex.test(userAgent)) {
-      const version = userAgent.match(
-        /(?:windows nt|mac os x|android)\s*([0-9._]+)/i
-      );
+      const version = userAgent.match(/(?:windows nt|mac os x|android)\s*([0-9._]+)/i);
       return {
         name,
         version: version ? version[1] : 'unknown',
@@ -155,7 +151,5 @@ function isIPInRange(ip, network, bits) {
 }
 
 function ipToLong(ip) {
-  return (
-    ip.split('.').reduce((acc, octet) => (acc << 8) + parseInt(octet), 0) >>> 0
-  );
+  return ip.split('.').reduce((acc, octet) => (acc << 8) + parseInt(octet), 0) >>> 0;
 }

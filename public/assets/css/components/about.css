@@ -1,28 +1,38 @@
+.about {
+  display: flex; /* Flex layout for alignment */
+  gap: var(--space-md); /* Space between sections */
+  border: 1px solid var(--card-border);
+  box-shadow: var(--card-shadow);
+  margin: 0 auto var(--space-sm);
+}
+
+/* Main intro paragraph styling */
 .about-intro {
-  font-size: var(--text-md);
-  color: var(--text-primary);
-  line-height: 1.7;
-  font-weight: 600;
-  margin-bottom: var(--space-xxs); /* Added smaller margin */
-  animation: fadeInUp 0.6s ease-out;
-  text-align: center;
+  font-size: var(--text-md); /* Use design system text size */
+  color: var(--text-primary); /* Primary text color from theme */
+  line-height: 1.7; /* Increased line height for readability */
+  font-weight: 600; /* Semi-bold weight for emphasis */
+  margin-bottom: var(--space-xxs); /* Small bottom margin */
+  animation: fadeInUp 0.6s ease-out; /* Animate in from bottom */
+  text-align: center; /* Center align intro text */
 }
 
+/* Regular paragraph styling */
 .about-paragraph {
-  color: var(--text-secondary);
-  line-height: 1.8;
-  margin-bottom: var(--space-xxxs); /* Reduced spacing between paragraphs */
-  opacity: 0;
-  animation: fadeInUp 0.6s ease-out forwards;
-  font-size: var(--text-sm);
+  color: var(--text-secondary); /* Secondary text color from theme */
+  line-height: 1.8; /* Increased line height for readability */
+  margin-bottom: var(--space-xs); /* Space between paragraphs */
+  opacity: 0; /* Start invisible for animation */
+  animation: fadeInUp 0.6s ease-out forwards; /* Animate in and stay visible */
+  font-size: var(--text-sm); /* Slightly smaller text */
 }
 
-/* Add paragraph styling */
+/* Remove margin from last paragraph */
 .about-paragraph:last-child {
   margin-bottom: 0;
 }
 
-/* Stagger animations */
+/* Staggered animation delays for paragraphs */
 .about-paragraph:nth-child(2) {
   animation-delay: 0.2s;
 }
@@ -33,114 +43,85 @@
   animation-delay: 0.4s;
 }
 
-/* Add hover effect to paragraphs */
+/* Hover effect for paragraphs */
 .about-paragraph:hover {
-  transform: translateX(4px);
-  transition: transform 0.3s ease;
+  transform: translateX(4px); /* Slight right shift on hover */
+  transition: transform 0.3s ease; /* Smooth transition */
 }
 
-/* Reset any inherited styles that might interfere */
+/* Main about section container */
 [data-content='about'] {
-  position: relative;
-  max-height: 300px;
-  overflow: hidden;
-  transition: max-height 0.3s ease;
-  padding-bottom: calc(var(--space-xl) + 40px); /* Extra space for button */
-  margin: 0 auto var(--space-xl);
-  max-width: 90ch;
-  display: flex;
+  position: relative; /* For absolute positioning of children */
+  max-height: 375px; /* Initial collapsed height */
+  overflow: hidden; /* Hide overflow content */
+  transition: max-height 0.3s ease; /* Smooth height transition */
+  margin: var(--space-xs); /* Outer spacing */
+  max-width: 90ch; /* Optimal reading width */
+  display: flex; /* Stack content vertically */
   flex-direction: column;
-  gap: var(--space-xxs);
-  animation: fadeIn 0.6s ease-out;
+  gap: var(--space-xxs); /* Space between elements */
+  animation: fadeIn 0.6s ease-out; /* Fade in animation */
+  border-radius: var(--border-radius); /* Add border radius to container */
 }
 
+/* Expanded state */
 [data-content='about'].expanded {
-  max-height: 2000px;
+  max-height: 3000px; /* Large height when expanded */
 }
 
+/* Gradient overlay */
 [data-content='about']::after {
   content: '';
-  position: absolute;
-  bottom: 0;
+  position: absolute; /* Position over content */
+  bottom: 0; /* Align to bottom */
   left: 0;
   width: 100%;
-  height: 100px;
-  background: linear-gradient(to bottom, transparent, var(--bg-primary));
-  pointer-events: none;
-  opacity: 1;
+  height: 375px; /* Adjusted height */
+  background: linear-gradient(
+    to bottom,
+    transparent 25%,
+    var(--bg-transition) /* Fade to background color */
+  );
+  pointer-events: none; /* Allow clicking through */
+  opacity: 0.4;
   transition: opacity 0.3s;
-  z-index: 1;
+  z-index: 2; /* Stack above content */
+  border-radius: var(--border-radius) 0;
 }
 
+/* Hide gradient when expanded */
 [data-content='about'].expanded::after {
   opacity: 0;
 }
 
+/* Read more button container */
 .read-more-container {
-  position: absolute !important;
-  bottom: var(--space-md) !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-  display: flex !important;
-  align-items: center;
-  gap: var(--space-xs);
-  z-index: 10 !important; /* Ensure it's above everything */
-  background: var(--bg-secondary);
-  padding: var(--space-xs) var(--space-sm);
-  border-radius: 20px;
-  border: 1px solid var(--card-border);
-  box-shadow: var(--card-shadow);
-  opacity: 1 !important;
-  pointer-events: auto !important;
+  text-align: center; /* Center the button */
+  margin-top: 0; /* Add space above button */
+  margin-bottom: 0; /* Add space below button */
+  z-index: 3; /* Keep above content */
 }
 
-.read-more-container:hover {
-  transform: translateX(-50%) translateY(-2px);
-  box-shadow: var(--card-shadow-hover);
-}
-
+/* Button text styling */
 .read-more-text {
-  color: var(--accent);
-  font-size: var(--text-sm);
-  font-weight: var(--font-weight-medium);
-  font-family: var(--font-primary);
-  background: none;
-  border: none;
-  padding: 0;
+  background: rgb(30, 41, 59);
+  border: 1px solid var(--card-border);
+  border-radius: 25px;
+  padding: var(--space-xxs) var(--space-xs);
+  color: var(--text-primary);
   cursor: pointer;
-}
-
-.read-more-btn {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: 20px;
-  padding: 8px 16px;
-  cursor: pointer;
+  box-shadow: var(--card-shadow);
   transition: all 0.3s ease;
 }
 
-.read-more-btn:hover {
-  transform: translateX(-50%) translateY(-2px);
-  box-shadow: var(--shadow-sm);
+/* Button hover effect */
+.read-more-text:hover {
+  transform: translateY(-5px);
+  color: var(--accent);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.read-more-btn svg {
-  width: 16px;
-  height: 16px;
-  stroke: var(--accent);
-  transition: transform 0.3s ease;
-}
-
-[data-content='about'].expanded .read-more-btn svg {
-  transform: rotate(180deg);
-}
-
-/* Add responsive adjustments */
+/* Mobile responsiveness */
 @media (max-width: 768px) {
   [data-content='about'] {
     padding: var(--space-xs);
@@ -148,11 +129,11 @@
   }
 
   .about-intro {
-    font-size: calc(var(--text-lg) * 0.9);
+    font-size: calc(var(--text-lg) * 0.9); /* Slightly smaller on mobile */
   }
 }
 
-/* Reduce motion if user prefers */
+/* Accessibility - Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   [data-content='about'],
   .about-intro,
@@ -160,8 +141,7 @@
     animation: none;
     opacity: 1;
   }
-  .read-more-container,
-  .read-more-btn svg {
+  .read-more-container {
     transition: none;
   }
 }

@@ -41,7 +41,7 @@ main {
   border: 1px solid var(--card-border);
   box-shadow: var(--card-shadow);
   margin: var(--space-sm) auto; /* Reduced from space-xl */
-  padding: var(--space-sm) 0; /* Reduced from space-xl */
+  padding: 0; /* Reduced from space-xl */
   max-width: var(--container-width);
   width: min(100% - 2rem, var(--container-width));
   transition:
@@ -61,7 +61,7 @@ main {
   font-size: var(--h2-size);
   color: var(--text-primary);
   position: relative;
-  padding-bottom: var(--space-xxs); /* Reduced from space-sm */
+  padding-bottom: var(--space-sm); /* Reduced from space-sm */
 }
 
 .section-header::after {
@@ -80,7 +80,7 @@ main {
 .container {
   width: min(100% - 2rem, var(--container-width));
   margin-inline: auto;
-  padding: var(--space-md);
+  padding: var(--space-md) var(--space-md);
 }
 
 /* Update footer styles */
@@ -155,6 +155,23 @@ h3 {
 
 .nav-item {
   font-weight: var(--font-weight-medium);
+}
+
+.main-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* ...existing styles... */
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  /* ...existing styles... */
+}
+
+.theme-toggle {
+  margin-left: 1rem; /* Adjust spacing as needed */
 }
 
 /* Media Queries */

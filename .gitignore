@@ -105,6 +105,7 @@ ecosystem.config.js
 .eslintignore
 .mocharc.json
 jest.config.js
+tsconfig.json
 
 # Project Specific
 assets/js/config.js

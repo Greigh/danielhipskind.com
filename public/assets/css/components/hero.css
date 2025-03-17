@@ -3,14 +3,14 @@
   align-items: center;
   justify-content: center;
   min-height: 35vh; /* Reduced from 40vh */
-  padding: var(--space-md) var(--space-sm); /* Reduced from space-lg */
+  padding: var(--space-sm) var(--space-sm); /* Reduced from space-lg */
   background: var(--bg-secondary);
   position: relative;
   overflow: hidden;
   border-radius: var(--border-radius);
   border: 1px solid var(--card-border);
   box-shadow: var(--card-shadow);
-  margin: 0 auto var(--space-md); /* Reduced from space-lg */
+  margin: 0 auto var(--space-sm); /* Reduced from space-lg */
   max-width: var(--container-width);
   width: min(100% - 2rem, var(--container-width));
 }
