@@ -5,12 +5,9 @@
 /**
  * Basic debug utility for development
  */
-export const debug = (message, data) => {
-  if (
-    process.env.NODE_ENV !== 'production' ||
-    window.location.hostname === 'localhost'
-  ) {
-    console.log(`[Debug] ${message}`, data || '');
+export const debug = (...args) => {
+  if (window.DEBUG_MODE) {
+    console.log('[Debug]', ...args);
   }
 };
 

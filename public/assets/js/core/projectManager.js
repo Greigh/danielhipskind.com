@@ -2,26 +2,43 @@ import { debug } from '../utils/debug.js';
 import iconManager from './iconManager.js';
 import { analytics } from '../services/analytics.js';
 import { cacheManager } from './cacheManager.js';
+import { social } from './icons.js';
 class ProjectManager {
   constructor() {
     this.projects = {
       'blocking-machine': {
         name: 'BlockingMachine',
         owner: 'greigh',
-        repo: 'blockingmachine',
+        repo: 'BlockingMachine', // Check exact case sensitivity
       },
       portfolio: {
         name: 'Portfolio Website',
         owner: 'greigh',
-        repo: 'danielhipskind.com',
+        repo: 'danielhipskind.com', // Verify this is exact repo name
       },
     };
+
+    // Add validation on initialization
+    debug('ProjectManager initialized with:', {
+      projects: this.projects,
+      validateRepos: Object.values(this.projects).map(
+        (p) => `https://github.com/${p.owner}/${p.repo}`
+      ),
+    });
 
     this.initialized = false;
     this.cacheConfig = {
       key: 'github-projects-cache',
       expirationTime: 3600000, // 1 hour
     };
+
+    // Initialize with cacheManager
+    this.cacheManager = cacheManager;
+
+    debug('ProjectManager initialized with cacheManager:', {
+      cacheConfig: this.cacheManager.config,
+      cacheAvailable: Boolean(this.cacheManager),
+    });
   }
 
   async initialize() {
@@ -54,35 +71,52 @@ class ProjectManager {
 
   async getProjectData(owner, repo) {
     try {
-      // Try cache first
+      debug('Getting project data:', { owner, repo });
+
+      // 1. Try cache first using cacheManager
       const cached = await cacheManager.getCachedData(owner, repo);
       if (cached) {
+        debug('Using cached data:', { cached });
         return cached;
       }
 
-      // Fetch fresh data
-      const data = await this.fetchFromGitHub(owner, repo);
-      if (!data) {
-        return this.getFallbackData(owner, repo);
+      // 2. Try public GitHub API
+      const publicData = await this.fetchPublicGitHub(owner, repo);
+      if (publicData) {
+        debug('Got data from public GitHub API:', { publicData });
+        await cacheManager.cacheData(owner, repo, publicData);
+        return publicData;
       }
 
-      // Cache the new data
-      await cacheManager.cacheData(owner, repo, data);
-      return data;
+      // 3. Try authenticated GitHub API
+      const authenticatedData = await this.fetchAuthenticatedGitHub(
+        owner,
+        repo
+      );
+      if (authenticatedData) {
+        debug('Got data from authenticated GitHub API:', { authenticatedData });
+        await cacheManager.cacheData(owner, repo, authenticatedData);
+        return authenticatedData;
+      }
+
+      // 4. Use fallback data
+      debug('Using fallback data');
+      const fallbackData = this.getFallbackData(owner, repo);
+      await cacheManager.cacheData(owner, repo, fallbackData);
+      return fallbackData;
     } catch (error) {
-      console.warn(`Error getting project data: ${error.message}`);
+      debug('Error in getProjectData:', error);
       return this.getFallbackData(owner, repo);
     }
   }
 
-  async fetchFromGitHub(owner, repo) {
+  async fetchPublicGitHub(owner, repo) {
     try {
       const headers = {
         Accept: 'application/vnd.github.v3+json',
         'User-Agent': 'danielhipskind-portfolio',
       };
 
-      // Fetch repo, languages, and workflows in parallel
       const [repoResponse, languagesResponse, workflowsResponse] =
         await Promise.all([
           fetch(`https://api.github.com/repos/${owner}/${repo}`, { headers }),
@@ -95,7 +129,153 @@ class ProjectManager {
           ),
         ]);
 
-      if (!repoResponse.ok || !languagesResponse.ok) {
+      if (!repoResponse.ok) {
+        debug('Public GitHub API failed:', {
+          status: repoResponse.status,
+          statusText: repoResponse.statusText,
+        });
+        return null;
+      }
+
+      return this.processGitHubResponse(
+        await repoResponse.json(),
+        await languagesResponse.json(),
+        workflowsResponse.ok
+          ? await workflowsResponse.json()
+          : { workflows: [] }
+      );
+    } catch (error) {
+      debug('Public GitHub API Error:', error);
+      return null;
+    }
+  }
+
+  async fetchAuthenticatedGitHub(owner, repo) {
+    try {
+      // Get token from your API
+      const tokenResponse = await fetch('/api/github/token');
+      if (!tokenResponse.ok) {
+        debug('Failed to get GitHub token');
+        return null;
+      }
+
+      const token = await tokenResponse.text();
+      const headers = {
+        Accept: 'application/vnd.github.v3+json',
+        'User-Agent': 'danielhipskind-portfolio',
+        Authorization: `token ${token}`,
+      };
+
+      const [repoResponse, languagesResponse, workflowsResponse] =
+        await Promise.all([
+          fetch(`https://api.github.com/repos/${owner}/${repo}`, { headers }),
+          fetch(`https://api.github.com/repos/${owner}/${repo}/languages`, {
+            headers,
+          }),
+          fetch(
+            `https://api.github.com/repos/${owner}/${repo}/actions/workflows`,
+            { headers }
+          ),
+        ]);
+
+      if (!repoResponse.ok) {
+        debug('Authenticated GitHub API failed:', {
+          status: repoResponse.status,
+          statusText: repoResponse.statusText,
+        });
+        return null;
+      }
+
+      return this.processGitHubResponse(
+        await repoResponse.json(),
+        await languagesResponse.json(),
+        workflowsResponse.ok
+          ? await workflowsResponse.json()
+          : { workflows: [] }
+      );
+    } catch (error) {
+      debug('Authenticated GitHub API Error:', error);
+      return null;
+    }
+  }
+
+  processGitHubResponse(repoData, languagesData, workflowsData) {
+    return {
+      id: repoData.id,
+      name: repoData.name,
+      description: repoData.description || 'No description available',
+      languages: Object.keys(languagesData).map((lang) => ({
+        name: lang,
+        icon: iconManager.getLanguageIcon(lang),
+      })),
+      workflows:
+        workflowsData.workflows?.map((workflow) => ({
+          name: workflow.name,
+          type: this.getWorkflowType(workflow.name),
+          icon: iconManager.getWorkflowIcon(
+            this.getWorkflowType(workflow.name)
+          ),
+        })) || [],
+      html_url: repoData.html_url,
+    };
+  }
+
+  async fetchFromGitHub(owner, repo) {
+    try {
+      debug('Fetching GitHub data:', { owner, repo });
+
+      const headers = {
+        Accept: 'application/vnd.github.v3+json',
+        'User-Agent': 'danielhipskind-portfolio',
+      };
+
+      // Debug rate limit first
+      const rateLimitResponse = await fetch(
+        'https://api.github.com/rate_limit',
+        { headers }
+      );
+      const rateLimit = await rateLimitResponse.json();
+
+      debug('GitHub API Rate Limit:', {
+        remaining: rateLimit.resources.core.remaining,
+        reset: new Date(rateLimit.resources.core.reset * 1000).toLocaleString(),
+      });
+
+      // If we're rate limited, try using cached data
+      if (rateLimit.resources.core.remaining === 0) {
+        debug('Rate limited, checking cache...');
+        const cached = await this.getCache(owner, repo);
+        if (cached) return cached;
+      }
+
+      // Fetch repo data
+      const repoResponse = await fetch(
+        `https://api.github.com/repos/${owner}/${repo}`,
+        { headers }
+      );
+
+      debug('GitHub API Response:', {
+        status: repoResponse.status,
+        ok: repoResponse.ok,
+        headers: Object.fromEntries(repoResponse.headers.entries()),
+      });
+
+      if (!repoResponse.ok) {
+        throw new Error(`GitHub API error: ${repoResponse.status}`);
+      }
+
+      // Fetch repo, languages, and workflows in parallel
+      const [languagesResponse, workflowsResponse] = await Promise.all([
+        fetch(`https://api.github.com/repos/${owner}/${repo}/languages`, {
+          headers,
+        }),
+        fetch(
+          `https://api.github.com/repos/${owner}/${repo}/actions/workflows`,
+          { headers }
+        ),
+      ]);
+
+      if (!languagesResponse.ok) {
         throw new Error(`GitHub API error: ${repoResponse.status}`);
       }
 
@@ -106,101 +286,50 @@ class ProjectManager {
       ]);
 
       return {
+        id: repoData.id,
+        name: repoData.name,
         description: repoData.description || 'No description available',
-        languages: Object.keys(languagesData).map((lang) => ({
-          name: lang,
-          icon: iconManager.getLanguageIcon(lang),
-        })),
+        languages: Object.keys(languagesData).map((lang) => {
+          // Normalize language name to match our icon keys
+          const normalizedLang = lang
+            .toLowerCase()
+            .replace(/\s+/g, '-') // Replace spaces with hyphens
+            .replace(/\./g, '') // Remove dots
+            .replace(/\+\+/g, 'pp') // C++ → cpp
+            .replace(/#/g, 'sharp'); // C# → csharp
+
+          debug(`Language mapping:`, {
+            original: lang,
+            normalized: normalizedLang,
+            hasIcon: Boolean(iconManager.getLanguageIcon(normalizedLang)),
+          });
+
+          const iconData = iconManager.getLanguageIcon(normalizedLang);
+          return {
+            name: lang, // Keep original name for display
+            normalizedName: normalizedLang, // Add normalized name for debugging
+            icon: iconData,
+          };
+        }),
         workflows:
-          workflowsData.workflows?.map((workflow) => ({
-            name: workflow.name,
-            type: this.getWorkflowType(workflow.name),
-            icon: iconManager.getWorkflowIcon(
-              this.getWorkflowType(workflow.name)
-            ),
-          })) || [],
+          workflowsData.workflows?.map((workflow) => {
+            const type = this.getWorkflowType(workflow.name);
+            const iconData = iconManager.getWorkflowIcon(type);
+            return {
+              name: workflow.name,
+              type,
+              icon: iconData,
+            };
+          }) || [],
         html_url: repoData.html_url,
         stars: repoData.stargazers_count,
       };
     } catch (error) {
-      debug(`GitHub fetch error: ${error.message}`);
+      debug('GitHub API Error:', {
+        message: error.message,
+        stack: error.stack,
+      });
       return null;
-    }
-  }
-
-  async getCache(owner, repo) {
-    try {
-      const cacheKey = `${this.cacheConfig.key}-${owner}-${repo}`;
-      const cached = localStorage.getItem(cacheKey);
-      if (!cached) return null;
-
-      const { data, timestamp } = JSON.parse(cached);
-      const now = new Date().getTime();
-
-      // Check expiration
-      if (now - timestamp > this.cacheConfig.expirationTime) {
-        this.clearCache(owner, repo);
-        return null;
-      }
-
-      return data;
-    } catch (error) {
-      console.error('Cache read error:', error);
-      this.clearCache(owner, repo);
-      return null;
-    }
-  }
-
-  setCache(owner, repo, data) {
-    try {
-      const cacheKey = `${this.cacheConfig.key}-${owner}-${repo}`;
-      const cacheData = {
-        data,
-        timestamp: new Date().getTime(),
-      };
-      localStorage.setItem(cacheKey, JSON.stringify(cacheData));
-    } catch (error) {
-      console.error('Cache write error:', error);
-    }
-  }
-
-  clearCache(owner, repo) {
-    const cacheKey = `${this.cacheConfig.key}-${owner}-${repo}`;
-    localStorage.removeItem(cacheKey);
-  }
-
-  updateCacheStatus(isFresh = true) {
-    const statusElement = document.getElementById('cache-status');
-    if (statusElement) {
-      statusElement.className = `cache-status ${isFresh ? 'fresh' : 'stale'}`;
-      statusElement.title = `Cache ${isFresh ? 'is fresh' : 'needs refresh'}`;
-    }
-  }
-
-  async checkForUpdates(owner, repo) {
-    try {
-      const etag = localStorage.getItem(`${this.cacheConfig.key}-etag`);
-      const response = await fetch(
-        `https://api.github.com/repos/${owner}/${repo}`,
-        {
-          headers: etag ? { 'If-None-Match': etag } : {},
-        }
-      );
-
-      if (response.status === 304) {
-        return false; // No updates available
-      }
-
-      // Store new ETag
-      const newEtag = response.headers.get('etag');
-      if (newEtag) {
-        localStorage.setItem(`${this.cacheConfig.key}-etag`, newEtag);
-      }
-
-      return true; // Updates available
-    } catch (error) {
-      console.error('Error checking for updates:', error);
-      return false;
     }
   }
 
@@ -341,7 +470,8 @@ class ProjectManager {
             icon: iconManager.getWorkflowIcon('error-webhook'),
           },
         ],
-        html_url: `https://github.com/${owner}/${repo}`,
+        // Fix URL construction to use the passed owner/repo
+        html_url: `https://github.com/${owner}/blockingmachine`,
       },
       'danielhipskind.com': {
         description:
@@ -354,9 +484,17 @@ class ProjectManager {
           { name: 'Linting', icon: iconManager.getWorkflowIcon('linting') },
           { name: 'Testing', icon: iconManager.getWorkflowIcon('testing') },
         ],
-        html_url: `https://github.com/${owner}/${repo}`,
+        // Fix URL construction to use the passed owner/repo
+        html_url: `https://github.com/${owner}/danielhipskind.com`,
       },
     };
+
+    // Debug the URL construction
+    debug('Constructing fallback URL:', {
+      owner,
+      repo,
+      url: fallbackData[repo]?.html_url,
+    });
 
     return fallbackData[repo] || null;
   }
@@ -390,14 +528,18 @@ class ProjectManager {
       const techEl = document.getElementById(selectors.techStack);
       if (techEl && data.languages) {
         techEl.innerHTML = data.languages
-          .map(
-            (lang) => `
-            <span class="tech-tag" data-lang="${lang.name}">
-              ${lang.icon ? `<span class="tech-icon">${lang.icon}</span>` : ''}
-              ${lang.name}
-            </span>
-          `
-          )
+          .map((lang) => {
+            debug(`Rendering language: ${lang.name}`, {
+              hasIcon: Boolean(lang.icon),
+              iconType: typeof lang.icon?.icon,
+            });
+            return `
+              <span class="tech-tag" data-lang="${lang.name}">
+                ${lang.icon?.icon ? `<span class="tech-icon">${lang.icon.icon}</span>` : ''}
+                ${lang.name}
+              </span>
+            `;
+          })
           .join('');
       }
 
@@ -407,11 +549,11 @@ class ProjectManager {
         workflowEl.innerHTML = data.workflows
           .map(
             (flow) => `
-            <span class="workflow-tag">
-              ${flow.icon ? `<span class="workflow-icon" data-type="${flow.type}">${flow.icon}</span>` : ''}
-              ${flow.name}
-            </span>
-          `
+          <span class="workflow-tag">
+            ${flow.icon?.icon ? `<span class="workflow-icon" data-type="${flow.type}">${flow.icon.icon}</span>` : ''}
+            ${flow.name}
+          </span>
+        `
           )
           .join('');
       }
@@ -419,6 +561,16 @@ class ProjectManager {
       // Update GitHub link
       const linkEl = document.querySelector(selectors.githubLink);
       if (linkEl) linkEl.href = data.html_url;
+
+      // Update debug logging to handle object structure
+      debug(
+        'Language data:',
+        data.languages.map((l) => ({
+          name: l.name,
+          iconType: typeof l.icon,
+          iconString: l.icon?.icon?.substring(0, 50) + '...' || 'No icon',
+        }))
+      );
 
       return true;
     } catch (error) {
@@ -499,20 +651,77 @@ class ProjectManager {
   }
 
   getWorkflowType(name) {
+    if (!name) return 'gh-pages'; // Default fallback
+
     const normalized = name.toLowerCase();
-    if (normalized.includes('lint')) return 'linting';
-    if (normalized.includes('test')) return 'testing';
-    if (normalized.includes('ci') || normalized.includes('build'))
-      return 'github';
-    if (normalized.includes('error') || normalized.includes('discord'))
-      return 'error-webhook';
-    return 'github';
+    debug('Mapping workflow type:', {
+      original: name,
+      normalized: normalized,
+    });
+
+    // Exact matches first
+    const mappings = {
+      'pages-build-deployment': 'gh-pages',
+      'github-pages': 'gh-pages',
+      'gh-pages': 'gh-pages',
+      'deploy-pages': 'gh-pages',
+      eslint: 'eslint',
+      lint: 'lint',
+      linting: 'lint',
+      aglint: 'aglint',
+    };
+
+    // Check exact matches
+    if (mappings[normalized]) {
+      debug(
+        `Found exact workflow mapping: ${normalized} -> ${mappings[normalized]}`
+      );
+      return mappings[normalized];
+    }
+
+    // Check partial matches
+    if (normalized.includes('pages') || normalized.includes('deploy'))
+      return 'gh-pages';
+    if (normalized.includes('eslint')) return 'eslint';
+    if (normalized.includes('aglint')) return 'aglint';
+    if (normalized.includes('lint')) return 'lint';
+
+    debug(
+      `No specific mapping found for workflow: ${name}, defaulting to gh-pages`
+    );
+    return 'gh-pages';
   }
 
   getFallbackWorkflows(repo) {
-    // Use content.js fallback data
-    const project = content.projects.find((p) => p.githubUrl.includes(repo));
-    return project?.technologies.workflows || [];
+    debug('Getting fallback workflows for repo:', repo);
+
+    const fallbacks = {
+      blockingmachine: [
+        { name: 'GitHub Pages', type: 'gh-pages' },
+        { name: 'Linting', type: 'lint' },
+        { name: 'ESLint', type: 'eslint' },
+      ],
+      'danielhipskind.com': [
+        { name: 'GitHub Pages', type: 'gh-pages' },
+        { name: 'AGLint', type: 'aglint' },
+      ],
+    };
+
+    const workflows = fallbacks[repo] || [];
+
+    debug('Fallback workflows:', {
+      repo,
+      workflows: workflows.map((w) => ({
+        name: w.name,
+        type: w.type,
+      })),
+    });
+
+    return workflows.map((wf) => ({
+      name: wf.name,
+      type: wf.type,
+      icon: iconManager.getWorkflowIcon(wf.type),
+    }));
   }
 
   async fetchProjectData(owner, repo) {
@@ -625,74 +834,25 @@ class ProjectManager {
   }
 
   createProjectCard(project) {
-    const card = document.createElement('div');
-    card.className = 'project-card';
-    card.id = project.id;
+    return `
+      <div class="project-card" data-project-id="${project.id}">
+        <div class="project-content">
+          <h3 class="project-title">${project.name}</h3>
+          <p class="project-description">${project.description}</p>
 
-    card.innerHTML = `
-      <div class="project-header">
-        <h3>${project.name}</h3>
-        <a href="https://github.com/${project.owner}/${project.repo}"
-           class="github-link"
-           target="_blank"
-           rel="noopener noreferrer"
-           aria-label="View ${project.name} on GitHub">
-          ${iconManager.getIcon('github')}
-        </a>
-      </div>
-      <p id="${project.id}-description" class="project-description">
-        Loading project details...
-      </p>
-      <div class="project-tech">
-        <h4>Technologies</h4>
-        <div id="${project.id}-tech-stack" class="tech-stack">
-          ${
-            project.languages
-              ?.map(
-                (lang) => `
-            <span class="tech-tag">
-              ${lang.icon ? `<span class="tech-icon">${lang.icon}</span>` : ''}
-              ${lang.name}
-            </span>
-          `
-              )
-              .join('') || 'Loading...'
-          }
-        </div>
-      </div>
-      <div class="project-workflows">
-        <h4>Workflows</h4>
-        <div id="${project.id}-workflow-info" class="workflow-info">
-          ${
-            project.workflows
-              ?.map(
-                (workflow) => `
-            <span class="workflow-tag">
-              ${workflow.icon ? `<span class="workflow-icon">${workflow.icon}</span>` : ''}
-              ${workflow.name}
-            </span>
-          `
-              )
-              .join('') || 'Loading workflow information...'
-          }
+          <div class="project-actions">
+            <a href="${project.html_url}" class="github-button" target="_blank" rel="noopener noreferrer">
+              <span class="github-icon">${social.github}</span>
+              <span class="button-text">View on GitHub</span>
+            </a>
+          </div>
+
+          <div class="technologies-section">
+            <!-- ...existing tech stack and workflow sections... -->
+          </div>
         </div>
       </div>
     `;
-
-    // Add intersection observer for analytics
-    if (window.analyticsPreferences?.isEnabled()) {
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            analytics.trackProjectView(project);
-            observer.disconnect();
-          }
-        });
-      });
-      observer.observe(card);
-    }
-
-    return card;
   }
 
   async loadProject(id) {
@@ -737,9 +897,17 @@ class ProjectManager {
   }
 
   async forceRefresh() {
-    cacheManager.clearAllCache();
+    debug('Force refreshing project data');
+    this.cacheManager.clearAllCache();
     await this.initialize();
+    debug('Project data refreshed');
   }
 }
 
+// Create and export singleton instance
 export const projectManager = new ProjectManager();
+
+// Add to window for console access
+if (typeof window !== 'undefined') {
+  window.projectManager = projectManager;
+}

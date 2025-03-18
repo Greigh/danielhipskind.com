@@ -104,21 +104,45 @@
 
 /* Button text styling */
 .read-more-text {
-  background: rgb(30, 41, 59);
+  background: var(--bg-secondary);
   border: 1px solid var(--card-border);
-  border-radius: 25px;
-  padding: var(--space-xxs) var(--space-xs);
+  border-radius: var(--border-radius);
+  padding: var(--space-xxs) var(--space-sm);
   color: var(--text-primary);
   cursor: pointer;
   box-shadow: var(--card-shadow);
   transition: all 0.3s ease;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xxs);
 }
 
 /* Button hover effect */
 .read-more-text:hover {
-  transform: translateY(-5px);
+  transform: translateY(-2px);
   color: var(--accent);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: var(--bg-hover);
+  border-color: var(--accent);
+  box-shadow: var(--hover-shadow);
+}
+
+/* Active state */
+.read-more-text:active {
+  transform: translateY(0);
+  box-shadow: var(--card-shadow);
+}
+
+/* Dark theme specific adjustments */
+[data-theme='dark'] .read-more-text {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .read-more-text:hover {
+  background: var(--bg-hover);
+  color: var(--accent);
 }
 
 /* Mobile responsiveness */

@@ -95,4 +95,10 @@ class CacheManager {
   }
 }
 
+// Export singleton instance
 export const cacheManager = new CacheManager();
+
+// Add to window for console access
+if (typeof window !== 'undefined') {
+  window.cacheManager = cacheManager;
+}

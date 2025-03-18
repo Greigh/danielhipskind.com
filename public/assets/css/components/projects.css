@@ -13,7 +13,7 @@
   background: var(--bg-primary);
   border-radius: var(--border-radius);
   border: 1px solid var(--card-border);
-  padding: var(--space-lg);
+  padding: var(--space-sm);
   transition: all 0.3s ease;
   display: flex;
   flex-direction: column;
@@ -33,7 +33,7 @@
 .project-content {
   display: flex;
   flex-direction: column;
-  gap: var(--space-md);
+  gap: 0;
 }
 
 /* Project title styling */
@@ -55,7 +55,7 @@
 /* Project metadata section */
 .project-meta {
   margin-top: auto;
-  padding-top: var(--space-md);
+  padding-top: var(--space-xxs);
   border-top: 1px solid var(--border-color);
   display: flex;
   flex-wrap: wrap;
@@ -73,22 +73,6 @@
 }
 .project-card:nth-child(4) {
   animation-delay: 0.4s;
-}
-
-/* Responsive Grid */
-@media (min-width: 768px) {
-  .projects-grid {
-    grid-template-columns: repeat(1, 1fr);
-  }
-  .project-card {
-    padding: var(--space-xl);
-  }
-}
-
-@media (min-width: 1024px) {
-  .projects-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
 }
 
 /* Accessibility - Reduced Motion */

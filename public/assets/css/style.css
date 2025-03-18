@@ -84,24 +84,6 @@ main {
   padding: var(--space-md) var(--space-md);
 }
 
-/* Update footer styles */
-footer {
-  background: var(--bg-secondary);
-  border-top: 1px solid var(--card-border);
-  padding: var(--space-md) 0;
-  margin-top: auto;
-  width: min(100% - 2rem, var(--container-width));
-  margin-inline: auto;
-  border-radius: var(--border-radius) var (--border-radius) 0 0;
-}
-
-footer .container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: var(--space-md);
-}
-
 .logo img {
   height: 40px;
 }
@@ -162,13 +144,11 @@ h3 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  /* ...existing styles... */
 }
 
 .nav-links {
   display: flex;
   align-items: center;
-  /* ...existing styles... */
 }
 
 .theme-toggle {

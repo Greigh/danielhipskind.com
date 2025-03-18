@@ -9,6 +9,7 @@ class SkillManager {
     this.technicalContainer = document.getElementById('technical-skills');
     this.professionalContainer = document.getElementById('professional-skills');
     this.observers = new Map(); // Store observers for cleanup
+    this.iconManager = iconManager; // Add this line
   }
 
   async initialize(skills) {
@@ -85,51 +86,53 @@ class SkillManager {
   async renderSkillCategory(container, skills, category) {
     container.innerHTML = ''; // Clear existing skills
 
-    skills.forEach((skill) => {
+    // Filter skills based on visibility
+    const visibleSkills = skills.filter((skill) => {
+      const icon = iconManager.getLanguageIcon(skill.language);
+      return icon !== null; // Only include skills with visible icons
+    });
+
+    debug(`Rendering ${visibleSkills.length} visible skills for ${category}`);
+
+    visibleSkills.forEach((skill) => {
       const skillElement = this.createSkillElement(skill, category);
-      container.appendChild(skillElement);
-      this.observeSkillVisibility(skillElement, skill, category);
+      if (skillElement) {
+        // Only append if element was created
+        container.appendChild(skillElement);
+        this.observeSkillVisibility(skillElement, skill, category);
+      }
     });
   }
 
   createSkillElement(skill, category) {
-    const li = document.createElement('li');
-    li.className = 'skill-item';
-    li.dataset.skill = skill.name;
-    li.dataset.category = category;
+    const iconData = this.iconManager.getLanguageIcon(skill.language);
 
-    const content = document.createElement('div');
-    content.className = 'skill-content';
-
-    // Add language icon if available
-    if (skill.language) {
-      const icon = document.createElement('div');
-      icon.className = 'skill-icon';
-      icon.innerHTML = iconManager.getLanguageIcon(skill.language);
-      content.appendChild(icon);
-    }
-
-    // Add skill name
-    const name = document.createElement('span');
-    name.className = 'skill-name';
-    name.textContent = skill.name;
-    content.appendChild(name);
-
-    li.appendChild(content);
-
-    // Add progress bar if level is provided
-    if (skill.level) {
-      const progress = this.createProgressBar(skill.level);
-      li.appendChild(progress);
-    }
-
-    // Add animation delay based on index
-    requestAnimationFrame(() => {
-      li.style.animationDelay = `${Math.random() * 0.3}s`;
-      li.classList.add('skill-item--visible');
+    debug('Creating skill element:', {
+      skill,
+      iconData,
+      iconType: typeof iconData?.icon,
+      icon: iconData?.icon?.substring(0, 50) + '...', // Show first 50 chars
     });
 
-    return li;
+    if (!iconData) {
+      return null;
+    }
+
+    const element = document.createElement('div');
+    element.className = 'skill-item';
+    element.dataset.skill = skill.name;
+    element.dataset.category = category;
+
+    element.innerHTML = `
+      <div class="skill-icon">${iconData.icon}</div>
+      <div class="skill-name">${iconData.name}</div>
+    `;
+
+    if (skill.level) {
+      element.appendChild(this.createProgressBar(skill.level));
+    }
+
+    return element;
   }
 
   createProgressBar(level) {

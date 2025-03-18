@@ -1,38 +1,120 @@
 footer {
   background: var(--bg-secondary);
-  border: 1px solid var(--card-border);
+  border-top: 1px solid var(--card-border);
   border-radius: var(--border-radius) var(--border-radius) 0 0;
   box-shadow: var(--card-shadow);
   padding: var(--space-md) 0;
-  margin-top: auto;
-  width: min(100% - 2rem, var(--container-width));
-  margin-inline: auto;
+  width: min(85% - 2rem, calc(var(--container-width) - 4rem));
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+}
+
+footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0.2;
 }
 
 footer .container {
+  width: min(100%, var(--container-width));
+  margin: 0 auto;
+  padding: var(--space-xs);
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  padding: var(--space-md);
+  gap: var(--space-sm);
 }
 
 .social-links {
   display: flex;
   gap: var(--space-md);
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin: var(--space-xs);
+}
+
+.footer-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+}
+
+.footer-meta {
+  text-align: center;
+  width: 100%;
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--card-border);
 }
 
 .social-icon {
-  color: var(--text-secondary);
-  font-size: 1.5rem;
-  transition: color 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+  border-radius: 50%;
+  transition:
+    transform 0.2s ease,
+    color 0.2s ease;
+}
+
+.social-icon svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  flex-shrink: 0; /* Prevent SVG from shrinking */
+  transform-origin: center; /* Ensure transforms happen from center */
+}
+
+/* Specific adjustment for LinkedIn icon if needed */
+.social-icon[data-social-icon='linkedin'] svg {
+  transform: scale(0.9); /* Slightly reduce LinkedIn icon size */
 }
 
 .social-icon:hover {
   color: var(--accent);
+  transform: translateY(-2px);
 }
 
 @media (max-width: 768px) {
   footer {
-    width: min(100% - 1rem, var(--container-width));
+    padding: var(--space-md) 0;
   }
+
+  footer .container {
+    flex-direction: column;
+    text-align: center;
+    padding: var(--space-sm);
+  }
+
+  .social-links {
+    gap: var(--space-md);
+  }
+}
+
+[data-theme='dark'] footer {
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .footer-meta,
+[data-theme='dark'] .theme-info {
+  color: var(--text-secondary);
+}
+
+[data-theme='dark'] .social-icon {
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .social-icon:hover {
+  color: var(--accent);
 }

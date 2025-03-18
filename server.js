@@ -6,7 +6,11 @@ import dotenv from 'dotenv';
 import apiRouter from './server/routes/api.js';
 import ServiceManager from './server/services/core/ServiceManager.js';
 import { authenticate } from './server/middleware/authMiddleware.js';
-import { debugApp } from './server/utils/debug.js';
+import {
+  debugApp,
+  setupLogging,
+  setupLogRotation,
+} from './server/utils/debug.js';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import realtimeService from './server/services/analytics/realtimeService.js';
@@ -36,9 +40,18 @@ app.use(cookieParser()); // Add this before routes
 // Apply CSP middleware before other routes
 app.use(cspMiddleware);
 
+setupLogging(app);
+setupLogRotation();
+
 app.use((req, res, next) => {
   if (req.path.endsWith('.js')) {
     res.type('application/javascript; charset=UTF-8');
+  } else if (req.path.endsWith('.css')) {
+    res.type('text/css; charset=UTF-8');
+  } else if (req.path.endsWith('.html')) {
+    res.type('text/html; charset=UTF-8');
+  } else if (req.path.endsWith('.json')) {
+    res.type('application/json; charset=UTF-8');
   }
   next();
 });
@@ -107,7 +120,6 @@ app.get('/analytics/health', authenticate, (req, res) => {
   });
 });
 
-// Remove duplicate server initialization code and merge into single startServer function
 async function startServer() {
   try {
     debugApp('Starting server initialization...');

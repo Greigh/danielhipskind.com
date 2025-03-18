@@ -1,5 +1,12 @@
 import debugModule from 'debug';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { DEBUG } from '../config/constants.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const LOG_DIR = path.join(__dirname, '../../../logs');
+const LOG_FILE = path.join(LOG_DIR, 'server.log');
 
 const LOG_LEVELS = {
   INFO: 'INFO',
@@ -99,6 +106,67 @@ export const debugDb = debugModule('app:db');
 export const debugService = debugModule('app:service');
 export const debugMetrics = debugModule('app:metrics');
 export const debugRealtime = debugModule('app:realtime');
+
+// PRODUCTION LOGGING CONFIGURATION
+// Remove these comments and the isLocalhost check when deploying
+const isLocalhost = (req) => {
+  const host = req.get('host') || '';
+  return host.includes('localhost') || host.includes('127.0.0.1');
+};
+
+// Configure logging middleware
+export const setupLogging = (app) => {
+  // Ensure logs directory exists
+  if (!fs.existsSync(LOG_DIR)) {
+    fs.mkdirSync(LOG_DIR, { recursive: true });
+    debugApp('Creating logs directory at:', LOG_DIR);
+  }
+
+  // Custom logging middleware
+  app.use((req, res, next) => {
+    // DEVELOPMENT: Skip logging for localhost requests
+    // Remove this check for production
+    if (isLocalhost(req)) {
+      return next();
+    }
+
+    const logEntry = {
+      timestamp: new Date().toISOString(),
+      method: req.method,
+      path: req.path,
+      ip: req.ip,
+      userAgent: req.get('user-agent'),
+    };
+
+    // Append to log file
+    fs.appendFile(LOG_FILE, JSON.stringify(logEntry) + '\n', (err) => {
+      if (err) debugApp('Logging error:', err);
+    });
+
+    next();
+  });
+};
+
+// Log rotation utility
+export const setupLogRotation = () => {
+  const MAX_LOG_SIZE = 5 * 1024 * 1024; // 5MB
+
+  // Check log file size daily
+  setInterval(
+    () => {
+      if (fs.existsSync(LOG_FILE)) {
+        const stats = fs.statSync(LOG_FILE);
+        if (stats.size > MAX_LOG_SIZE) {
+          const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+          const archivePath = `${LOG_FILE}.${timestamp}`;
+          fs.renameSync(LOG_FILE, archivePath);
+          debugApp(`Log file rotated to: ${archivePath}`);
+        }
+      }
+    },
+    24 * 60 * 60 * 1000
+  ); // Check daily
+};
 
 export {
   debug,

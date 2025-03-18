@@ -15,7 +15,7 @@
 
   /* Fluid Typography Scale */
   --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem); /* 12px - 14px */
-  --text-sm: clamp(0.875rem, 0.8rem + 0.375vw, 1rem); /* 14px - 16px */
+  --text-sm: 0.875rem;
   --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem); /* 16px - 18px */
   --text-md: clamp(1.125rem, 1rem + 0.625vw, 1.25rem); /* 18px - 20px */
   --text-lg: clamp(1.25rem, 1.1rem + 0.75vw, 1.5rem); /* 20px - 24px */
@@ -34,35 +34,47 @@
 
   /* Spacing Scale */
   --space-xxxs: clamp(0.125rem, 0.25vw, 0.25rem);
-  --space-xxs: clamp(0.25rem, 0.5vw, 0.375rem);
-  --space-xs: clamp(0.5rem, 1vw, 0.75rem);
-  --space-sm: clamp(1rem, 2vw, 1.5rem);
-  --space-md: clamp(2rem, 4vw, 3rem);
+  --space-xxs: 0.25rem;
+  --space-xs: 0.5rem;
+  --space-sm: 0.75rem;
+  --space-md: 1rem;
   --space-lg: clamp(3rem, 6vw, 4.5rem);
   --space-xl: clamp(4rem, 8vw, 6rem);
   --space-xxl: clamp(5rem, 10vw, 8rem);
 
   /* Layout */
   --container-width: 1200px;
-  --border-radius: 1.25rem;
-  --border-radius-sm: 0.5rem;
+  --border-radius: 0.5rem; /* Increased from 0.375rem */
+  --border-radius-sm: 0.375rem; /* Keep original as smaller option */
+  --border-radius-lg: 0.75rem; /* Add larger option if needed */
   --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   --card-shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   --nav-height: 4rem;
 
   /* Colors - Light Theme */
   --bg-primary: #ffffff;
-  --bg-secondary: #f8fafc;
+  --bg-secondary: #eef1f5; /* Darker than before */
   --bg-transition: #f8fafc87;
-  --text-primary: #1e293b;
-  --text-secondary: #475569;
-  --accent: #3b82f6;
+  --text-primary: #2d333b;
+  --text-secondary: #6c757d;
+  --accent: #0d6efd;
   --accent-hover: #60a5fa;
   --card-border: rgba(0, 0, 0, 0.1);
   --error: #ef4444;
   --success: #22c55e;
   --warning: #f59e0b;
   --bg-rgb: 255, 255, 255;
+  --bg-hover: #e2e7ed; /* Adjusted for new secondary */
+  --hover-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --border-color: #cfd6de; /* Slightly darker border */
+
+  /* Dark theme - flipped container colors */
+  --bg-primary-dark: #22272e;
+  --bg-secondary-dark: #2d333b; /* Was previously darker */
+  --bg-hover-dark: #2d333b; /* Match secondary for button */
+  --card-bg-dark: #22272e; /* Lighter than container */
+  --text-primary-dark: #adbac7;
+  --border-color-dark: #444c56;
 
   /* Transitions */
   --transition-base: 0.3s ease;
@@ -72,9 +84,9 @@
 
 [data-theme='dark'] {
   --bg-primary: #0f172a;
-  --bg-secondary: rgba(255, 255, 255, 0.05);
+  --bg-secondary: #2d333b;
   --bg-transition: rgba(0, 0, 0, 0.25);
-  --text-primary: rgba(255, 255, 255, 0.9);
+  --text-primary: #adbac7;
   --text-secondary: rgba(255, 255, 255, 0.8);
   --card-border: rgba(255, 255, 255, 0.1);
   --error: #f87171;
@@ -82,6 +94,9 @@
   --warning: #fbbf24;
   --bg-rgb: 17, 24, 39;
   --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+  --bg-hover: #373e47;
+  --hover-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  --border-color: #444c56;
 }
 
 [data-theme='dark'] .section,

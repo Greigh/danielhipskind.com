@@ -29,5 +29,6 @@
       "from": "/",
       "to": "/index.html"
     }
-  ]
+  ],
+  "codewindProfiling.showProfiling": true
 }
