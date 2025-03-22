@@ -12,6 +12,8 @@
     />
     <meta name="author" content="Daniel Hipskind" />
     <meta name="keywords" content="Daniel Hipskind, Software Developer" />
+
+    <!-- Favicon -->
     <link
       rel="icon"
       href="./assets/images/DanielPortfolio.ico"
@@ -22,24 +24,30 @@
       href="./assets/images/DanielPortfolio.ico"
       type="image/x-icon"
     />
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
+
+    <!-- Preload Assets -->
     <link
       rel="preload"
       href="/assets/js/index.js"
       as="script"
       crossorigin="anonymous"
-      data-cfasync="false"
     />
-    <meta name="cf-2fa-verify" content="true" />
+    <link rel="preload" href="/assets/css/styles.css" as="style" />
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="/assets/css/styles.css" />
     <title>Daniel Hipskind | Software Developer</title>
-    <link rel="stylesheet" href="./assets/css/styles.css" />
   </head>
   <body>
+    <!-- Navigation -->
     <header>
       <nav>
         <div class="nav-container glass-effect">
@@ -50,7 +58,7 @@
               <li><a href="#skills">Skills</a></li>
             </ul>
             <button id="theme-toggle" aria-label="Toggle theme">
-              <!-- SVG will be injected here by JavaScript -->
+              <!-- SVG icons will be injected by JavaScript -->
             </button>
           </div>
         </div>
@@ -58,78 +66,82 @@
     </header>
 
     <main>
+      <!-- Hero Section -->
       <section id="hero">
-        <img
-          class="hero-img"
-          src="./assets/images/258.png"
-          alt="Daniel Hipskind"
-        />
-        <h1>Daniel Hipskind</h1>
-        <p>Software Developer & Problem Solver</p>
+        <div class="hero-content">
+          <img
+            src="./assets/images/profile.jpg"
+            alt="Daniel Hipskind"
+            class="hero-img"
+          />
+          <h1>Daniel Hipskind</h1>
+          <p>Software Developer</p>
+          <div class="hero-cta">
+            <a href="#about" class="primary-btn">Learn More</a>
+            <a href="mailto:me@danielhipskind.com" class="secondary-btn"
+              >Contact Me</a
+            >
+          </div>
+        </div>
       </section>
 
-      <section id="about" class="section">
-        <div class="container">
-          <div class="about-container">
-            <div class="about-content glass-effect">
-              <div class="about-text">
-                <!-- Content will be injected by JavaScript -->
+      <!-- About Section -->
+      <section id="about">
+        <div class="about-container">
+          <div class="about-content glass-effect">
+            <div class="about-text">
+              <div class="initial-content">
+                <p class="about-intro">Your intro text here</p>
+                <!-- Initial content paragraphs -->
               </div>
+              <div class="expanded-content">
+                <!-- Expanded content paragraphs -->
+              </div>
+              <div class="about-gradient"></div>
+              <button class="read-more-btn">
+                Read More
+                <!-- SVG icon will be injected by JavaScript -->
+              </button>
             </div>
           </div>
         </div>
       </section>
 
-      <section id="projects" class="section">
-        <div class="container">
-          <h2>Projects</h2>
-          <div class="project-grid">
-            <!-- Projects will be injected here -->
-          </div>
+      <!-- Projects Section -->
+      <section id="projects">
+        <h2>Projects</h2>
+        <div class="project-grid">
+          <!-- Project cards will be injected by JavaScript -->
         </div>
       </section>
 
-      <section id="skills" class="section">
-        <div class="container">
-          <h2>Skills</h2>
-          <div class="skills-container">
-            <div class="skills-group glass-effect">
-              <h3>Technical Skills</h3>
-              <div class="skills-grid">
-                <!-- Skills will be injected by JavaScript -->
-              </div>
-            </div>
-
-            <div class="skills-group glass-effect">
-              <h3>Professional Skills</h3>
-              <div class="skills-grid">
-                <!-- Skills will be injected by JavaScript -->
-              </div>
-            </div>
-          </div>
+      <!-- Skills Section -->
+      <section id="skills">
+        <h2>Skills</h2>
+        <div class="skills-container">
+          <!-- Skills groups will be injected by JavaScript -->
         </div>
       </section>
     </main>
 
+    <!-- Footer -->
     <footer>
       <div class="footer-container glass-effect">
         <div class="footer-content">
           <div class="footer-social">
-            <!-- Social links injected by JavaScript -->
+            <!-- Social links -->
           </div>
           <div class="footer-tech">
-            <!-- Built with text injected by JavaScript -->
+            <!-- Tech stack info -->
           </div>
           <div class="footer-copyright">
-            <!-- Copyright text injected by JavaScript -->
+            <!-- Copyright info -->
           </div>
         </div>
       </div>
     </footer>
-    <script
-      type="module"
-      src="./assets/js/index.js"
-      data-cfasync="false"
-    ></script>
+
+    <!-- Scripts -->
+    <script type="module" src="/assets/js/index.js"></script>
   </body>
 </html>

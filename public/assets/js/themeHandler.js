@@ -39,4 +39,12 @@ prefersDark.addEventListener('change', (e) => {
   }
 });
 
+document.addEventListener('DOMContentLoaded', () => {
+  // Apply stored theme
+  const storedTheme = localStorage.getItem('theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', storedTheme);
+  // Make content visible after theme is applied
+  document.documentElement.style.visibility = 'visible';
+});
+
 export { setTheme };
