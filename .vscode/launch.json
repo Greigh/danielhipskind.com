@@ -36,5 +36,6 @@
       "description": "Select the entry point for your program",
       "options": ["index.js", "tests/articles.spec.js"]
     }
-  ]
+  ],
+  "typescript.validate.enable": false
 }

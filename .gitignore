@@ -2,144 +2,95 @@
 node_modules/
 package-lock.json
 yarn.lock
-bower_components/
+pnpm-lock.yaml
 
-# Environment & Secrets
+# Environment variables
 .env
-.env.local
 .env.*
 !.env.example
-.env.production
-.env.development
-.env.test
-secrets.json
 
-# Build & Distribution
-/dist/
-/build/
-*.bundle.js
-*.bundle.js.map
-*.min.js
-*.min.css
-*.chunk.js
-/public/assets/css/*.min.css
+# Build outputs
+dist/
+build/
+out/
+.next/
+.nuxt/
+.output/
 
-# Development
-.cache/
-.npm/
-.eslintcache
-lib-cov/
-*.tmp
-*.temp
-.tmp/
-.temp/
-tmp/
-.cache/
+# IDE and editor files
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+.vs/
+*.swp
+*.swo
+*~
 
-# Logs & Debug
+# Logs
 logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-debug.log
-*.debug
-.debug
 
-# Testing & Coverage
-coverage/
-test-results/
-playwright-report/
-/playwright/.cache/
-test.js
-.nyc_output/
-reports/
-mochawesome-report/
-.test-results/
-
-# IDE - VSCode
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-
-# IDE - Other
-.idea/
-*.swp
-*.swo
-*~
-
-# System Files
-## macOS
+# Operating System
 .DS_Store
-.AppleDouble
-.LSOverride
+.DS_Store?
 ._*
 .Spotlight-V100
 .Trashes
-
-## Windows
-Thumbs.db
 ehthumbs.db
-Desktop.ini
+Thumbs.db
 
-# SSL & Security
-*.pem
-*.key
-*.crt
-*.cert
-*.der
-*.p12
-*.pfx
+# Testing
+coverage/
+.nyc_output/
+.jest/
+__snapshots__/
 
-# Configuration
-deploy.config.js
-deploy.config.yml
-deploy.sh
-ecosystem.config.js
-*.conf
-.prettierrc
-.babelrc
-.eslintrc*
-.eslintignore
-.mocharc.json
-jest.config.js
-tsconfig.json
+# Cache directories
+.cache/
+.parcel-cache/
+.npm/
+.eslintcache
+.stylelintcache
+.prettiercache
 
-# Project Specific
-assets/js/config.js
-projects/visual-rss-feed/data/
-projects/visual-rss-feed/logs/
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.swp
+*.orig
 
-# Analytics
-analytics/css/*.min.css
-analytics/js/*.min.js
-.analytics-cache/
-analytics/dist/
-analytics/coverage/
-analytics/reports/
-analytics-*.log
-analytics.json
+# Debug
+.debug/
+debug.log
+.chrome/
 
-# Database
-*.mongodb
-mongodb.log
-mongod.lock
-/data/db/
-/data/backups/
-dump/
-*.bson
-*.dump
-*.gz
-
-# Documentation
-docs/_site/
-docs/.jekyll-cache/
-docs/.sass-cache/
-
-# Runtime
-pids/
+# Misc
+.history/
 *.pid
 *.seed
 *.pid.lock
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+
+# Optional: Production builds
+/public/assets/js/*.min.js
+/public/assets/css/*.min.css
+
+# Optional: Large media files
+*.mp4
+*.tiff
+*.avi
+*.flv
+*.mov
+*.wmv
+
+nodemon.json
+nginx.config
+ecosystem.config.cjs

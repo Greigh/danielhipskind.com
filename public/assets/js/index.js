@@ -1,74 +1,240 @@
-import { debug } from './core/utils.js';
-import { ReadMore } from './components/readMore.js';
-import contentManager from './core/contentManager.js';
-import iconManager from './core/iconManager.js';
-import navigationManager from './core/navigationManager.js';
-import { projectManager } from './core/projectManager.js';
+import { about } from './content.js';
+import { generateCopyright, initialize, socialLinks } from './content.js';
+import { languages, social } from './icons.js';
+import {} from './themeHandler.js';
 
-/**
- * Main application class that orchestrates the initialization of all components
- * @class App
- * @description Manages the initialization sequence and lifecycle of the application
- */
-class App {
-  /**
-   * Creates an instance of App and begins initialization
-   * @constructor
-   * @description Sets up initial state and triggers async initialization sequence
-   */
-  constructor() {
-    /** @type {ReadMore|null} Instance of ReadMore component */
-    this.readMore = null;
-
-    // Begin initialization sequence
-    this.initialize();
+// Render projects
+function renderProjects(projects = []) {
+  const projectGrid = document.querySelector('.project-grid');
+  if (!projectGrid) {
+    console.error('Project grid element not found');
+    return;
   }
 
-  /**
-   * Initializes all application components in the correct sequence
-   * @async
-   * @returns {Promise<boolean>} Success status of initialization
-   * @throws {Error} If any component initialization fails
-   * @description
-   * Initialization sequence:
-   * 1. Content initialization
-   * 2. DOM update pause
-   * 3. ReadMore component
-   * 4. Parallel initialization of icon, navigation, and project managers
-   */
-  async initialize() {
-    try {
-      // Step 1: Initialize content
-      await contentManager.initialize();
+  projectGrid.innerHTML = projects
+    .map((project) => {
+      // Calculate language percentages
+      const totalBytes = Object.values(project.languages).reduce(
+        (a, b) => a + b,
+        0
+      );
+      const languagePercentages = Object.entries(project.languages)
+        .map(([name, bytes]) => ({
+          name,
+          icon: languages[name.toLowerCase()] || '',
+          percentage: ((bytes / totalBytes) * 100).toFixed(1),
+        }))
+        .sort((a, b) => b.percentage - a.percentage);
 
-      // Step 2: Wait for DOM update to ensure content is rendered
-      await new Promise((resolve) => requestAnimationFrame(resolve));
+      return `
+      <article class="project-card glass-effect">
+        <div class="project-header">
+          <h3>${project.title}</h3>
+        </div>
+        <p class="project-description">${
+          project.description || 'No description available'
+        }</p>
+        <div class="languages-list">
+          ${languagePercentages
+            .map(
+              (lang) => `
+              <div class="language-item">
+                <span class="language-icon">${lang.icon}</span>
+                <span class="language-name">${lang.name}</span>
+                <span class="language-percentage">${lang.percentage}%</span>
+              </div>
+            `
+            )
+            .join('')}
+        </div>
+        <div class="project-footer">
+          ${
+            project.githubUrl
+              ? `
+            <a href="${project.githubUrl}"
+               target="_blank"
+               rel="noopener"
+               class="project-link github">
+              View on GitHub
+            </a>
+          `
+              : ''
+          }
+          ${
+            project.demoUrl
+              ? `
+            <a href="${project.demoUrl}"
+               target="_blank"
+               rel="noopener"
+               class="project-link demo">
+              Live Demo
+            </a>
+          `
+              : ''
+          }
+        </div>
+      </article>
+    `;
+    })
+    .join('');
+}
 
-      // Step 3: Initialize ReadMore component
-      this.readMore = new ReadMore();
+// Render skills
+function renderSkills(skills) {
+  const technicalGrid = document.querySelector(
+    '.skills-group:nth-child(1) .skills-grid'
+  );
 
-      // Step 4: Initialize remaining components in parallel
-      await Promise.all([
-        iconManager.initialize(),
-        navigationManager.initialize(),
-        projectManager.initialize(),
-      ]);
+  if (technicalGrid) {
+    technicalGrid.innerHTML = skills.technical
+      .map(
+        (skill) => `
+        <div class="skill-card">
+          <span class="skill-name" data-lang="${skill.id}">
+            ${languages[skill.id.toLowerCase()] || ''}
+            ${skill.name}
+          </span>
+          <div class="skill-bar">
+            <div class="skill-level" style="width: ${skill.level}%"></div>
+          </div>
+        </div>
+      `
+      )
+      .join('');
+  }
 
-      return true;
-    } catch (error) {
-      console.error('App: Initialization failed:', error);
-      return false;
-    }
+  const professionalGrid = document.querySelector(
+    '.skills-group:nth-child(2) .skills-grid'
+  );
+
+  if (professionalGrid) {
+    professionalGrid.innerHTML = skills.professional
+      .map(
+        (skill) => `
+        <div class="skill-card">
+          <span class="skill-name">${skill.name}</span>
+          <div class="skill-bar">
+            <div class="skill-level" style="width: ${skill.level}%"></div>
+          </div>
+        </div>
+      `
+      )
+      .join('');
   }
 }
 
-/**
- * Create and expose a single instance of App when DOM is ready
- * @listens DOMContentLoaded
- * @global
- */
-document.addEventListener('DOMContentLoaded', () => {
-  window.app = new App();
-});
+function renderFooter() {
+  const socialContainer = document.querySelector('.footer-social');
+  const techContainer = document.querySelector('.footer-tech');
+  const copyrightContainer = document.querySelector('.footer-copyright');
 
-export default App;
+  if (!socialContainer || !techContainer || !copyrightContainer) return;
+
+  const currentYear = new Date().getFullYear();
+
+  // Render social links
+  socialContainer.innerHTML = `
+    <div class="social-links">
+      ${socialLinks
+        .map(
+          (link) => `
+          <a href="${link.url}"
+             target="_blank"
+             rel="noopener"
+             class="social-link">
+            ${social[link.icon]}
+            <span class="sr-only">${link.name}</span>
+          </a>`
+        )
+        .join('')}
+    </div>
+  `;
+
+  // Render tech stack text
+  techContainer.innerHTML = `
+    <p>Built with ❤️ using modern web technologies</p>
+  `;
+
+  // Render copyright
+  copyrightContainer.innerHTML = `
+    <p>© ${currentYear} Daniel Hipskind</p>
+    <p class="license">All rights reserved. Read <a href="https://github.com/Greigh/danielhipskind.com/blob/main/LICENSE">LICENSE</a> for more info.</p>
+  `;
+}
+
+function renderAbout() {
+  const aboutSection = document.querySelector('.about-text');
+  if (!aboutSection) {
+    console.error('About section not found');
+    return;
+  }
+
+  aboutSection.innerHTML = `
+    <p class="about-intro">${about.intro}</p>
+    <div class="initial-content">
+      ${about.shortDescription.map((text) => `<p>${text}</p>`).join('')}
+    </div>
+    <div class="expanded-content">
+      ${about.expandedDescription.map((text) => `<p>${text}</p>`).join('')}
+    </div>
+    <div class="about-gradient"></div>
+    <button class="read-more-btn">
+      Read More
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+    </button>
+  `;
+
+  // Add event listener for the Read More button
+  const readMoreBtn = aboutSection.querySelector('.read-more-btn');
+  const expandedContent = aboutSection.querySelector('.expanded-content');
+  const gradient = aboutSection.querySelector('.about-gradient');
+
+  if (readMoreBtn && expandedContent && gradient) {
+    expandedContent.style.display = 'none';
+
+    readMoreBtn.addEventListener('click', () => {
+      const isExpanded = aboutSection.classList.contains('expanded');
+      aboutSection.classList.toggle('expanded');
+
+      if (!isExpanded) {
+        expandedContent.style.display = 'block';
+        gradient.style.opacity = '0';
+        readMoreBtn.innerHTML = `
+          Show Less
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="18 15 12 9 6 15"></polyline>
+          </svg>
+        `;
+      } else {
+        expandedContent.style.display = 'none';
+        gradient.style.opacity = '1';
+        readMoreBtn.innerHTML = `
+          Read More
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        `;
+        document.getElementById('about').scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+  }
+}
+
+async function initializePage() {
+  try {
+    const initializedContent = await initialize();
+
+    renderAbout();
+    renderProjects(initializedContent.projects);
+    renderSkills(initializedContent.skills);
+    renderFooter();
+    generateCopyright();
+  } catch (error) {
+    console.error('Failed to initialize page:', error);
+  }
+}
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', initializePage);

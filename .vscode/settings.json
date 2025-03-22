@@ -1,34 +1,9 @@
 {
-  "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit"
-  },
-  "eslint.validate": ["javascript"],
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "files.eol": "\n",
   "files.trimTrailingWhitespace": true,
-  "liveServer.settings.port": 5500,
-  "liveServer.settings.root": "/",
-  "liveServer.settings.https": {
-    "enable": false,
-    "cert": "",
-    "key": "",
-    "passphrase": ""
-  },
-  "liveServer.settings.cors": {
-    "enable": true,
-    "allowOrigin": ["*"]
-  },
-  "liveServer.settings.file": "404.html",
-  "liveServer.settings.rewrites": [
-    {
-      "from": "/privacy-policy",
-      "to": "/privacy-policy.html"
-    },
-    {
-      "from": "/",
-      "to": "/index.html"
-    }
-  ],
-  "codewindProfiling.showProfiling": true
+  "javascript.suggest.autoImports": true,
+  "typescript.suggest.autoImports": true,
+  "stylelint.validate": ["css", "scss"]
 }

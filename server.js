@@ -1,213 +1,257 @@
-import express from 'express';
-import { createServer } from 'http';
-import cors from 'cors';
-import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
-import apiRouter from './server/routes/api.js';
-import ServiceManager from './server/services/core/ServiceManager.js';
-import { authenticate } from './server/middleware/authMiddleware.js';
-import {
-  debugApp,
-  setupLogging,
-  setupLogRotation,
-} from './server/utils/debug.js';
+import express from 'express';
+import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
+import cors from 'cors'; // Add cors if not already present
 import helmet from 'helmet';
-import rateLimit from 'express-rate-limit';
-import realtimeService from './server/services/analytics/realtimeService.js';
-import analyticsService from './server/services/analytics/analyticsService.js'; // Changed to default import
-import { cspMiddleware } from './server/middleware/cspMiddleware.js';
 
-dotenv.config();
+// Load environment variables based on NODE_ENV
+dotenv.config({
+  path: process.env.NODE_ENV === 'production' ? '.env.production' : '.env',
+});
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
-const server = createServer(app);
-const PORT = process.env.PORT || 3000;
 
-// Initialize WebSocket server
-realtimeService.initialize(server);
+// Place this before any routes
+app.use(express.static(join(__dirname, 'public')));
 
-// Middleware setup - order matters!
-app.use(express.json());
-app.use(helmet());
+// Production security middleware
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+  app.use(
+    cors({
+      origin: process.env.CORS_ORIGIN,
+      methods: ['GET', 'POST'],
+      credentials: true,
+    })
+  );
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          scriptSrc: ["'self'", "'unsafe-inline'"],
+          styleSrc: ["'self'", "'unsafe-inline'"],
+          imgSrc: ["'self'", 'data:', 'https:'],
+          connectSrc: ["'self'", 'https://api.github.com'],
+          fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+          objectSrc: ["'none'"],
+          mediaSrc: ["'none'"],
+          frameSrc: ["'none'"],
+        },
+      },
+      crossOriginEmbedderPolicy: false,
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+    })
+  );
+}
+
+// Configuration object
+const config = {
+  port: process.env.PORT || 3000,
+  host: process.env.HOST || 'localhost',
+  isDev: process.env.NODE_ENV !== 'production',
+  staticMaxAge: process.env.STATIC_MAX_AGE || 86400,
+};
+
+export default config;
+
+// Static file serving with production caching
 app.use(
-  cors({
-    origin: ['https://danielhipskind.com', `http://localhost:${PORT}`],
-    credentials: true,
+  express.static(join(__dirname, 'public'), {
+    maxAge:
+      process.env.NODE_ENV === 'production' ? config.staticMaxAge * 1000 : 0,
+    setHeaders: (res, path) => {
+      if (path.endsWith('.css')) {
+        res.setHeader('Content-Type', 'text/css');
+      }
+      // Add security headers in production
+      if (process.env.NODE_ENV === 'production') {
+        res.setHeader('X-Content-Type-Options', 'nosniff');
+        res.setHeader('X-Frame-Options', 'DENY');
+        res.setHeader('X-XSS-Protection', '1; mode=block');
+      }
+    },
+    index: false, // Disable automatic serving of index.html
   })
 );
-app.use(cookieParser()); // Add this before routes
 
-// Apply CSP middleware before other routes
-app.use(cspMiddleware);
-
-setupLogging(app);
-setupLogRotation();
-
-app.use((req, res, next) => {
-  if (req.path.endsWith('.js')) {
-    res.type('application/javascript; charset=UTF-8');
-  } else if (req.path.endsWith('.css')) {
-    res.type('text/css; charset=UTF-8');
-  } else if (req.path.endsWith('.html')) {
-    res.type('text/html; charset=UTF-8');
-  } else if (req.path.endsWith('.json')) {
-    res.type('application/json; charset=UTF-8');
-  }
-  next();
-});
-
-app.use(express.static('public'));
-
-// Rate limiting for analytics
-const analyticsLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100,
-});
-
-// Update analytics routes for new structure
-app.use('/analytics', analyticsLimiter, (req, res, next) => {
-  // Handle WebSocket upgrade requests
-  if (req.headers.upgrade === 'websocket') {
-    return next();
-  }
-
-  // Serve static files
-  express.static('analytics', {
-    index: 'login.html',
-    extensions: ['html'],
-  })(req, res, next);
-});
-
-// WebSocket upgrade handling
-server.on('upgrade', (request, socket, head) => {
-  const pathname = new URL(request.url, `http://${request.headers.host}`)
-    .pathname;
-
-  if (pathname === '/analytics/ws') {
-    realtimeService.wss.handleUpgrade(request, socket, head, (ws) => {
-      realtimeService.wss.emit('connection', ws, request);
+// Add GitHub proxy endpoint
+app.get('/api/github/repos', async (req, res) => {
+  try {
+    const response = await fetch('https://api.github.com/users/greigh/repos', {
+      headers: {
+        Accept: 'application/vnd.github.v3+json',
+        Authorization: `token ${process.env.GITHUB_TOKEN}`,
+      },
     });
-  } else {
-    socket.destroy();
+
+    if (!response.ok) {
+      throw new Error(`GitHub API error: ${response.statusText}`);
+    }
+
+    const repos = await response.json();
+    res.json(repos);
+  } catch (error) {
+    console.error('GitHub API error:', error);
+    res.status(500).json({ error: 'Failed to fetch GitHub data' });
   }
 });
 
-// Protected analytics routes with new structure
-app.use(
-  '/analytics/dashboard',
-  authenticate,
-  express.static('analytics/dashboard')
-);
+app.get('/api/test/github', async (req, res) => {
+  try {
+    const response = await fetch('https://api.github.com/users/greigh/repos', {
+      headers: {
+        Accept: 'application/vnd.github.v3+json',
+        Authorization: `token ${process.env.GITHUB_TOKEN}`,
+      },
+    });
 
-// API routes with new structure
-app.use('/api', apiRouter);
+    if (!response.ok) {
+      throw new Error(`GitHub API error: ${response.statusText}`);
+    }
 
-app.get('/health', (req, res) => {
-  res.status(200).json({
-    status: 'healthy',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
+    const data = await response.json();
+    res.json({
+      status: 'success',
+      count: data.length,
+      sampleRepo: data[0],
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      message: error.message,
+    });
+  }
+});
+
+app.get('/api/github', async (req, res) => {
+  try {
+    const { username, repo } = req.query;
+    const response = await fetch(
+      `${GITHUB_API_BASE}/repos/${username}/${repo}`,
+      {
+        headers: {
+          Accept: 'application/vnd.github.v3+json',
+          Authorization: `token ${process.env.GITHUB_TOKEN}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`GitHub API error: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    console.error('GitHub API error:', error);
+    res.status(500).json({ error: 'Failed to fetch repository data' });
+  }
+});
+
+app.get('/api/github/repos/:username/:repo', async (req, res) => {
+  try {
+    const { username, repo } = req.params;
+    const response = await fetch(
+      `https://api.github.com/repos/${username}/${repo}`,
+      {
+        headers: {
+          Accept: 'application/vnd.github.v3+json',
+          Authorization: `token ${process.env.GITHUB_TOKEN}`,
+          'User-Agent': 'danielhipskind.com',
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`GitHub API error: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    console.error('GitHub API error:', error);
+    res.status(500).json({
+      error: 'Failed to fetch GitHub data',
+      details:
+        process.env.NODE_ENV === 'development' ? error.message : undefined,
+    });
+  }
+});
+
+// Add GitHub language endpoint
+app.get('/api/github/repos/:username/:repo/languages', async (req, res) => {
+  try {
+    const { username, repo } = req.params;
+    console.log(`Fetching languages for: ${username}/${repo}`); // Debug log
+
+    const response = await fetch(
+      `https://api.github.com/repos/${username}/${repo}/languages`,
+      {
+        headers: {
+          Accept: 'application/vnd.github.v3+json',
+          Authorization: `token ${process.env.GITHUB_TOKEN}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`GitHub API error: ${response.statusText}`);
+    }
+
+    const languages = await response.json();
+    res.json(languages);
+  } catch (error) {
+    console.error('GitHub API error:', error);
+    res.status(500).json({ error: 'Failed to fetch language data' });
+  }
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({
+    error:
+      process.env.NODE_ENV === 'production'
+        ? 'Internal Server Error'
+        : err.message,
   });
 });
 
-// Add health check endpoint for analytics
-app.get('/analytics/health', authenticate, (req, res) => {
-  res.json({
-    status: 'healthy',
-    wsClients: realtimeService.clients.size,
-    activeUsers: realtimeService.activeUsers.size,
-    uptime: process.uptime(),
+// Catch-all route for SPA - move this after all other routes
+app.get('*', (req, res) => {
+  res.sendFile(join(__dirname, 'public', 'index.html'), {
+    headers: {
+      'Cache-Control': 'no-cache',
+    },
   });
 });
 
-async function startServer() {
-  try {
-    debugApp('Starting server initialization...');
-
-    // Initialize core services first
-    await ServiceManager.initialize();
-
-    // Initialize feature services in order
-    await realtimeService.initialize(server);
-    await analyticsService.initialize();
-
-    // Configure server logging
-    debugApp('Server Configuration:', {
-      port: PORT,
-      environment: process.env.NODE_ENV,
-      analyticsEnabled: process.env.ENABLE_ANALYTICS === 'true',
-      corsEnabled: process.env.ENABLE_CORS === 'true',
-      compressionEnabled: true,
-      staticCacheMaxAge: '1 day',
-      rateLimitWindow: '15 minutes',
-      rateLimitMax: 100,
-    });
-
-    // Start HTTP server
-    server.listen(PORT, () => {
-      debugApp('Server started successfully!');
-      debugApp('----------------------------');
-      debugApp(`Local:            http://localhost:${PORT}`);
-      debugApp(`Analytics:        http://localhost:${PORT}/analytics`);
-      debugApp(`API Endpoint:     http://localhost:${PORT}/api`);
-      debugApp(`WebSocket:        ws://localhost:${PORT}/analytics/ws`);
-      debugApp(`Health Check:     http://localhost:${PORT}/health`);
-      debugApp('----------------------------');
-    });
-  } catch (error) {
-    debugApp(`Failed to start server: ${error.stack}`);
-    process.exit(1);
-  }
-}
-
-// Remove initializeServer function and just call startServer
-startServer();
-
-// Enhanced graceful shutdown
-async function shutdown(signal) {
-  debugApp(`${signal} received. Starting graceful shutdown...`);
-
-  // Close WebSocket server first
-  if (realtimeService.wss) {
-    debugApp('Closing WebSocket server...');
-    await new Promise((resolve) => realtimeService.wss.close(resolve));
-  }
-
-  // Close HTTP server
-  if (server) {
-    debugApp('Closing HTTP server...');
-    await new Promise((resolve) => server.close(resolve));
-  }
-
-  // Cleanup services
-  try {
-    debugApp('Cleaning up services...');
-    await ServiceManager.cleanup();
-    debugApp('Cleanup completed successfully');
-  } catch (error) {
-    debugApp(`Cleanup error: ${error.message}`);
-  }
-
-  // Exit process
-  debugApp('Exiting process...');
-  process.exit(0);
-}
-
-// Handle multiple shutdown signals
-['SIGTERM', 'SIGINT', 'SIGQUIT'].forEach((signal) => {
-  process.on(signal, () => shutdown(signal));
+// Start server
+const port = process.env.PORT || 3000;
+const server = app.listen(port, () => {
+  console.log(
+    `Server running in ${
+      process.env.NODE_ENV || 'development'
+    } mode on port ${port}`
+  );
 });
 
-// Handle uncaught errors
-process.on('uncaughtException', (error) => {
-  debugApp(`Uncaught Exception: ${error.message}`);
-  shutdown('UNCAUGHT_EXCEPTION');
+// Handle graceful shutdowns
+process.on('SIGTERM', () => {
+  console.log('SIGTERM signal received: closing HTTP server');
+  server.close(() => {
+    console.log('HTTP server closed');
+    process.exit(0);
+  });
 });
 
-process.on('unhandledRejection', (reason, promise) => {
-  debugApp('Unhandled Rejection at:', promise, 'reason:', reason);
-  shutdown('UNHANDLED_REJECTION');
+process.on('SIGINT', () => {
+  console.log('SIGINT signal received: closing HTTP server');
+  server.close(() => {
+    console.log('HTTP server closed');
+    process.exit(0);
+  });
 });
-
-// Export for testing
-export default app;

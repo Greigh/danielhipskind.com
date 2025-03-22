@@ -1,35 +1,28 @@
-# All Rights Reserved
+BSD 3-Clause License
 
-Copyright (c) 2024 Daniel Hipskind
+Copyright (c) 2025, Daniel Hipskind aka Greigh
 
-The software, code, documentation, design elements, and all associated materials in this repository ("the Work") are protected by copyright law and other intellectual property laws. All rights are reserved by Daniel Hipskind.
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
 
-## Restrictions
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
 
-No part of this Work may be reproduced, distributed, modified, or used in any form without explicit written permission from the copyright holder. This includes, but is not limited to:
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
 
-1. Source code
-2. Design elements
-3. Implementation methods
-4. Analytics system
-5. Architecture patterns
-6. Custom algorithms
-7. Documentation
+3. Neither the name of the copyright holder nor the names of its
+   contributors may be used to endorse or promote products derived from
+   this software without specific prior written permission.
 
-## Permission Requests
-
-To request permission to use any part of this Work:
-
-Email: me@danielhipskind.com
-
-Include:
-
-- Your full name and organization
-- Specific components you wish to use
-- Detailed intended use case
-- Project timeline and scope
-- Implementation details
-
-## Legal Notice
-
-Unauthorized use, reproduction, or distribution of this Work may result in severe civil and criminal penalties, and will be prosecuted to the maximum extent possible under law.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
