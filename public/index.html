@@ -13,33 +13,40 @@
     <meta name="author" content="Daniel Hipskind" />
     <meta name="keywords" content="Daniel Hipskind, Software Developer" />
 
+    <!-- Add this before other styles -->
+    <style>
+      html {
+        visibility: hidden;
+        background: #1a1a1a; /* Dark theme default */
+      }
+    </style>
+
     <!-- Favicon -->
     <link
       rel="icon"
-      href="./assets/images/DanielPortfolio.ico"
+      href="/assets/images/DanielPortfolio.ico"
       type="image/x-icon"
     />
     <link
       rel="shortcut icon"
-      href="./assets/images/DanielPortfolio.ico"
+      href="/assets/images/DanielPortfolio.ico"
       type="image/x-icon"
     />
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
 
-    <!-- Preload Assets -->
+    <!-- Update preload directives -->
     <link
       rel="preload"
       href="/assets/js/index.js"
       as="script"
       crossorigin="anonymous"
     />
+    <link rel="modulepreload" href="/assets/js/content.js" />
+    <link rel="modulepreload" href="/assets/js/icons.js" />
+    <link rel="modulepreload" href="/assets/js/themeHandler.js" />
     <link rel="preload" href="/assets/css/styles.css" as="style" />
 
     <!-- Styles -->
@@ -69,19 +76,23 @@
       <!-- Hero Section -->
       <section id="hero">
         <div class="hero-content">
-          <img
-            src="./assets/images/DanielPortfolio.webp"
-            alt="Daniel Hipskind"
-            class="hero-img"
-          />
+          <picture>
+            <source
+              srcset="/assets/images/DanielPortfolio.webp"
+              type="image/webp"
+            />
+            <img
+              src="/assets/images/DanielPortfolio.jpg"
+              alt="Daniel Hipskind"
+              class="hero-img"
+              loading="eager"
+              decoding="async"
+              width="150"
+              height="150"
+            />
+          </picture>
           <h1>Daniel Hipskind</h1>
           <p>Software Developer</p>
-          <div class="hero-cta">
-            <a href="#about" class="primary-btn">Learn More</a>
-            <a href="mailto:me@danielhipskind.com" class="secondary-btn"
-              >Contact Me</a
-            >
-          </div>
         </div>
       </section>
 
@@ -119,7 +130,14 @@
       <section id="skills">
         <h2>Skills</h2>
         <div class="skills-container">
-          <!-- Skills groups will be injected by JavaScript -->
+          <div class="skills-group">
+            <h3>Technical Skills</h3>
+            <div class="skills-grid"></div>
+          </div>
+          <div class="skills-group">
+            <h3>Professional Skills</h3>
+            <div class="skills-grid"></div>
+          </div>
         </div>
       </section>
     </main>
@@ -141,7 +159,7 @@
       </div>
     </footer>
 
-    <!-- Scripts -->
+    <!-- Move script to end of body -->
     <script type="module" src="/assets/js/index.js"></script>
   </body>
 </html>

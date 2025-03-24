@@ -229,6 +229,16 @@ app.get('*', (req, res) => {
   });
 });
 
+// Add after your routes
+app.use((req, res, next) => {
+  res.status(404).sendFile(join(__dirname, 'public', 'index.html'));
+});
+
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something broke!');
+});
+
 // Start server
 const port = process.env.PORT || 3000;
 const server = app.listen(port, () => {
@@ -254,4 +264,27 @@ process.on('SIGINT', () => {
     console.log('HTTP server closed');
     process.exit(0);
   });
+});
+
+// Add caching and proper static file handling
+app.use(
+  express.static(join(__dirname, 'public'), {
+    maxAge: process.env.NODE_ENV === 'production' ? '1d' : 0,
+    etag: true,
+    lastModified: true,
+    setHeaders: (res, path) => {
+      if (path.endsWith('.js')) {
+        res.setHeader('Content-Type', 'application/javascript');
+      } else if (path.endsWith('.webp')) {
+        res.setHeader('Content-Type', 'image/webp');
+      } else if (path.endsWith('.jpg') || path.endsWith('.jpeg')) {
+        res.setHeader('Content-Type', 'image/jpeg');
+      }
+    },
+  })
+);
+
+// Add fallback route for SPA
+app.get('*', (req, res) => {
+  res.sendFile(join(__dirname, 'public', 'index.html'));
 });

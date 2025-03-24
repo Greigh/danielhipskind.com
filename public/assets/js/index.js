@@ -81,17 +81,33 @@ function renderProjects(projects = []) {
 
 // Render skills
 function renderSkills(skills) {
+  if (!skills) {
+    console.error('No skills data provided');
+    return;
+  }
+
   const technicalGrid = document.querySelector(
     '.skills-group:nth-child(1) .skills-grid'
   );
+  const professionalGrid = document.querySelector(
+    '.skills-group:nth-child(2) .skills-grid'
+  );
 
-  if (technicalGrid) {
+  if (!technicalGrid || !professionalGrid) {
+    console.error('Skills grid elements not found', {
+      technicalGrid: !!technicalGrid,
+      professionalGrid: !!professionalGrid,
+    });
+    return;
+  }
+
+  if (skills.technical?.length) {
     technicalGrid.innerHTML = skills.technical
       .map(
         (skill) => `
         <div class="skill-card">
           <span class="skill-name" data-lang="${skill.id}">
-            ${languages[skill.id.toLowerCase()] || ''}
+            ${languages[skill.id?.toLowerCase()] || ''}
             ${skill.name}
           </span>
           <div class="skill-bar">
@@ -103,11 +119,7 @@ function renderSkills(skills) {
       .join('');
   }
 
-  const professionalGrid = document.querySelector(
-    '.skills-group:nth-child(2) .skills-grid'
-  );
-
-  if (professionalGrid) {
+  if (skills.professional?.length) {
     professionalGrid.innerHTML = skills.professional
       .map(
         (skill) => `
