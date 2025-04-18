@@ -1,0 +1,91 @@
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.2);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.heart {
+  color: #ff4f4f;
+  display: inline-block;
+  animation: pulse 1.5s infinite;
+}
+
+/* Animation Utility Classes */
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.5s ease-out;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Transition Classes */
+.transition-all {
+  transition: all 0.3s ease;
+}
+
+.transition-transform {
+  transition: transform 0.3s ease;
+}
+
+.transition-opacity {
+  transition: opacity 0.3s ease;
+}
+
+/* Hover Effects */
+.hover-scale:hover {
+  transform: scale(1.05);
+}
+
+.hover-up:hover {
+  transform: translateY(-4px);
+}
+
+.hover-opacity:hover {
+  opacity: 0.8;
+}

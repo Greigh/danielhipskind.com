@@ -14,21 +14,40 @@ A modern, responsive personal website built with Express.js and vanilla JavaScri
 
 - **Backend**: Node.js, Express.js
 - **Frontend**: Vanilla JavaScript, CSS3, HTML5
-- **APIs**: GitHub REST API
+- **APIs**: Custom Express.js endpoints proxying the GitHub REST API
 - **Security**: Helmet.js, CORS
-- **Deployment**: PM2, Nginx
+- **Deployment**: Node.js server (Express), PM2 process manager, Nginx reverse proxy
 
-## 🚀 Deployment 📦 Installation 📝 Development
+### So what's in the background not here?
+
+- **.env.production**: Environment variables for sensitive data (example shown in `.env.example`)
+- **server.js**: Main server file for Express.js
+- **CNAME**: Custom domain configuration on my webserver
+- **nginx.conf**: Nginx configuration for reverse proxying
+
+
+## 🚀 Deployment
 
 Deployment, Installation, and Development instructions are available upon request.
 
 ## 🔒 Security
 
-- CORS configuration for API endpoints
 - Helmet.js for security headers
-- Rate limiting on API routes
+- CORS configuration for API endpoints
 - Environment-based security measures
 - Secure static file serving
+
+## 📝 Used During Development
+
+- **[nodemon](https://nodemon.io)**: For auto-restarting the server during development
+- **[ESLint](https://eslint.org)**: For code linting and style checking
+- **[Prettier](https://prettier.io)**: For code formatting
+- **[GitHub](https://github.com)**: For version control
+- **[VSCode](https://code.visualstudio.com)**: Recommended IDE
+- **[ForkLift 4](https://binarynights.com/)**: For file management on macOS
+- **[Core Shell](https://coreshell.app)**: For terminal access on macOS
+- **[Spotify](https://spotify.com)**: For entertainment while coding
+- **[Vivaldi](https://vivalid.net)**: For web browsing and testing
 
 ## 👤 Author
 
@@ -55,6 +74,8 @@ This project is licensed under the BSD 3-Clause License. See the [LICENSE](LICEN
 1. Retain the copyright notice
 2. Include the license text in distributions
 3. Do not use the author's name for endorsement
+4. Please contact me for commercial use or special cases
+5. Ensure compliance with the [BSD 3-Clause License](LICENSE)
 
 ## 🤝 Contributing
 

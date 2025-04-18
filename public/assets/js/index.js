@@ -50,26 +50,12 @@ function renderProjects(projects = []) {
         <div class="project-footer">
           ${
             project.githubUrl
-              ? `
-            <a href="${project.githubUrl}"
-               target="_blank"
-               rel="noopener"
-               class="project-link github">
-              View on GitHub
-            </a>
-          `
+              ? `<a href="${project.githubUrl}" target="_blank" rel="noopener" class="project-link github">View on GitHub</a>`
               : ''
           }
           ${
             project.demoUrl
-              ? `
-            <a href="${project.demoUrl}"
-               target="_blank"
-               rel="noopener"
-               class="project-link demo">
-              Live Demo
-            </a>
-          `
+              ? `<a href="${project.demoUrl}" target="_blank" rel="noopener" class="project-link demo">Live Demo</a>`
               : ''
           }
         </div>
@@ -81,6 +67,8 @@ function renderProjects(projects = []) {
 
 // Render skills
 function renderSkills(skills) {
+  console.log('Skills data received:', skills); // Debug log
+
   if (!skills) {
     console.error('No skills data provided');
     return;
@@ -92,6 +80,8 @@ function renderSkills(skills) {
   const professionalGrid = document.querySelector(
     '.skills-group:nth-child(2) .skills-grid'
   );
+
+  console.log('Grid elements:', { technicalGrid, professionalGrid }); // Debug log
 
   if (!technicalGrid || !professionalGrid) {
     console.error('Skills grid elements not found', {
@@ -142,8 +132,6 @@ function renderFooter() {
 
   if (!socialContainer || !techContainer || !copyrightContainer) return;
 
-  const currentYear = new Date().getFullYear();
-
   // Render social links
   socialContainer.innerHTML = `
     <div class="social-links">
@@ -164,12 +152,12 @@ function renderFooter() {
 
   // Render tech stack text
   techContainer.innerHTML = `
-    <p>Built with ❤️ using modern web technologies</p>
+    <p>Built with <span class="heart">♥</span> using modern web technologies</p>
   `;
 
   // Render copyright
   copyrightContainer.innerHTML = `
-    <p>© ${currentYear} Daniel Hipskind</p>
+    ${generateCopyright()}
     <p class="license">All rights reserved. Read <a href="https://github.com/Greigh/danielhipskind.com/blob/main/LICENSE">LICENSE</a> for more info.</p>
   `;
 }
@@ -242,7 +230,6 @@ async function initializePage() {
     renderProjects(initializedContent.projects);
     renderSkills(initializedContent.skills);
     renderFooter();
-    generateCopyright();
   } catch (error) {
     console.error('Failed to initialize page:', error);
   }

@@ -92,5 +92,39 @@ debug.log
 *.wmv
 
 nodemon.json
-nginx.config
+CNAME
+server.js
 ecosystem.config.cjs
+
+# Media and assets
+*.gif
+*.ico
+*.pdf
+*.psd
+*.ai
+*.sketch
+*.fig
+
+# Font files
+*.woff
+*.woff2
+*.eot
+*.ttf
+*.otf
+
+# Compressed files
+*.gz
+*.br
+*.zip
+*.tar
+*.7z
+
+# Source maps
+*.map
+
+# Cache directories
+.cache/
+public/assets/cache/
+
+nginx
+templates

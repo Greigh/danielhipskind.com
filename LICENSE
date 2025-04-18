@@ -1,4 +1,8 @@
-BSD 3-Clause License
+# BSD 3-Clause License
+
+## Legal Jargon
+
+Also found [here](https://opensource.org/licenses/BSD-3-Clause)
 
 Copyright (c) 2025, Daniel Hipskind aka Greigh
 
@@ -26,3 +30,21 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+## Real Talk
+
+This project is licensed under the BSD 3-Clause License. This means you can use, modify, and distribute this work, but you must include the original copyright notice and license text in any copies or substantial portions of the work.
+
+But hey, let's keep it real. This is a personal project, and while I’m cool with you using it for personal or educational purposes, if you want to use it for commercial purposes or in a way that could make me money (or cost me money), please reach out first.
+
+## Contact Information
+
+Email: me@danielhipskind.com
+
+Include:
+
+- Your full name and organization
+- Specific components you wish to use
+- Detailed intended use case
+- Project timeline and scope
+- Implementation details

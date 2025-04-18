@@ -13,7 +13,11 @@ const FEATURED_REPOS = [
     displayName: 'Portfolio Website',
     order: 2,
   },
-  // Add more repos here
+  {
+    repo: 'WebExpressStudioTemplate',
+    displayName: 'Web Express Studio Template',
+    order: 3,
+  },
 ];
 
 export async function fetchGitHubData() {

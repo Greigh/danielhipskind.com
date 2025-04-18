@@ -1,0 +1,23 @@
+/* Helper Classes */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.glass-effect {
+  background: var(--nav-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--nav-border);
+  box-shadow: var(--nav-shadow);
+}
