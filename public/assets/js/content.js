@@ -45,6 +45,12 @@ export const socialLinks = [
     icon: 'twitter',
   },
   {
+    name: 'Mastodon',
+    url: 'https://mastodon.social/@danielhipskind',
+    icon: 'mastodon',
+    rel: 'me',
+  },
+  {
     name: 'Email',
     url: 'mailto:me@danielhipskind.com',
     icon: 'email',

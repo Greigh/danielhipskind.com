@@ -140,7 +140,7 @@ function renderFooter() {
           (link) => `
           <a href="${link.url}"
              target="_blank"
-             rel="noopener"
+             rel="${link.rel || 'noopener'}"
              class="social-link">
             ${social[link.icon]}
             <span class="sr-only">${link.name}</span>
