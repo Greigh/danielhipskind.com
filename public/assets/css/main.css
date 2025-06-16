@@ -11,6 +11,7 @@
 @import './components/projects.css';
 @import './components/skills.css';
 @import './components/footer.css';
+@import './components/carousel.css';
 
 /* Utility Imports */
 @import './utilities/utilities.css';

@@ -2,67 +2,99 @@ import { about } from './content.js';
 import { generateCopyright, initialize, socialLinks } from './content.js';
 import { languages, social } from './icons.js';
 import {} from './themeHandler.js';
+import { Carousel } from './utils/carousel.js';
+
+let projectCarousel = null;
 
 // Render projects
 function renderProjects(projects = []) {
-  const projectGrid = document.querySelector('.project-grid');
-  if (!projectGrid) {
-    console.error('Project grid element not found');
+  const projectSection = document.getElementById('projects');
+  if (!projectSection) {
+    console.error('Project section not found');
     return;
   }
 
-  projectGrid.innerHTML = projects
-    .map((project) => {
-      // Calculate language percentages
-      const totalBytes = Object.values(project.languages).reduce(
-        (a, b) => a + b,
-        0
-      );
-      const languagePercentages = Object.entries(project.languages)
-        .map(([name, bytes]) => ({
-          name,
-          icon: languages[name.toLowerCase()] || '',
-          percentage: ((bytes / totalBytes) * 100).toFixed(1),
-        }))
-        .sort((a, b) => b.percentage - a.percentage);
+  // Create or get container
+  let projectGrid = projectSection.querySelector('.project-grid');
+  if (!projectGrid) {
+    projectGrid = document.createElement('div');
+    projectGrid.className = 'project-grid carousel-container';
+    projectSection.appendChild(projectGrid);
+  } else {
+    projectGrid.className = 'project-grid carousel-container';
+  }
 
-      return `
-      <article class="project-card glass-effect">
-        <div class="project-header">
-          <h3>${project.title}</h3>
-        </div>
-        <p class="project-description">${
-          project.description || 'No description available'
-        }</p>
-        <div class="languages-list">
-          ${languagePercentages
-            .map(
-              (lang) => `
-              <div class="language-item">
-                <span class="language-icon">${lang.icon}</span>
-                <span class="language-name">${lang.name}</span>
-                <span class="language-percentage">${lang.percentage}%</span>
-              </div>
-            `
-            )
-            .join('')}
-        </div>
-        <div class="project-footer">
-          ${
-            project.githubUrl
-              ? `<a href="${project.githubUrl}" target="_blank" rel="noopener" class="project-link github">View on GitHub</a>`
-              : ''
-          }
-          ${
-            project.demoUrl
-              ? `<a href="${project.demoUrl}" target="_blank" rel="noopener" class="project-link demo">Live Demo</a>`
-              : ''
-          }
-        </div>
-      </article>
+  // Empty the container
+  projectGrid.innerHTML = '';
+
+  // Create project cards
+  projects.forEach((project) => {
+    // Calculate language percentages
+    const totalBytes = Object.values(project.languages).reduce(
+      (a, b) => a + b,
+      0
+    );
+    const languagePercentages = Object.entries(project.languages)
+      .map(([name, bytes]) => ({
+        name,
+        icon: languages[name.toLowerCase()] || '',
+        percentage: ((bytes / totalBytes) * 100).toFixed(1),
+      }))
+      .sort((a, b) => b.percentage - a.percentage);
+
+    const projectCard = document.createElement('article');
+    projectCard.className = 'project-card glass-effect';
+
+    projectCard.innerHTML = `
+      <div class="project-header">
+        <h3>${project.title}</h3>
+      </div>
+      <p class="project-description">${
+        project.description || 'No description available'
+      }</p>
+      <div class="languages-list">
+        ${languagePercentages
+          .map(
+            (lang) => `
+            <div class="language-item">
+              <span class="language-icon">${lang.icon}</span>
+              <span class="language-name">${lang.name}</span>
+              <span class="language-percentage">${lang.percentage}%</span>
+            </div>
+          `
+          )
+          .join('')}
+      </div>
+      <div class="project-footer">
+        ${
+          project.githubUrl
+            ? `<a href="${project.githubUrl}" target="_blank" rel="noopener" class="project-link github">View on GitHub</a>`
+            : ''
+        }
+        ${
+          project.demoUrl
+            ? `<a href="${project.demoUrl}" target="_blank" rel="noopener" class="project-link demo">Live Demo</a>`
+            : ''
+        }
+      </div>
     `;
-    })
-    .join('');
+
+    projectGrid.appendChild(projectCard);
+  });
+
+  // Initialize carousel
+  if (projectCarousel) {
+    projectCarousel.destroy();
+  }
+
+  projectCarousel = new Carousel(projectGrid, {
+    slidesToShow: 1, // Default for mobile
+    autoplay: true,
+    autoplaySpeed: 5000,
+    infinite: true,
+    showControls: true,
+    showPagination: true,
+  });
 }
 
 // Render skills
