@@ -6,16 +6,17 @@ export class Carousel {
     this.slides = [];
     this.controls = null;
     this.pagination = null;
+    this.progressBar = null;
 
     // Configuration
     this.options = {
-      slidesToShow: options.slidesToShow || 1,
-      autoplay: options.autoplay || false,
-      autoplaySpeed: options.autoplaySpeed || 5000,
-      infinite: options.infinite || false,
-      showControls: options.showControls !== false,
-      showPagination: options.showPagination !== false,
-      itemsPerSlide: options.itemsPerSlide || 1,
+      slidesToShow: options.slidesToShow || 1.5, // Default to 1.5 slides
+      autoplay: options.autoplay || false, // Autoplay enabled by default
+      autoplaySpeed: options.autoplaySpeed || 8000, // 8 seconds
+      infinite: options.infinite || true, // Infinite loop enabled by default
+      showControls: options.showControls !== false, // Controls enabled by default
+      showPagination: options.showPagination !== false, // Pagination enabled by default
+      itemsPerSlide: options.itemsPerSlide || 1, // Default to 1 item per slide
       ...options,
     };
 
@@ -70,6 +71,7 @@ export class Carousel {
     for (let slideIndex = 0; slideIndex < totalSlides; slideIndex++) {
       const slide = document.createElement('div');
       slide.className = 'carousel-slide';
+      if (slideIndex === 0) slide.classList.add('active');
 
       // Calculate which items go in this slide
       const startItemIndex = slideIndex * itemsPerSlide;
@@ -90,15 +92,45 @@ export class Carousel {
 
     this.totalSlides = this.slides.length;
 
+    // Create a container for controls and pagination
+    let controlsContainer = document.querySelector(
+      '.carousel-controls-container'
+    );
+    if (!controlsContainer) {
+      controlsContainer = document.createElement('div');
+      controlsContainer.className = 'carousel-controls-container';
+      this.container.parentNode.insertBefore(
+        controlsContainer,
+        this.container.nextSibling
+      );
+    } else {
+      controlsContainer.innerHTML = '';
+    }
+
+    // Add progress bar
+    this.createProgressBar(controlsContainer);
+
     // Add controls if enabled
     if (this.options.showControls && this.totalSlides > 1) {
-      this.createControls();
+      this.createControls(controlsContainer);
     }
 
     // Add pagination if enabled
     if (this.options.showPagination && this.totalSlides > 1) {
-      this.createPagination();
+      this.createPagination(controlsContainer);
     }
+  }
+
+  createProgressBar(container) {
+    const progressContainer = document.createElement('div');
+    progressContainer.className = 'carousel-progress';
+
+    this.progressBar = document.createElement('div');
+    this.progressBar.className = 'carousel-progress-bar';
+    this.progressBar.style.width = `${(1 / this.totalSlides) * 100}%`;
+
+    progressContainer.appendChild(this.progressBar);
+    container.appendChild(progressContainer);
   }
 
   getItemsPerSlide() {
@@ -110,7 +142,7 @@ export class Carousel {
     return 1; // 1 item per slide on small screens
   }
 
-  createControls() {
+  createControls(container) {
     // Remove previous controls if they exist
     if (this.controls) {
       this.controls.remove();
@@ -134,28 +166,15 @@ export class Carousel {
     this.controls.appendChild(prevButton);
     this.controls.appendChild(nextButton);
 
-    // Create a container for both controls and pagination
-    let controlsContainer = document.querySelector(
-      '.carousel-controls-container'
-    );
-    if (!controlsContainer) {
-      controlsContainer = document.createElement('div');
-      controlsContainer.className = 'carousel-controls-container';
-      this.container.parentNode.insertBefore(
-        controlsContainer,
-        this.container.nextSibling
-      );
-    }
-
     // Append controls to the container
-    controlsContainer.appendChild(this.controls);
+    container.appendChild(this.controls);
 
     // Add event listeners
     prevButton.addEventListener('click', () => this.prev());
     nextButton.addEventListener('click', () => this.next());
   }
 
-  createPagination() {
+  createPagination(container) {
     // Remove previous pagination if it exists
     if (this.pagination) {
       this.pagination.remove();
@@ -183,21 +202,8 @@ export class Carousel {
       this.pagination.appendChild(dot);
     }
 
-    // Get the controls container
-    let controlsContainer = document.querySelector(
-      '.carousel-controls-container'
-    );
-    if (!controlsContainer) {
-      controlsContainer = document.createElement('div');
-      controlsContainer.className = 'carousel-controls-container';
-      this.container.parentNode.insertBefore(
-        controlsContainer,
-        this.container.nextSibling
-      );
-    }
-
     // Append pagination to the container
-    controlsContainer.appendChild(this.pagination);
+    container.appendChild(this.pagination);
   }
 
   setupEventListeners() {
@@ -208,13 +214,14 @@ export class Carousel {
       }
     });
 
+    // Resume autoplay on mouse leave
     this.container.addEventListener('mouseleave', () => {
       if (this.options.autoplay && this.isPaused) {
         this.startAutoplay();
       }
     });
 
-    // Touch events for swipe
+    // Touch events for swipe navigation
     this.container.addEventListener(
       'touchstart',
       (e) => {
@@ -274,6 +281,15 @@ export class Carousel {
     const offset = -this.currentSlide * 100;
     this.track.style.transform = `translateX(${offset}%)`;
 
+    // Update active slide class
+    this.slides.forEach((slide, index) => {
+      if (index === this.currentSlide) {
+        slide.classList.add('active');
+      } else {
+        slide.classList.remove('active');
+      }
+    });
+
     // Update pagination
     if (this.pagination) {
       const dots = this.pagination.querySelectorAll('.carousel-dot');
@@ -284,6 +300,13 @@ export class Carousel {
           dot.classList.remove('active');
         }
       });
+    }
+
+    // Update progress bar
+    if (this.progressBar) {
+      const progressPercentage =
+        ((this.currentSlide + 1) / this.totalSlides) * 100;
+      this.progressBar.style.width = `${progressPercentage}%`;
     }
   }
 
@@ -369,8 +392,11 @@ export class Carousel {
     } else {
       // Just remove track and controls for rebuilding
       if (this.track) this.track.remove();
-      if (this.controls) this.controls.remove();
-      if (this.pagination) this.pagination.remove();
+
+      const controlsContainer = document.querySelector(
+        '.carousel-controls-container'
+      );
+      if (controlsContainer) controlsContainer.innerHTML = '';
     }
   }
 }
