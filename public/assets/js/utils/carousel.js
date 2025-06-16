@@ -61,17 +61,28 @@ export class Carousel {
     this.container.innerHTML = '';
     this.container.appendChild(this.track);
 
-    // Group children into slides based on screen size and responsive settings
+    // We need to create slides with multiple items per slide
+    const totalItems = children.length;
     const itemsPerSlide = this.getItemsPerSlide();
+    const totalSlides = Math.ceil(totalItems / itemsPerSlide);
 
-    // Create slides with multiple items
-    for (let i = 0; i < children.length; i += itemsPerSlide) {
+    // Create the slides with proper grouping of items
+    for (let slideIndex = 0; slideIndex < totalSlides; slideIndex++) {
       const slide = document.createElement('div');
       slide.className = 'carousel-slide';
 
-      // Add up to itemsPerSlide items to this slide
-      const slideItems = children.slice(i, i + itemsPerSlide);
-      slideItems.forEach((item) => slide.appendChild(item));
+      // Calculate which items go in this slide
+      const startItemIndex = slideIndex * itemsPerSlide;
+      const endItemIndex = Math.min(startItemIndex + itemsPerSlide, totalItems);
+
+      // Add the items to this slide
+      for (
+        let itemIndex = startItemIndex;
+        itemIndex < endItemIndex;
+        itemIndex++
+      ) {
+        slide.appendChild(children[itemIndex]);
+      }
 
       this.track.appendChild(slide);
       this.slides.push(slide);
@@ -93,9 +104,7 @@ export class Carousel {
   getItemsPerSlide() {
     const viewportWidth = window.innerWidth;
 
-    if (viewportWidth >= 1200) {
-      return 2; // 2 items per slide on large screens
-    } else if (viewportWidth >= 768) {
+    if (viewportWidth >= 768) {
       return 2; // 2 items per slide on medium screens
     }
     return 1; // 1 item per slide on small screens
