@@ -86,6 +86,16 @@
   --transition-base: 0.3s;
   --transition-slow: 0.5s;
   --ease-base: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* GitHub button colors */
+  --github-button-bg: #24292e;
+  --github-button-text: #ffffff;
+  --github-button-hover: #2f363d;
+
+  /* Demo button colors */
+  --demo-button-bg: #0070f3;
+  --demo-button-text: #ffffff;
+  --demo-button-hover: #0051af;
 }
 
 /* Dark Theme */
@@ -102,4 +112,14 @@
   --nav-text: #ffffff;
   --nav-hover: #66b3ff;
   --hover-bg: rgba(255, 255, 255, 0.1);
+
+  /* GitHub button colors (dark theme) */
+  --github-button-bg: #2f363d;
+  --github-button-text: #ffffff;
+  --github-button-hover: #444d56;
+
+  /* Demo button colors (dark theme) */
+  --demo-button-bg: #0070f3;
+  --demo-button-text: #ffffff;
+  --demo-button-hover: #0051af;
 }

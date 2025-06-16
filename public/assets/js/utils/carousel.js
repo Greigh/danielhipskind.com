@@ -15,6 +15,7 @@ export class Carousel {
       infinite: options.infinite || false,
       showControls: options.showControls !== false,
       showPagination: options.showPagination !== false,
+      itemsPerSlide: options.itemsPerSlide || 1,
       ...options,
     };
 
@@ -46,9 +47,6 @@ export class Carousel {
       this.startAutoplay();
     }
 
-    // Handle responsive behavior
-    this.handleResponsive();
-
     // Make sure everything is positioned correctly
     this.updatePosition();
   }
@@ -58,18 +56,26 @@ export class Carousel {
     this.track = document.createElement('div');
     this.track.className = 'carousel-track';
 
-    // Get child elements and wrap them in slides
+    // Get child elements
     const children = Array.from(this.container.children);
     this.container.innerHTML = '';
     this.container.appendChild(this.track);
 
-    children.forEach((child) => {
+    // Group children into slides based on screen size and responsive settings
+    const itemsPerSlide = this.getItemsPerSlide();
+
+    // Create slides with multiple items
+    for (let i = 0; i < children.length; i += itemsPerSlide) {
       const slide = document.createElement('div');
       slide.className = 'carousel-slide';
-      slide.appendChild(child);
+
+      // Add up to itemsPerSlide items to this slide
+      const slideItems = children.slice(i, i + itemsPerSlide);
+      slideItems.forEach((item) => slide.appendChild(item));
+
       this.track.appendChild(slide);
       this.slides.push(slide);
-    });
+    }
 
     this.totalSlides = this.slides.length;
 
@@ -84,7 +90,23 @@ export class Carousel {
     }
   }
 
+  getItemsPerSlide() {
+    const viewportWidth = window.innerWidth;
+
+    if (viewportWidth >= 1200) {
+      return 3; // 3 items per slide on large screens
+    } else if (viewportWidth >= 768) {
+      return 2; // 2 items per slide on medium screens
+    }
+    return 1; // 1 item per slide on small screens
+  }
+
   createControls() {
+    // Remove previous controls if they exist
+    if (this.controls) {
+      this.controls.remove();
+    }
+
     this.controls = document.createElement('div');
     this.controls.className = 'carousel-controls';
 
@@ -102,7 +124,22 @@ export class Carousel {
 
     this.controls.appendChild(prevButton);
     this.controls.appendChild(nextButton);
-    this.container.appendChild(this.controls);
+
+    // Create a container for both controls and pagination
+    let controlsContainer = document.querySelector(
+      '.carousel-controls-container'
+    );
+    if (!controlsContainer) {
+      controlsContainer = document.createElement('div');
+      controlsContainer.className = 'carousel-controls-container';
+      this.container.parentNode.insertBefore(
+        controlsContainer,
+        this.container.nextSibling
+      );
+    }
+
+    // Append controls to the container
+    controlsContainer.appendChild(this.controls);
 
     // Add event listeners
     prevButton.addEventListener('click', () => this.prev());
@@ -110,6 +147,11 @@ export class Carousel {
   }
 
   createPagination() {
+    // Remove previous pagination if it exists
+    if (this.pagination) {
+      this.pagination.remove();
+    }
+
     this.pagination = document.createElement('div');
     this.pagination.className = 'carousel-pagination';
 
@@ -132,7 +174,21 @@ export class Carousel {
       this.pagination.appendChild(dot);
     }
 
-    this.container.appendChild(this.pagination);
+    // Get the controls container
+    let controlsContainer = document.querySelector(
+      '.carousel-controls-container'
+    );
+    if (!controlsContainer) {
+      controlsContainer = document.createElement('div');
+      controlsContainer.className = 'carousel-controls-container';
+      this.container.parentNode.insertBefore(
+        controlsContainer,
+        this.container.nextSibling
+      );
+    }
+
+    // Append pagination to the container
+    controlsContainer.appendChild(this.pagination);
   }
 
   setupEventListeners() {
@@ -169,8 +225,7 @@ export class Carousel {
 
     // Window resize
     window.addEventListener('resize', () => {
-      this.handleResponsive();
-      this.updatePosition();
+      this.handleResize();
     });
 
     // Keyboard navigation
@@ -197,30 +252,18 @@ export class Carousel {
     }
   }
 
-  handleResponsive() {
-    // Update slides to show based on screen size
-    const viewportWidth = window.innerWidth;
-    let slidesToShow = 1;
-
-    if (viewportWidth >= 1200) {
-      slidesToShow = 3;
-    } else if (viewportWidth >= 768) {
-      slidesToShow = 2;
-    }
-
-    this.options.slidesToShow = slidesToShow;
+  handleResize() {
+    // On window resize, recreate the carousel to adjust items per slide
+    this.destroy(false);
+    this.createStructure();
+    this.goToSlide(0);
+    this.updatePosition();
   }
 
   updatePosition() {
     // Calculate position based on current slide
-    const slideWidth = 100 / this.options.slidesToShow;
-    const offset = -this.currentSlide * slideWidth;
+    const offset = -this.currentSlide * 100;
     this.track.style.transform = `translateX(${offset}%)`;
-
-    // Update slide widths
-    this.slides.forEach((slide) => {
-      slide.style.minWidth = `${slideWidth}%`;
-    });
 
     // Update pagination
     if (this.pagination) {
@@ -292,20 +335,33 @@ export class Carousel {
     clearInterval(this.autoplayInterval);
   }
 
-  destroy() {
+  destroy(removeElements = true) {
     // Clean up event listeners and intervals
     clearInterval(this.autoplayInterval);
-    window.removeEventListener('resize', this.handleResponsive);
 
-    // Remove carousel structure
-    this.container.innerHTML = '';
+    if (removeElements) {
+      // Remove carousel structure but keep content
+      const projectCards = [];
 
-    // Restore original content
-    this.slides.forEach((slide) => {
-      const content = slide.firstChild;
-      if (content) {
-        this.container.appendChild(content);
-      }
-    });
+      // Collect all project cards from slides
+      this.slides.forEach((slide) => {
+        Array.from(slide.children).forEach((child) => {
+          projectCards.push(child);
+        });
+      });
+
+      // Clear the container
+      this.container.innerHTML = '';
+
+      // Re-add the original project cards
+      projectCards.forEach((card) => {
+        this.container.appendChild(card);
+      });
+    } else {
+      // Just remove track and controls for rebuilding
+      if (this.track) this.track.remove();
+      if (this.controls) this.controls.remove();
+      if (this.pagination) this.pagination.remove();
+    }
   }
 }

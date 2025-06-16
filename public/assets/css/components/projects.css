@@ -1,106 +1,152 @@
-/* Project Grid */
-.project-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
-  box-sizing: border-box;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
+/* Project container */
+#projects {
+  text-align: center;
+  padding: 2rem 0;
 }
 
-/* Project Cards */
+.project-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+/* Project card */
 .project-card {
-  background: var(--nav-bg);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid var(--nav-border);
-  border-radius: 1rem;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  padding: var(--card-padding);
-  box-sizing: border-box;
+  height: 100%;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  width: 100%;
+  max-width: 400px;
 }
 
-/* Project Header */
+.project-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--card-shadow-hover);
+}
+
 .project-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-}
-
-/* Project Description */
-.project-description {
-  font-size: var(--font-size-base);
-  line-height: 1.6;
-  color: var(--text-secondary);
   margin-bottom: 1rem;
 }
 
-/* Language Item */
+.project-header h3 {
+  color: var(--heading);
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.project-description {
+  flex-grow: 1;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.languages-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
 .language-item {
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 0.35rem 0.75rem;
-  border-radius: 6px;
-  background: var(--nav-border);
-  transition: all 0.2s ease;
-  font-size: var(--font-size-sm);
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  background-color: var(--tag-bg);
+  border-radius: 1rem;
+  font-size: 0.75rem;
 }
 
-.language-item:hover {
-  transform: translateY(-2px);
-  background: var(--nav-border-hover);
-  box-shadow: 0 3px 10px #66b3ffbf;
+.language-icon svg {
+  width: 1rem;
+  height: 1rem;
 }
 
-/* Language Text */
 .language-name {
-  font-weight: var(--font-weight-medium);
-  color: var(--text-color);
-  margin: 0 0.4rem;
+  color: var(--text);
 }
 
 .language-percentage {
-  opacity: 0.8;
-  color: var(--text-secondary);
+  color: var(--text-muted);
+  font-size: 0.7rem;
 }
 
-/* Project Links */
+/* Updated project footer and buttons */
 .project-footer {
   display: flex;
   gap: 1rem;
-  margin-top: auto;
-  text-align: center;
-  align-content: center;
   justify-content: center;
+  margin-top: auto;
+  flex-wrap: wrap; /* Allow buttons to wrap on narrow screens */
 }
 
 .project-link {
+  padding: 0.75rem 1.25rem;
+  border-radius: 25px; /* Make rounded like other buttons */
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: var(
+    --font-weight-medium
+  ); /* Match font weight of other buttons */
+  transition: all 0.3s ease; /* Match other transition timings */
   display: inline-flex;
   align-items: center;
-  padding: 0.5rem 1rem;
-  border-radius: 25px;
-  font-weight: var(--font-weight-medium);
-  transition: all 0.3s ease;
-  font-size: var(--font-size-base);
-  text-decoration: none;
-}
-
-.project-link.github {
-  background: var(--nav-border);
-  color: var(--text-color);
-}
-
-.project-link.demo {
-  background: var(--accent-color);
-  color: var(--bg-color);
+  gap: 0.5rem;
+  min-width: 140px;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  position: relative;
+  overflow: hidden;
 }
 
 .project-link:hover {
   transform: translateY(-2px);
-  box-shadow: 0 3px 10px #66b3ffbf;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); /* Match other button hover shadows */
   text-decoration: none;
+}
+
+.project-link:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Updated button colors to match theme */
+.project-link.github {
+  background-color: var(--nav-border); /* Match secondary button style */
+  color: var(--text-color);
+  border: none;
+}
+
+.project-link.github:hover {
+  background-color: var(--nav-border-hover);
+  color: var(--nav-hover);
+}
+
+.project-link.demo {
+  background-color: var(--accent-color); /* Match primary button style */
+  color: var(--bg-color);
+  border: none;
+}
+
+.project-link.demo:hover {
+  background-color: var(--link-hover);
+}
+
+@media (min-width: 768px) {
+  .project-card {
+    flex: 0 0 calc(50% - 2rem);
+  }
+}
+
+@media (min-width: 1200px) {
+  .project-card {
+    flex: 0 0 calc(33.333% - 2rem);
+  }
 }
