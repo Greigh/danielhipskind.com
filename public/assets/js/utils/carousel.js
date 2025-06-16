@@ -10,13 +10,13 @@ export class Carousel {
 
     // Configuration
     this.options = {
-      slidesToShow: options.slidesToShow || 1.5, // Default to 1.5 slides
-      autoplay: options.autoplay || false, // Autoplay enabled by default
-      autoplaySpeed: options.autoplaySpeed || 8000, // 8 seconds
-      infinite: options.infinite || true, // Infinite loop enabled by default
-      showControls: options.showControls !== false, // Controls enabled by default
-      showPagination: options.showPagination !== false, // Pagination enabled by default
-      itemsPerSlide: options.itemsPerSlide || 1, // Default to 1 item per slide
+      slidesToShow: options.slidesToShow || 1,
+      autoplay: options.autoplay || false,
+      autoplaySpeed: options.autoplaySpeed || 5000,
+      infinite: options.infinite || false,
+      showControls: options.showControls !== false,
+      showPagination: options.showPagination !== false,
+      itemsPerSlide: options.itemsPerSlide || 1,
       ...options,
     };
 
@@ -28,6 +28,8 @@ export class Carousel {
     this.isTransitioning = false;
     this.touchStartX = 0;
     this.touchEndX = 0;
+    this.resizeTimer = null; // Add this line for debounce
+    this.lastScreenWidth = window.innerWidth; // Add this line to track screen width
 
     // Initialize carousel
     this.init();
@@ -214,14 +216,13 @@ export class Carousel {
       }
     });
 
-    // Resume autoplay on mouse leave
     this.container.addEventListener('mouseleave', () => {
       if (this.options.autoplay && this.isPaused) {
         this.startAutoplay();
       }
     });
 
-    // Touch events for swipe navigation
+    // Touch events for swipe
     this.container.addEventListener(
       'touchstart',
       (e) => {
@@ -239,9 +240,26 @@ export class Carousel {
       { passive: true }
     );
 
-    // Window resize
+    // Window resize - debounced to improve performance
     window.addEventListener('resize', () => {
-      this.handleResize();
+      // Clear the existing timer
+      clearTimeout(this.resizeTimer);
+
+      // Set a new timer to delay execution
+      this.resizeTimer = setTimeout(() => {
+        // Only rebuild if width changed significantly (affecting layout)
+        const currentWidth = window.innerWidth;
+        const breakpointChanged =
+          (this.lastScreenWidth < 768 && currentWidth >= 768) ||
+          (this.lastScreenWidth >= 768 && currentWidth < 768) ||
+          (this.lastScreenWidth < 1200 && currentWidth >= 1200) ||
+          (this.lastScreenWidth >= 1200 && currentWidth < 1200);
+
+        if (breakpointChanged) {
+          this.handleResize();
+          this.lastScreenWidth = currentWidth;
+        }
+      }, 250); // 250ms delay
     });
 
     // Keyboard navigation
@@ -269,11 +287,38 @@ export class Carousel {
   }
 
   handleResize() {
-    // On window resize, recreate the carousel to adjust items per slide
+    // Store current slide index to maintain position after rebuild
+    const currentSlideIndex = this.currentSlide;
+
+    // Get all project cards before destroying carousel
+    const originalCards = [];
+    this.slides.forEach((slide) => {
+      const cards = Array.from(slide.children);
+      cards.forEach((card) => originalCards.push(card));
+    });
+
+    // Clean up old carousel
     this.destroy(false);
+
+    // Re-add original cards to container for restructuring
+    originalCards.forEach((card) => {
+      this.container.appendChild(card);
+    });
+
+    // Rebuild carousel with new screen size
     this.createStructure();
-    this.goToSlide(0);
+
+    // Go to the appropriate slide (make sure it's within bounds)
+    const safeSlideIndex = Math.min(currentSlideIndex, this.totalSlides - 1);
+    this.goToSlide(safeSlideIndex >= 0 ? safeSlideIndex : 0);
+
+    // Update position
     this.updatePosition();
+
+    // Restart autoplay if it was running
+    if (this.options.autoplay && !this.isPaused) {
+      this.startAutoplay();
+    }
   }
 
   updatePosition() {
@@ -370,6 +415,7 @@ export class Carousel {
   destroy(removeElements = true) {
     // Clean up event listeners and intervals
     clearInterval(this.autoplayInterval);
+    clearTimeout(this.resizeTimer);
 
     if (removeElements) {
       // Remove carousel structure but keep content
@@ -389,6 +435,14 @@ export class Carousel {
       projectCards.forEach((card) => {
         this.container.appendChild(card);
       });
+
+      // Also remove the controls container if it exists
+      const controlsContainer = document.querySelector(
+        '.carousel-controls-container'
+      );
+      if (controlsContainer) {
+        controlsContainer.remove();
+      }
     } else {
       // Just remove track and controls for rebuilding
       if (this.track) this.track.remove();
