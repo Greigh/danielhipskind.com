@@ -24,8 +24,27 @@ export const about = {
   ],
 };
 
-// Projects will be populated from GitHub
+// Projects will be populated from GitHub, plus our custom project
 let projects = [];
+
+// Manual project entry for Call Center Helper
+const callCenterHelperProject = {
+  title: 'Call Center Helper',
+  repoName: 'callcenterhelper',
+  description:
+    'A powerful productivity toolkit designed for call center agents. Streamlines workflows with hold timers, call flow guides, pattern formatters, and quick notes. Features Cisco Finesse and Webex integration with dark/light themes for reduced eye strain. Enhances customer interactions while improving efficiency and compliance.',
+  githubUrl: null, // No GitHub URL yet
+  languages: {
+    JavaScript: 15000,
+    HTML: 8000,
+    CSS: 5000,
+  },
+  updatedAt: new Date().toLocaleDateString(),
+  order: 0, // Put it first in the list
+  demoUrl: '/callcenterhelper/',
+  has_pages: false,
+  topics: ['utility', 'call-center', 'customer-service'],
+};
 
 // Social links configuration
 export const socialLinks = [
@@ -85,7 +104,8 @@ const skills = {
 export async function initialize() {
   try {
     const githubProjects = await fetchGitHubData();
-    projects = githubProjects;
+    // Add the manual project to the GitHub projects
+    projects = [callCenterHelperProject, ...githubProjects];
 
     return {
       about,
@@ -97,7 +117,8 @@ export async function initialize() {
     console.error('Failed to initialize content:', error);
     return {
       about,
-      projects: [],
+      // Still include the manual project even if GitHub fetch fails
+      projects: [callCenterHelperProject],
       skills,
       social: socialLinks,
     };
