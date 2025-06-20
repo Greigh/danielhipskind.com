@@ -336,7 +336,7 @@ export class Carousel {
     if (this.progressBar) {
       const progressPercentage =
         ((this.currentSlide + 1) / this.totalSlides) * 100;
-      this.progressBar.style.width = `${progressPercentage}%`;
+      this.progressBar.classList.add(`skill-bar-${progressPercentage}`);
     }
   }
 
