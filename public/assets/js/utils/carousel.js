@@ -123,18 +123,6 @@ export class Carousel {
     }
   }
 
-  createProgressBar(container) {
-    const progressContainer = document.createElement('div');
-    progressContainer.className = 'carousel-progress';
-
-    this.progressBar = document.createElement('div');
-    this.progressBar.className = 'carousel-progress-bar';
-    this.progressBar.style.width = `${(1 / this.totalSlides) * 100}%`;
-
-    progressContainer.appendChild(this.progressBar);
-    container.appendChild(progressContainer);
-  }
-
   getItemsPerSlide() {
     const viewportWidth = window.innerWidth;
 

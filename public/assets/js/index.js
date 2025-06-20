@@ -110,8 +110,6 @@ function renderProjects(projects = []) {
 
 // Render skills
 function renderSkills(skills) {
-  console.log('Skills data received:', skills); // Debug log
-
   if (!skills) {
     console.error('No skills data provided');
     return;
@@ -123,8 +121,6 @@ function renderSkills(skills) {
   const professionalGrid = document.querySelector(
     '.skills-group:nth-child(2) .skills-grid'
   );
-
-  console.log('Grid elements:', { technicalGrid, professionalGrid }); // Debug log
 
   if (!technicalGrid || !professionalGrid) {
     console.error('Skills grid elements not found', {

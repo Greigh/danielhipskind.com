@@ -120,20 +120,3 @@
   flex-direction: column;
   align-items: center;
 }
-
-/* Visual indicator for current position */
-.carousel-progress {
-  height: 4px;
-  width: 80%;
-  background-color: rgba(0, 0, 0, 0.1);
-  border-radius: 2px;
-  margin: 0 auto 1rem;
-  overflow: hidden;
-}
-
-.carousel-progress-bar {
-  height: 100%;
-  background-color: var(--accent-color);
-  transition: width 0.5s ease-in-out;
-  border-radius: 2px;
-}
