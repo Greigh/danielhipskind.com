@@ -109,9 +109,6 @@ export class Carousel {
       controlsContainer.innerHTML = '';
     }
 
-    // Add progress bar
-    this.createProgressBar(controlsContainer);
-
     // Add controls if enabled
     if (this.options.showControls && this.totalSlides > 1) {
       this.createControls(controlsContainer);
