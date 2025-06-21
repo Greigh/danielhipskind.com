@@ -8,6 +8,11 @@ pnpm-lock.yaml
 .env
 .env.*
 !.env.example
+!.env.deploy.example
+.env.deploy.example
+.env.example
+postbuild-rename.cjs
+postbuild-rename.js
 
 # Build outputs
 dist/
@@ -128,3 +133,7 @@ public/assets/cache/
 
 nginx
 templates
+deploy.sh
+deploy-simple.sh
+
+Call Center Help

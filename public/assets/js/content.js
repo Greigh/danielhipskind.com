@@ -32,7 +32,7 @@ const callCenterHelperProject = {
   title: 'Call Center Helper',
   repoName: 'callcenterhelper',
   description:
-    'A powerful productivity toolkit designed for call center agents. Streamlines workflows with hold timers, call flow guides, pattern formatters, and quick notes. Features Cisco Finesse and Webex integration with dark/light themes for reduced eye strain. Enhances customer interactions while improving efficiency and compliance.',
+    'A powerful productivity toolkit designed for call center agents. Streamlines workflows with hold timers, call flow guides, pattern formatters, and quick notes. Features dark/light themes for reduced eye strain. Enhances customer interactions while improving efficiency and compliance. Finesse and Webex support coming soon!',
   githubUrl: null, // No GitHub URL yet
   languages: {
     SCSS: 48000, // 48%
