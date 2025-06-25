@@ -1,5 +1,6 @@
-Attribution-NonCommercial-NoDerivatives 4.0 International
-Creative Commons Public License
+# Creative Commons Public License
+
+## Attribution-NonCommercial-NoDerivatives 4.0 International
 
 =======================================================================
 
@@ -402,7 +403,7 @@ But hey, let's keep it real. This is a personal project, and while I’m cool wi
 
 ## Contact Information
 
-Email: me@danielhipskind.com
+Email: [Send me an email](mailto:me@danielhipskind.com)
 
 Include:
 
