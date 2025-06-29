@@ -35,9 +35,10 @@ const callCenterHelperProject = {
     'A powerful productivity toolkit designed for call center agents. Streamlines workflows with hold timers, call flow guides, pattern formatters, and quick notes. Features dark/light themes for reduced eye strain. Enhances customer interactions while improving efficiency and compliance. Finesse and Webex support coming soon!',
   githubUrl: null, // No GitHub URL yet
   languages: {
-    SCSS: 48000, // 48%
-    JavaScript: 44000, // 44%
-    HTML: 8000, // 8%
+    JavaScript: 48000, // 48%
+    SCSS: 42000, // 42%
+    HTML: 8000, // 7%
+    SH: 3000, // 3%
   },
   updatedAt: new Date().toLocaleDateString(),
   order: 0, // Put it first in the list
