@@ -12,8 +12,8 @@ export class Carousel {
     this.options = {
       slidesToShow: options.slidesToShow || 1,
       autoplay: options.autoplay || false,
-      autoplaySpeed: options.autoplaySpeed || 5000,
-      infinite: options.infinite || false,
+      autoplaySpeed: options.autoplaySpeed || 15000,
+      infinite: options.infinite || true,
       showControls: options.showControls !== false,
       showPagination: options.showPagination !== false,
       itemsPerSlide: options.itemsPerSlide || 1,
