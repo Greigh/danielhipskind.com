@@ -124,7 +124,7 @@ export class Carousel {
     const viewportWidth = window.innerWidth;
 
     if (viewportWidth >= 768) {
-      return 2; // 2 items per slide on medium screens
+      return 3; // 2 items per slide on medium screens
     }
     return 1; // 1 item per slide on small screens
   }
