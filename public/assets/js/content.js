@@ -29,11 +29,11 @@ let projects = [];
 
 // Manual project entry for Call Center Helper
 const callCenterHelperProject = {
-  title: 'Call Center Helper',
+  title: 'Adamas - Call Center Helper',
   repoName: 'callcenterhelper',
   description:
     'A powerful productivity toolkit designed for call center agents. Streamlines workflows with hold timers, call flow guides, pattern formatters, and quick notes. Features dark/light themes for reduced eye strain. Enhances customer interactions while improving efficiency and compliance. Finesse and Webex support coming soon!',
-  githubUrl: null, // No GitHub URL yet
+  githubUrl: 'https://github.com/Greigh/Adamas',
   languages: {
     JavaScript: 48000, // 48%
     SCSS: 42000, // 42%
