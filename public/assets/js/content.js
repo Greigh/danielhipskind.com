@@ -71,6 +71,11 @@ export const socialLinks = [
     rel: 'me',
   },
   {
+    name: 'Bluesky',
+    url: 'https://bsky.app/profile/danielhipskind.com',
+    icon: 'bluesky',
+  },
+  {
     name: 'Email',
     url: 'mailto:me@danielhipskind.com',
     icon: 'email',
