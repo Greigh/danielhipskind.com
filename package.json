@@ -1,8 +1,12 @@
 {
-  "name": "daniel-portfolio",
+  "name": "danielhipskind.com",
   "version": "1.0.0",
   "private": true,
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/danielhipskind.com.git"
+  },
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
@@ -10,11 +14,11 @@
   },
   "dependencies": {
     "cors": "^2.8.5",
-    "dotenv": "^16.5.0",
-    "express": "^4.21.2",
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
     "helmet": "^8.1.0",
     "mime-types": "^3.0.1",
-    "nodemailer": "^7.0.3"
+    "nodemailer": "^7.0.5"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"

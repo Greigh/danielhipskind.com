@@ -11,7 +11,7 @@ export class Carousel {
     // Configuration
     this.options = {
       slidesToShow: options.slidesToShow || 1,
-      autoplay: options.autoplay || false,
+      autoplay: options.autoplay || true,
       autoplaySpeed: options.autoplaySpeed || 15000,
       infinite: options.infinite || true,
       showControls: options.showControls !== false,

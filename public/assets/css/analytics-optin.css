@@ -1,0 +1,26 @@
+#analytics-optin {
+  position: fixed;
+  bottom: 12px;
+  right: 12px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #111;
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  z-index: 9999;
+}
+#analytics-optin .optin-inner {
+  padding: 12px 16px;
+  font-size: 14px;
+}
+#analytics-optin button {
+  margin-left: 8px;
+  padding: 6px 10px;
+  border: none;
+  background: #0066cc;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+}
+#analytics-optin button[aria-disabled='true'] {
+  opacity: 0.6;
+}

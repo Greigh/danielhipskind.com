@@ -1,0 +1,22 @@
+{
+  "name": "Daniel Hipskind",
+  "short_name": "Daniel",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a1a1a",
+  "theme_color": "#0066cc",
+  "icons": [
+    {
+      "src": "/assets/images/216.png",
+      "sizes": "216x216",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/images/512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Admin - Analytics</title>
+    <link rel="stylesheet" href="/admin/analytics.css" />
+  </head>
+  <body>
+    <main class="container">
+      <h1>Analytics (Admin)</h1>
+
+      <div class="controls">
+        <label
+          >Admin token:
+          <input
+            id="admin-token"
+            type="password"
+            placeholder="Paste admin token"
+        /></label>
+        <button id="save-token">Save token</button>
+        <button id="login-cookie" style="margin-left: 8px">
+          Login (cookie)
+        </button>
+        <button id="logout" style="margin-left: 8px">Logout</button>
+        <span id="token-status">Not logged in</span>
+        <br />
+        <label
+          >Limit:
+          <input id="limit" type="number" value="100" min="1" max="1000"
+        /></label>
+        <button id="load">Load</button>
+        <button id="clear-cache">Clear local view</button>
+        <br />
+        <div style="margin-top: 8px">
+          <button id="export-csv">Export CSV</button>
+          <button id="export-rss" style="margin-left: 8px">Export RSS</button>
+          <button id="server-export" style="margin-left: 8px">
+            Server Export (stream)
+          </button>
+          <button id="json-export" style="margin-left: 8px">
+            JSON Export (cursor)
+          </button>
+        </div>
+      </div>
+
+      <div id="status" class="status">Not loaded</div>
+
+      <section style="margin-top: 12px">
+        <h3>cURL example</h3>
+        <pre id="curl-examples"># cURL examples will appear here</pre>
+      </section>
+
+      <table id="events-table" class="events">
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>IP</th>
+            <th>UA</th>
+            <th>Path</th>
+            <th>Event</th>
+            <th>Data</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </main>
+
+    <script src="/admin/analytics.js"></script>
+  </body>
+</html>

@@ -101,7 +101,7 @@ function renderProjects(projects = []) {
 
   projectCarousel = new Carousel(projectGrid, {
     autoplay: true,
-    autoplaySpeed: 7000,
+    autoplaySpeed: 8500,
     infinite: true,
     showControls: true,
     showPagination: true,

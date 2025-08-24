@@ -3,24 +3,24 @@ import { fetchGitHubData } from './utils/github.js';
 // About section content
 export const about = {
   intro:
-    "Hi!👋🏻 I'm Daniel Hipskind, a passionate and dedicated software developer with a focus on creating responsive and user-friendly web applications.",
+    "Hi!👋🏻 I'm Daniel Hipskind, a software engineer with a solid foundation in React and full-stack development, committed to creating clean, efficient code.",
   shortDescription: [
-    'My journey into the world of programming began with a curiosity about how technology shapes our daily lives, and it has since evolved into a deep-seated passion for crafting elegant solutions to complex problems.',
+    'My journey into programming began with a curiosity about how technology shapes our daily lives, and it has since evolved into a deep-seated passion for crafting elegant solutions to complex problems.',
 
-    'With a solid foundation in front-end technologies like HTML, CSS, and JavaScript, as well as experience with modern frameworks like React, I strive to build intuitive and engaging user interfaces. My approach to development is centered on creating clean, efficient code that not only meets functional requirements but also enhances user experience.',
+    'I have a solid foundation in front-end technologies like HTML, CSS, and JavaScript, and experience with modern frameworks like React. My approach is centered on creating clean, efficient code that not only meets functional requirements but also enhances user experience.',
 
-    "I'm currently pursuing an Associate's degree in Computer Programming at Grand Rapids Community College, where I'm constantly expanding my knowledge and honing my skills. This formal education, combined with my self-driven learning and practical projects, has given me a well-rounded understanding of software development principles and best practices.",
+    "My experience extends beyond front-end development. I've worked on several full-stack projects, utilizing technologies like Node.js and Express for backend development, and MongoDB for database management. This full-stack experience allows me to understand and contribute to all aspects of web application development.",
   ],
   expandedDescription: [
-    "My experience extends beyond front-end development. I've worked on several full-stack projects, utilizing technologies like Node.js and Express for backend development, and MongoDB for database management. This full-stack experience allows me to understand and contribute to all aspects of web application development.",
+    "I'm currently pursuing an Associate's degree in Computer Programming at Grand Rapids Community College, where I'm constantly expanding my knowledge and honing my skills. This formal education, combined with self-driven learning and practical projects, has given me a well-rounded understanding of software development principles and best practices.",
 
-    "I'm particularly interested in the intersection of technology and user experience. I believe that great software should not only function flawlessly but also be intuitive and accessible to all users. This philosophy guides my approach to every project I undertake.",
+    "I'm particularly interested in the intersection of technology and user experience, believing that great software should be intuitive and accessible to all users. This philosophy guides my approach to every project I undertake.",
 
-    "When I'm not coding, I enjoy exploring new programming concepts and contributing to open-source projects that challenge me to grow as a developer. Outside of technology, I love spending time in the great outdoors, where I find inspiration and balance. I also appreciate unwinding with a good movie or TV show, and occasionally, I indulge in a video game. As an avid learner, I’m always eager to stay updated with the latest trends in web development.",
+    "When I'm not coding, I enjoy exploring new programming concepts and contributing to open-source projects. Outside of technology, I love spending time in the great outdoors, unwinding with a good movie or TV show, and occasionally indulging in a video game. As an avid learner, I’m always eager to stay updated with the latest trends in web development.",
 
-    "I believe in the power of technology to make a positive impact, and I'm eager to be part of that change. Whether it's creating applications that simplify daily tasks or developing solutions that address larger societal challenges, I'm committed to using my skills to contribute meaningfully to the tech community and beyond.",
+    "I believe in the power of technology to make a positive impact and am committed to using my skills to contribute meaningfully to the tech community and beyond. I'm always open to new opportunities, collaborations, and challenges that allow me to grow as a developer and make a difference.",
 
-    "I'm always open to new opportunities, collaborations, and challenges that allow me to grow as a developer, make a difference through technology, and think outside the box. If you're interested in working together or just want to connect, feel free to reach out. I look forward to hearing from you!",
+    "If you're interested in working together or just want to connect, feel free to reach out. I look forward to hearing from you!",
   ],
 };
 

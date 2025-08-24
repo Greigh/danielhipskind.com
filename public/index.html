@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
   <head>
     <meta charset="UTF-8" />
     <meta
@@ -13,7 +13,7 @@
     <meta name="author" content="Daniel Hipskind" />
     <meta
       name="keywords"
-      content="Daniel Hipskind, Software Developer, Full-Stack Developer, Portfolio, Projects, Skills, Web Development, JavaScript, React, Node.js, Express, MongoDB, CSS, HTML, Web Design, UI/UX, Frontend, Backend, Open Source, Software Engineer, Web Applications, Software Engineering, Tech Portfolio, Developer Portfolio, Software Projects, Programming Skills, Technical Skills, Professional Skills"
+      content="Daniel Hipskind, Software Developer, Full-Stack Developer, Portfolio, Projects, Skills, Web Development, JavaScript, React, Node.js, Express, MongoDB, CSS, HTML, Web Design, UI/UX, Frontend, Backend, Open Source, Software Engineer, Web Applications, Software Engineering, Tech Portfolio, Developer Portfolio, Software Projects, Programming Skills, Technical Skills, Professional Skills, Software Engineer"
     />
     <meta name="theme-color" content="#0066cc" />
     <meta
@@ -42,6 +42,10 @@
       content="Explore my projects and skills as a software developer."
     />
     <meta name="twitter:image" content="/assets/images/DanielPortfolio.jpg" />
+    <meta name="twitter:image:alt" content="Portrait of Daniel Hipskind" />
+    <meta property="og:image:alt" content="Portrait of Daniel Hipskind" />
+    <meta property="og:image:width" content="1024" />
+    <meta property="og:image:height" content="1024" />
     <meta
       property="og:title"
       content="Daniel Hipskind - Software Developer Portfolio"
@@ -68,6 +72,19 @@
     />
     <meta name="fediverse:site:icon:type" content="image/png" />
 
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Daniel Hipskind",
+        "url": "https://danielhipskind.com",
+        "sameAs": [
+          "https://github.com/greigh",
+          "https://linkedin.com/in/danielhipskind"
+        ]
+      }
+    </script>
+
     <!-- Add this before other styles -->
     <style>
       html {
@@ -75,6 +92,9 @@
         background: #1a1a1a;
       }
     </style>
+
+    <link rel="canonical" href="https://danielhipskind.com/" />
+    <meta name="robots" content="index, follow" />
 
     <!-- Favicon -->
     <link
@@ -98,10 +118,12 @@
       href="/assets/images/DanielPortfolio.ico"
       type="image/x-icon"
     />
+    <link rel="manifest" href="/assets/manifest.json" />
+    <meta name="apple-mobile-web-app-title" content="Daniel Hipskind" />
 
     <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
     <!-- Update preload directives -->
     <link
@@ -111,6 +133,24 @@
       crossorigin="anonymous"
     />
 
+    <!-- Lightweight opt-in analytics loader (will only run if analytics_enabled=true) -->
+    <script>
+      if (localStorage.getItem('analytics_enabled') === 'true') {
+        (function () {
+          // Placeholder: load analytics script dynamically (server-proxied recommended)
+          var s = document.createElement('script');
+          s.src = '/assets/js/analytics.js';
+          s.defer = true;
+          document.head.appendChild(s);
+        })();
+      }
+    </script>
+
+    <!-- Dev DX links: help/search/prefetch -->
+    <link rel="help" href="/contact" />
+    <link rel="search" href="/opensearch.xml" />
+    <link rel="prefetch" href="/callcenterhelper/" as="document" />
+
     <!-- Styles -->
     <link rel="stylesheet" href="/assets/css/main.css" type="text/css" />
 
@@ -118,6 +158,18 @@
   </head>
 
   <body>
+    <noscript>
+      <style>
+        html {
+          visibility: visible;
+        }
+      </style>
+      <div class="noscript-msg" role="alert">
+        JavaScript is disabled — some features may not work.
+      </div>
+    </noscript>
+    <!-- Analytics opt-in banner mount point -->
+    <div id="analytics-optin-root"></div>
     <!-- Navigation -->
     <header>
       <nav>
@@ -156,7 +208,7 @@
             />
           </picture>
           <h1>Daniel Hipskind</h1>
-          <p>Software Developer</p>
+          <p>Software Engineer</p>
         </div>
       </section>
 
@@ -225,6 +277,8 @@
     </footer>
 
     <!-- javascript -->
+    <link rel="stylesheet" href="/assets/css/analytics-optin.css" />
+    <script src="/assets/js/analytics-optin.js" defer></script>
     <script type="module" src="/assets/js/index.js"></script>
   </body>
 </html>

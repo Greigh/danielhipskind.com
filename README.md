@@ -1,95 +1,214 @@
-# Daniel Hipskind's Personal Website
+# Daniel Hipskind's Portfolio & Tools
 
-A modern, responsive personal website built with Express.js and vanilla JavaScript, featuring GitHub integration and dynamic content loading.
+A comprehensive web platform featuring a personal portfolio website built with Node.js/Express and vanilla JavaScript.
 
-## 🚀 Features
+## 🚀 Key Features
 
-- **Modern Design**: Clean and responsive UI with dark/light theme support
-- **GitHub Integration**: Dynamically fetches and displays project repositories
-- **Performance Optimized**: Static asset caching and optimized loading
-- **Security Focused**: Implements CORS, Helmet, and other security best practices
-- **Mobile First**: Fully responsive across all device sizes
+### Portfolio Website
+
+- **Modern Design**: Clean, responsive UI with dark/light theme support
+- **GitHub Integration**: Real-time project repository display via GitHub API
+- **Performance Optimized**: Advanced caching, CDN-ready static assets
+- **Analytics**: Privacy-focused, first-party analytics with opt-in consent
+- **Admin Dashboard**: Secure analytics management and export capabilities
+
+### Infrastructure & Security
+
+- **Secure Admin Access**: Multi-layer authentication (nginx basic auth + app-level tokens)
+- **Redis Integration**: Session management and caching layer
+- **Rate Limiting**: GitHub API proxy with intelligent retry/backoff
+- **Security Headers**: Helmet.js, CORS, CSP implementation
+- **Automated Deployment**: Robust deployment pipeline with health checks
 
 ## 🛠️ Tech Stack
 
-- **Backend**: Node.js, Express.js
-- **Frontend**: Vanilla JavaScript, CSS3, HTML5
-- **APIs**: Custom Express.js endpoints proxying the GitHub REST API
-- **Security**: Helmet.js, CORS
-- **Deployment**: Node.js server (Express), PM2 process manager, Nginx reverse proxy
+### Backend
 
-### So what's in the background not here?
+- **Runtime**: Node.js with ES modules
+- **Framework**: Express.js with modern middleware
+- **Session Store**: Redis for scalable session management
+- **Process Manager**: PM2 for production deployment
+- **Reverse Proxy**: Nginx for static assets and SSL termination
 
-- **.env.production**: Environment variables for sensitive data (example shown in `.env.example`)
-- **server.js**: Main server file for Express.js
-- **CNAME**: Custom domain configuration on my webserver
-- **nginx.conf**: Nginx configuration for reverse proxying
+### Frontend
+
+- **Core**: Vanilla JavaScript (ES6+), CSS3, HTML5
+- **Build Tools**: Custom webpack-based build system and Shell scripts
+- **PWA Features**: Service workers, app manifest, offline capability
+- **UI Framework**: Custom CSS with CSS Grid/Flexbox, responsive design
+
+### APIs & Integration
+
+- **GitHub API**: Custom proxy with retry/backoff and caching
+- **Analytics**: First-party analytics with Redis storage and file persistence
+- **Admin Interface**: Token-based authentication with export capabilities
+
+### Infrastructure
+
+- **Caching**: Redis + in-memory fallback for multi-instance deployments
+- **Security**: Helmet.js, CORS, rate limiting, secure headers
+- **Monitoring**: Health checks, request logging, error tracking
+- **Deployment**: Automated pipeline with artifact verification
+
+## 📁 Project Structure
+
+```
+├── public/                    # Static assets for portfolio site
+│   ├── admin/                # Admin dashboard interface
+│   │   ├── analytics.html    # Analytics management UI
+│   │   ├── analytics.js      # Admin functionality
+│   │   └── analytics.css     # Admin styling
+│   ├── assets/               # Core static assets
+│   │   ├── css/             # Stylesheets and components
+│   │   ├── js/              # Client-side JavaScript modules
+│   │   ├── images/          # Images and icons
+│   │   └── manifest.json    # PWA manifest
+│   └── index.html           # Main portfolio page
+│
+├── logs/                    # Application logs (not in repo)
+│   ├── analytics-*.log      # Daily analytics logs
+│   └── combined.log         # Application logs
+│
+└── README.md               # This file
+```
+
+### Key Files (Not in Repository)
+
+- `server.js` - Main Express application server
+- `ecosystem.config.cjs` - PM2 process configuration
+- `deploy.sh` - Automated deployment script
+- `nginx/` - Nginx configuration files
+- `scripts/` - Utility and maintenance scripts
+- `.env.production` - Production environment variables
 
 
-## 🚀 Deployment
+## � Key Features Detail
 
-Deployment, Installation, and Development instructions are available upon request.
+### Analytics System
 
-## 🔒 Security
+- **Privacy-First**: First-party analytics with explicit user opt-in
+- **Data Storage**: Dual persistence (Redis + daily rotating log files)
+- **Admin Dashboard**: Secure analytics viewing, filtering, and export
+- **Export Formats**: JSON (cursor-based pagination), CSV (streaming), RSS feeds
+- **Session Management**: Redis-backed admin sessions with secure token handling
 
-- Helmet.js for security headers
-- CORS configuration for API endpoints
-- Environment-based security measures
-- Secure static file serving
+### GitHub Integration
 
-## 📝 Used During Development
+- **Smart Caching**: Multi-layer caching with Redis and memory fallback
+- **Rate Limit Handling**: Intelligent retry logic with exponential backoff
+- **Error Recovery**: Graceful degradation when API limits are reached
+- **Real-time Updates**: Dynamic repository display with live commit data
 
-- **[nodemon](https://nodemon.io)**: For auto-restarting the server during development
-- **[ESLint](https://eslint.org)**: For code linting and style checking
-- **[Prettier](https://prettier.io)**: For code formatting
-- **[GitHub](https://github.com)**: For version control
-- **[VSCode](https://code.visualstudio.com)**: Recommended IDE
-- **[ForkLift 4](https://binarynights.com/)**: For file management on macOS
-- **[Core Shell](https://coreshell.app)**: For terminal access on macOS
-- **[Spotify](https://spotify.com)**: For entertainment while coding
-- **[Vivaldi](https://vivalid.net)**: For web browsing and testing
+### Security & Performance
+
+- **Multi-layer Auth**: Nginx basic auth + Express middleware + Redis sessions
+- **Request Caching**: Conditional caching with smart TTL management
+- **Security Headers**: Comprehensive CSP, HSTS, and security middleware
+- **Health Monitoring**: Application health checks and error logging
+
+## � Development Tools & Environment
+
+### Build System
+
+- **Asset Processing**: Automatic file hashing, compression, and optimization
+- **Development Server**: Hot-reload development environment
+- **Build Verification**: Automated artifact checking and validation
+
+### Deployment Pipeline
+
+- **Automated Deploy**: One-command deployment with health checks
+- **SSH Security**: Key-based authentication with ssh-agent integration
+- **Build Validation**: Pre-deployment artifact verification
+- **Health Monitoring**: Post-deployment service validation
+
+### Development Stack
+
+- **[Node.js](https://nodejs.org)**: JavaScript runtime environment
+- **[Express.js](https://expressjs.com)**: Web application framework
+- **[Redis](https://redis.io)**: In-memory data structure store
+- **[PM2](https://pm2.keymetrics.io)**: Production process manager
+- **[Nginx](https://nginx.org)**: High-performance web server and reverse proxy
+
+### Recommended Development Tools
+
+- **[VSCode](https://code.visualstudio.com)**: Primary development environment
+- **[ForkLift 4](https://binarynights.com/)**: Advanced file management (macOS)
+- **[Core Shell](https://coreshell.app)**: Modern terminal experience (macOS)
+- **[Vivaldi](https://vivaldi.com)**: Feature-rich browser for testing
+
+### Music for Coding 🎵
+- **[Spotify](https://spotify.com)**: Background music and focus playlists
+
+## 🌐 Live Deployment
+
+- **Portfolio**: [danielhipskind.com](https://danielhipskind.com)
+- **Admin Dashboard**: [danielhipskind.com/admin](https://danielhipskind.com/admin) (Protected)
 
 ## 👤 Author
 
-Daniel Hipskind
+**Daniel Hipskind** - Full-Stack Software Engineer
 
-- Website: [danielhipskind.com](https://danielhipskind.com)
-- GitHub: [@greigh](https://github.com/greigh)
+- 🌐 Website: [danielhipskind.com](https://danielhipskind.com)
+- 💼 GitHub: [@greigh](https://github.com/greigh)
+- 📧 Email: [me@danielhipskind.com](mailto:me@danielhipskind.com)
+- 🐦 Twitter: [@DanielHipskind_](https://twitter.com/DanielHipskind_)
 
 ## 📄 License
 
-This project is licensed under the BSD 3-Clause License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the **BSD 3-Clause License**. See the [LICENSE](LICENSE) file for complete details.
 
-### License Overview
+### 📋 License Summary
 
-- ✅ Commercial use permitted
-- ✅ Modification and distribution allowed
-- ✅ Private use permitted
-- ❗ Must include original copyright notice
-- ❗ Must include BSD 3-Clause License text
-- ❗ Cannot use contributors' names to endorse derivative works
+**Permissions** ✅
+- ✅ Commercial use
+- ✅ Modification
+- ✅ Distribution
+- ✅ Private use
 
-### Usage Requirements
+**Conditions** ❗
+- ❗ License and copyright notice must be included
+- ❗ Cannot use contributors' names for endorsement
 
-1. Retain the copyright notice
-2. Include the license text in distributions
-3. Do not use the author's name for endorsement
-4. Please contact me for commercial use or special cases
-5. Ensure compliance with the [BSD 3-Clause License](LICENSE)
+**Limitations** ❌
+- ❌ No liability
+- ❌ No warranty
+
+### 🤝 Usage Guidelines
+
+1. **Attribution Required**: Retain original copyright notice and license text
+2. **No Endorsement**: Don't use author's name to promote derivative works
+3. **Commercial Use**: Permitted with proper attribution
+4. **Modifications**: Allowed, but must maintain license terms
+
+For commercial use or questions about licensing, please [contact me](mailto:me@danielhipskind.com).
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request. Make sure to read the [LICENSE](LICENSE) file and follow the contribution guidelines.
+Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/Greigh/danielhipskind.com/issues).
 
-For major changes:
+### Contributing Guidelines
 
-1. Open an issue first to discuss proposed changes
-2. Follow the coding style and conventions
-3. Update documentation as needed
-4. Add tests if applicable
+1. **Fork** the repository
+2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
+3. **Commit** your changes (`git commit -m 'Add amazing feature'`)
+4. **Push** to the branch (`git push origin feature/amazing-feature`)
+5. **Open** a Pull Request
 
-## 📧 Contact
+### Code Standards
 
-Daniel Hipskind - [me@danielhipskind.com](mailto:me@danielhipskind.com)
+- Follow existing code style and conventions
+- Update documentation for any new features
+- Test your changes thoroughly
+- Keep commits atomic and well-described
 
-Project Link: [https://github.com/Greigh/danielhipskind.com](https://github.com/Greigh/danielhipskind.com)
+## � Support & Contact
+
+- 📧 **Email**: [me@danielhipskind.com](mailto:me@danielhipskind.com)
+- 🐛 **Issues**: [GitHub Issues](https://github.com/Greigh/danielhipskind.com/issues)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/Greigh/danielhipskind.com/discussions)
+
+---
+
+⭐ **Star this repository** if you found it helpful!
+
+**Project Repository**: [https://github.com/Greigh/danielhipskind.com](https://github.com/Greigh/danielhipskind.com)

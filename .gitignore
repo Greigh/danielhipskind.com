@@ -1,6 +1,5 @@
 # Dependencies
 node_modules/
-package-lock.json
 yarn.lock
 pnpm-lock.yaml
 
@@ -137,3 +136,9 @@ deploy.sh
 deploy-simple.sh
 
 Call Center Help
+
+.known_hosts
+deploy_*
+deploy
+
+scripts
