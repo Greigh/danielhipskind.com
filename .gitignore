@@ -139,6 +139,10 @@ Call Center Help
 
 .known_hosts
 deploy_*
+deploy_old.sh
+*.log
+deployments.log
 deploy
 
 scripts
+*.sh

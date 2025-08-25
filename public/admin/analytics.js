@@ -17,18 +17,27 @@ document.getElementById('login-cookie').addEventListener('click', async () => {
   const secret = document.getElementById('admin-token').value.trim();
   if (!secret) { document.getElementById('status').textContent = 'Enter admin secret first'; return; }
   try {
-    const res = await fetch('/api/admin/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ secret }), credentials: 'include' });
+    const res = await fetch('/api/admin/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ secret }),
+      credentials: 'include'
+    });
     if (res.status === 204) {
       document.getElementById('status').textContent = 'Logged in with cookie (HttpOnly)';
       // set sessionStorage flag so UI knows it's logged in
       sessionStorage.setItem('admin_token', 'cookie');
       document.getElementById('token-status').textContent = 'Logged in (cookie)';
+    } else if (res.status === 401) {
+      document.getElementById('status').textContent = 'Invalid admin secret';
+    } else if (res.status === 403) {
+      document.getElementById('status').textContent = 'Admin login not enabled on server';
     } else {
       const j = await res.json().catch(()=>({}));
       document.getElementById('status').textContent = 'Cookie login failed: ' + (j.error || res.statusText);
     }
   } catch (e) {
-    document.getElementById('status').textContent = 'Cookie login error';
+    document.getElementById('status').textContent = 'Cookie login error: ' + e.message;
   }
 });
 
@@ -48,8 +57,14 @@ document.getElementById('load').addEventListener('click', async () => {
     const fetchOpts = tokenIsCookie ? { credentials: 'include' } : { headers: { Authorization: 'Bearer ' + token } };
     const res = await fetch(`/api/admin/analytics?limit=${limit}`, fetchOpts);
     if (!res.ok) {
-      const err = await res.json().catch(()=>({error:'unknown'}));
-      status.textContent = 'Error: ' + (err.error || res.statusText);
+      if (res.status === 401) {
+        status.textContent = 'Unauthorized - check your admin secret or re-login';
+      } else if (res.status === 403) {
+        status.textContent = 'Admin analytics not enabled on server';
+      } else {
+        const err = await res.json().catch(()=>({error:'unknown'}));
+        status.textContent = 'Error: ' + (err.error || res.statusText);
+      }
       return;
     }
     const json = await res.json();
@@ -192,6 +207,17 @@ document.getElementById('json-export').addEventListener('click', async () => {
 // Initialize token status on load
 document.addEventListener('DOMContentLoaded', () => {
   const token = sessionStorage.getItem('admin_token');
+
+  // Check if user is authenticated
+  if (!token) {
+    // Redirect to login page if no token
+    document.getElementById('status').textContent = 'Not authenticated. Redirecting to login...';
+    setTimeout(() => {
+      window.location.href = '/admin/login.html';
+    }, 2000);
+    return;
+  }
+
   if (token) document.getElementById('token-status').textContent = 'Logged in (token saved in session)';
   // Clear visible token input on load to avoid shoulder-surfing
   const input = document.getElementById('admin-token');

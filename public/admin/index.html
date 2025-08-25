@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Admin Dashboard - Daniel Hipskind</title>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        margin: 0;
+        padding: 2rem;
+        background: #f8f9fa;
+        color: #333;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .header {
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+        text-align: center;
+      }
+
+      .header h1 {
+        margin: 0 0 0.5rem 0;
+        color: #333;
+      }
+
+      .header p {
+        margin: 0;
+        color: #666;
+      }
+
+      .nav-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .nav-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        text-decoration: none;
+        color: inherit;
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+
+      .nav-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        text-decoration: none;
+        color: inherit;
+      }
+
+      .nav-card h3 {
+        margin: 0 0 1rem 0;
+        color: #667eea;
+        font-size: 1.25rem;
+      }
+
+      .nav-card p {
+        margin: 0;
+        color: #666;
+        line-height: 1.5;
+      }
+
+      .status-section {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+      }
+
+      .status-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+      }
+
+      .status-item {
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 4px;
+        text-align: center;
+      }
+
+      .status-item .label {
+        font-size: 0.85rem;
+        color: #666;
+        margin-bottom: 0.5rem;
+      }
+
+      .status-item .value {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #333;
+      }
+
+      .status-item.success .value {
+        color: #28a745;
+      }
+
+      .status-item.warning .value {
+        color: #ffc107;
+      }
+
+      .status-item.error .value {
+        color: #dc3545;
+      }
+
+      .footer {
+        text-align: center;
+        color: #666;
+        margin-top: 2rem;
+      }
+
+      .footer a {
+        color: #667eea;
+        text-decoration: none;
+      }
+
+      .footer a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Admin Dashboard</h1>
+        <p>Administrative tools and analytics for danielhipskind.com</p>
+      </div>
+
+      <div class="status-section">
+        <h3>System Status</h3>
+        <div class="status-grid">
+          <div class="status-item" id="auth-status">
+            <div class="label">Authentication</div>
+            <div class="value">Checking...</div>
+          </div>
+          <div class="status-item" id="server-status">
+            <div class="label">Server Status</div>
+            <div class="value">Checking...</div>
+          </div>
+          <div class="status-item" id="redis-status">
+            <div class="label">Redis Status</div>
+            <div class="value">Checking...</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-grid">
+        <a href="/admin/analytics.html" class="nav-card">
+          <h3>📊 Analytics Dashboard</h3>
+          <p>
+            View website analytics, user behavior, and traffic data. Export
+            reports in CSV, RSS, or JSON formats.
+          </p>
+        </a>
+
+        <a href="/admin/login.html" class="nav-card">
+          <h3>🔐 Admin Login</h3>
+          <p>
+            Authenticate with your admin credentials to access protected areas
+            and API endpoints.
+          </p>
+        </a>
+
+        <a
+          href="/api/admin/analytics?limit=10"
+          class="nav-card"
+          target="_blank"
+        >
+          <h3>🔧 API Testing</h3>
+          <p>
+            Direct access to admin API endpoints. Test analytics data retrieval
+            and system status.
+          </p>
+        </a>
+
+        <a href="/health" class="nav-card" target="_blank">
+          <h3>❤️ Health Check</h3>
+          <p>
+            View server health status, uptime, and system information for
+            monitoring purposes.
+          </p>
+        </a>
+      </div>
+
+      <div class="footer">
+        <p>
+          <a href="/">← Back to Main Site</a> |
+          <a href="/admin/login.html">Login</a> |
+          <a href="https://github.com/Greigh/danielhipskind.com" target="_blank"
+            >GitHub</a
+          >
+        </p>
+        <p style="margin-top: 1rem; font-size: 0.85rem">
+          Admin Secret: <code>twf7fwd*ZFX!geg7npw</code>
+        </p>
+      </div>
+    </div>
+
+    <script>
+      // Check authentication status
+      async function checkAuthStatus() {
+        const token = sessionStorage.getItem('admin_token');
+        const authStatus = document.getElementById('auth-status');
+
+        if (token) {
+          authStatus.className = 'status-item success';
+          authStatus.querySelector('.value').textContent = 'Authenticated';
+        } else {
+          authStatus.className = 'status-item warning';
+          authStatus.querySelector('.value').textContent = 'Not Logged In';
+        }
+      }
+
+      // Check server status
+      async function checkServerStatus() {
+        const serverStatus = document.getElementById('server-status');
+        try {
+          const response = await fetch('/api/status');
+          if (response.ok) {
+            const data = await response.json();
+            serverStatus.className = 'status-item success';
+            serverStatus.querySelector('.value').textContent = 'Online';
+          } else {
+            serverStatus.className = 'status-item error';
+            serverStatus.querySelector('.value').textContent = 'Error';
+          }
+        } catch (error) {
+          serverStatus.className = 'status-item error';
+          serverStatus.querySelector('.value').textContent = 'Offline';
+        }
+      }
+
+      // Check Redis status
+      async function checkRedisStatus() {
+        const redisStatus = document.getElementById('redis-status');
+        const token = sessionStorage.getItem('admin_token');
+
+        if (!token) {
+          redisStatus.className = 'status-item warning';
+          redisStatus.querySelector('.value').textContent = 'Need Auth';
+          return;
+        }
+
+        try {
+          const tokenIsCookie = token === 'cookie';
+          const fetchOpts = tokenIsCookie
+            ? { credentials: 'include' }
+            : { headers: { Authorization: 'Bearer ' + token } };
+
+          const response = await fetch(
+            '/api/admin/analytics?limit=1',
+            fetchOpts
+          );
+
+          if (response.ok) {
+            const data = await response.json();
+            if (data.source === 'redis') {
+              redisStatus.className = 'status-item success';
+              redisStatus.querySelector('.value').textContent = 'Connected';
+            } else {
+              redisStatus.className = 'status-item warning';
+              redisStatus.querySelector('.value').textContent = 'Fallback Mode';
+            }
+          } else {
+            redisStatus.className = 'status-item error';
+            redisStatus.querySelector('.value').textContent = 'Error';
+          }
+        } catch (error) {
+          redisStatus.className = 'status-item error';
+          redisStatus.querySelector('.value').textContent = 'Unknown';
+        }
+      }
+
+      // Initialize dashboard
+      document.addEventListener('DOMContentLoaded', () => {
+        checkAuthStatus();
+        checkServerStatus();
+        setTimeout(checkRedisStatus, 500); // Delay to allow auth check first
+      });
+    </script>
+  </body>
+</html>

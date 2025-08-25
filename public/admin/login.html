@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Admin Login - Daniel Hipskind</title>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .login-container {
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 400px;
+        margin: 1rem;
+      }
+
+      .login-header {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      .login-header h1 {
+        color: #333;
+        margin: 0 0 0.5rem 0;
+        font-size: 1.5rem;
+      }
+
+      .login-header p {
+        color: #666;
+        margin: 0;
+        font-size: 0.9rem;
+      }
+
+      .form-group {
+        margin-bottom: 1rem;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #333;
+      }
+
+      .form-group input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #e1e5e9;
+        border-radius: 4px;
+        font-size: 1rem;
+        box-sizing: border-box;
+        transition: border-color 0.2s;
+      }
+
+      .form-group input:focus {
+        outline: none;
+        border-color: #667eea;
+      }
+
+      .login-btn {
+        width: 100%;
+        padding: 0.75rem;
+        background: #667eea;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.2s;
+        margin-bottom: 1rem;
+      }
+
+      .login-btn:hover {
+        background: #5a6fd8;
+      }
+
+      .login-btn:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+      }
+
+      .alert {
+        padding: 0.75rem;
+        border-radius: 4px;
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+      }
+
+      .alert-error {
+        background: #fee;
+        border: 1px solid #fcc;
+        color: #c33;
+      }
+
+      .alert-success {
+        background: #efe;
+        border: 1px solid #cfc;
+        color: #3c3;
+      }
+
+      .alert-info {
+        background: #eef;
+        border: 1px solid #ccf;
+        color: #33c;
+      }
+
+      .loading {
+        display: inline-block;
+        width: 1rem;
+        height: 1rem;
+        border: 2px solid #fff;
+        border-radius: 50%;
+        border-top-color: transparent;
+        animation: spin 1s ease-in-out infinite;
+        margin-right: 0.5rem;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .auth-methods {
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #eee;
+      }
+
+      .auth-methods h3 {
+        margin: 0 0 1rem 0;
+        font-size: 1rem;
+        color: #555;
+      }
+
+      .auth-method {
+        margin-bottom: 0.5rem;
+        padding: 0.5rem;
+        background: #f8f9fa;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        color: #666;
+      }
+
+      .footer-links {
+        text-align: center;
+        margin-top: 1.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid #eee;
+      }
+
+      .footer-links a {
+        color: #667eea;
+        text-decoration: none;
+        font-size: 0.9rem;
+      }
+
+      .footer-links a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-container">
+      <div class="login-header">
+        <h1>Admin Login</h1>
+        <p>Access to analytics and admin tools</p>
+      </div>
+
+      <div id="alert-container"></div>
+
+      <form id="login-form">
+        <div class="form-group">
+          <label for="admin-secret">Admin Secret:</label>
+          <input
+            type="password"
+            id="admin-secret"
+            name="admin-secret"
+            placeholder="Enter your admin secret"
+            required
+          />
+        </div>
+
+        <button type="submit" class="login-btn" id="login-btn">
+          <span id="login-text">Login</span>
+        </button>
+      </form>
+
+      <div class="auth-methods">
+        <h3>Authentication Methods:</h3>
+        <div class="auth-method">
+          <strong>Admin Secret:</strong> Use your admin secret token for API
+          access
+        </div>
+        <div class="auth-method">
+          <strong>Session Login:</strong> Creates a secure session cookie
+          (requires Redis)
+        </div>
+      </div>
+
+      <div class="footer-links">
+        <a href="/">← Back to Main Site</a>
+      </div>
+    </div>
+
+    <script>
+      const form = document.getElementById('login-form');
+      const alertContainer = document.getElementById('alert-container');
+      const loginBtn = document.getElementById('login-btn');
+      const loginText = document.getElementById('login-text');
+      const adminSecretInput = document.getElementById('admin-secret');
+
+      // Show alert message
+      function showAlert(message, type = 'error') {
+        alertContainer.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+        setTimeout(() => {
+          alertContainer.innerHTML = '';
+        }, 5000);
+      }
+
+      // Set loading state
+      function setLoading(loading) {
+        loginBtn.disabled = loading;
+        if (loading) {
+          loginText.innerHTML = '<span class="loading"></span>Logging in...';
+        } else {
+          loginText.textContent = 'Login';
+        }
+      }
+
+      // Handle form submission
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const secret = adminSecretInput.value.trim();
+        if (!secret) {
+          showAlert('Please enter your admin secret');
+          return;
+        }
+
+        setLoading(true);
+
+        try {
+          // Try session-based login first
+          const response = await fetch('/api/admin/login', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ secret }),
+            credentials: 'include',
+          });
+
+          if (response.status === 204) {
+            showAlert(
+              'Login successful! Redirecting to analytics...',
+              'success'
+            );
+            // Store token in sessionStorage for API calls
+            sessionStorage.setItem('admin_token', 'cookie');
+            setTimeout(() => {
+              window.location.href = '/admin/analytics.html';
+            }, 1000);
+          } else if (response.status === 401) {
+            showAlert('Invalid admin secret. Please check your credentials.');
+          } else if (response.status === 403) {
+            showAlert('Admin login is not enabled on this server.');
+          } else if (response.status === 503) {
+            showAlert(
+              'Session store unavailable. You can still use the token directly in analytics.'
+            );
+            // Store the token for direct API use
+            sessionStorage.setItem('admin_token', secret);
+            setTimeout(() => {
+              window.location.href = '/admin/analytics.html';
+            }, 1000);
+          } else {
+            const errorData = await response.json().catch(() => ({}));
+            showAlert(errorData.error || `Login failed (${response.status})`);
+          }
+        } catch (error) {
+          console.error('Login error:', error);
+          showAlert(
+            'Network error. Please check your connection and try again.'
+          );
+        } finally {
+          setLoading(false);
+        }
+      });
+
+      // Check if already logged in
+      document.addEventListener('DOMContentLoaded', () => {
+        const existingToken = sessionStorage.getItem('admin_token');
+        if (existingToken) {
+          showAlert(
+            'You appear to be already logged in. Redirecting...',
+            'info'
+          );
+          setTimeout(() => {
+            window.location.href = '/admin/analytics.html';
+          }, 1500);
+        }
+      });
+    </script>
+  </body>
+</html>

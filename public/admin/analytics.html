@@ -10,37 +10,47 @@
     <main class="container">
       <h1>Analytics (Admin)</h1>
 
+      <div class="nav-links">
+        <a href="/admin/index.html">← Admin Dashboard</a>
+        <span style="margin: 0 1rem; color: var(--text-secondary, #ccc)"
+          >|</span
+        >
+        <a href="/admin/login.html">← Back to Login</a>
+        <span style="margin: 0 1rem; color: var(--text-secondary, #ccc)"
+          >|</span
+        >
+        <a href="/">← Main Site</a>
+      </div>
+
       <div class="controls">
-        <label
-          >Admin token:
-          <input
-            id="admin-token"
-            type="password"
-            placeholder="Paste admin token"
-        /></label>
-        <button id="save-token">Save token</button>
-        <button id="login-cookie" style="margin-left: 8px">
-          Login (cookie)
-        </button>
-        <button id="logout" style="margin-left: 8px">Logout</button>
-        <span id="token-status">Not logged in</span>
-        <br />
-        <label
-          >Limit:
-          <input id="limit" type="number" value="100" min="1" max="1000"
-        /></label>
-        <button id="load">Load</button>
-        <button id="clear-cache">Clear local view</button>
-        <br />
-        <div style="margin-top: 8px">
+        <div style="margin-bottom: 1rem">
+          <label
+            >Admin token:
+            <input
+              id="admin-token"
+              type="password"
+              placeholder="Paste admin secret token"
+          /></label>
+          <button id="save-token">Save token</button>
+          <button id="login-cookie">Login (cookie)</button>
+          <button id="logout">Logout</button>
+          <span id="token-status">Not logged in</span>
+        </div>
+
+        <div style="margin-bottom: 1rem">
+          <label
+            >Limit:
+            <input id="limit" type="number" value="100" min="1" max="1000" />
+          </label>
+          <button id="load">Load</button>
+          <button id="clear-cache">Clear local view</button>
+        </div>
+
+        <div>
           <button id="export-csv">Export CSV</button>
-          <button id="export-rss" style="margin-left: 8px">Export RSS</button>
-          <button id="server-export" style="margin-left: 8px">
-            Server Export (stream)
-          </button>
-          <button id="json-export" style="margin-left: 8px">
-            JSON Export (cursor)
-          </button>
+          <button id="export-rss">Export RSS</button>
+          <button id="server-export">Server Export (stream)</button>
+          <button id="json-export">JSON Export (cursor)</button>
         </div>
       </div>
 
