@@ -48,6 +48,7 @@ document.getElementById('load').addEventListener('click', async () => {
   const tbody = document.querySelector('#events-table tbody');
   tbody.innerHTML = '';
   status.textContent = 'Loading...';
+
   try {
     const tokenIsCookie = token === 'cookie';
     if (!token) {
@@ -68,27 +69,128 @@ document.getElementById('load').addEventListener('click', async () => {
       return;
     }
     const json = await res.json();
-    status.textContent = `Loaded ${json.count} events (source=${json.source})`;
     const events = json.events || [];
-    for (const e of events) {
-      const tr = document.createElement('tr');
-      const ts = document.createElement('td'); ts.textContent = e.timestamp || '';
-      const ip = document.createElement('td'); ip.textContent = e.ip || '';
-      const ua = document.createElement('td'); ua.textContent = e.ua || '';
-      const path = document.createElement('td'); path.textContent = e.path || '';
-      const ev = document.createElement('td'); ev.textContent = e.event || '';
-      const data = document.createElement('td'); data.textContent = JSON.stringify(e.data || '');
-      tr.appendChild(ts); tr.appendChild(ip); tr.appendChild(ua); tr.appendChild(path); tr.appendChild(ev); tr.appendChild(data);
-      tbody.appendChild(tr);
-    }
+
+    // Store events globally for filtering
+    window.currentEvents = events;
+
+    // Update stats
+    updateStats(events);
+
+    // Display events
+    displayEvents(events);
+
+    status.textContent = `Loaded ${json.count} events (source=${json.source})`;
+
   } catch (err) {
-    status.textContent = 'Fetch error';
+    status.textContent = 'Fetch error: ' + err.message;
+  }
+});
+
+// Enhanced display functions
+function updateStats(events) {
+  const statsGrid = document.getElementById('stats-grid');
+  statsGrid.style.display = 'grid';
+
+  // Calculate stats
+  const totalEvents = events.length;
+  const uniqueIPs = new Set(events.map(e => e.ip)).size;
+  const eventTypes = new Set(events.map(e => e.event)).size;
+  const latestEvent = events.length > 0 ?
+    Math.floor((Date.now() - new Date(events[0].timestamp).getTime()) / 60000) : 0;
+
+  // Update DOM
+  document.getElementById('total-events').textContent = totalEvents;
+  document.getElementById('unique-ips').textContent = uniqueIPs;
+  document.getElementById('event-types').textContent = eventTypes;
+  document.getElementById('latest-event').textContent = latestEvent;
+}
+
+function displayEvents(events) {
+  const eventFilter = document.getElementById('event-filter').value;
+  const filteredEvents = eventFilter ?
+    events.filter(event => event.event === eventFilter) :
+    events;
+
+  const tbody = document.querySelector('#events-table tbody');
+  tbody.innerHTML = '';
+
+  // Update count
+  document.getElementById('events-count').textContent = `${filteredEvents.length} events`;
+
+  for (const e of filteredEvents) {
+    const tr = document.createElement('tr');
+
+    // Timestamp with better formatting
+    const ts = document.createElement('td');
+    ts.className = 'timestamp';
+    ts.textContent = new Date(e.timestamp).toLocaleString();
+
+    // IP address
+    const ip = document.createElement('td');
+    ip.className = 'ip-address';
+    ip.textContent = e.ip || '-';
+
+    // Event type with styling
+    const ev = document.createElement('td');
+    const eventSpan = document.createElement('span');
+    eventSpan.className = `event-type ${e.event || 'unknown'}`;
+    eventSpan.textContent = e.event || 'unknown';
+    ev.appendChild(eventSpan);
+
+    // Path
+    const path = document.createElement('td');
+    path.textContent = e.path || '-';
+    path.style.maxWidth = '200px';
+    path.style.overflow = 'hidden';
+    path.style.textOverflow = 'ellipsis';
+    path.style.whiteSpace = 'nowrap';
+
+    // User Agent (shortened)
+    const ua = document.createElement('td');
+    const uaText = e.ua || '-';
+    ua.textContent = uaText.length > 50 ? uaText.substring(0, 50) + '...' : uaText;
+    ua.title = e.ua || '';
+    ua.style.maxWidth = '200px';
+    ua.style.overflow = 'hidden';
+    ua.style.textOverflow = 'ellipsis';
+    ua.style.whiteSpace = 'nowrap';
+
+    // Data with preview
+    const data = document.createElement('td');
+    data.className = 'data-preview';
+    const dataText = e.data ? JSON.stringify(e.data) : '-';
+    data.textContent = dataText.length > 50 ? dataText.substring(0, 50) + '...' : dataText;
+    data.title = dataText;
+    data.onclick = () => showDataModal(e);
+
+    tr.appendChild(ts);
+    tr.appendChild(ip);
+    tr.appendChild(ev);
+    tr.appendChild(path);
+    tr.appendChild(ua);
+    tr.appendChild(data);
+    tbody.appendChild(tr);
+  }
+}
+
+function showDataModal(event) {
+  alert('Event Data:\\n\\n' + JSON.stringify(event, null, 2));
+}
+
+// Event filter functionality
+document.getElementById('event-filter').addEventListener('change', () => {
+  if (window.currentEvents) {
+    displayEvents(window.currentEvents);
   }
 });
 
 document.getElementById('clear-cache').addEventListener('click', () => {
   document.querySelector('#events-table tbody').innerHTML = '';
+  document.getElementById('stats-grid').style.display = 'none';
+  document.getElementById('events-count').textContent = '-';
   document.getElementById('status').textContent = 'Cleared';
+  window.currentEvents = null;
 });
 
 // CSV export button

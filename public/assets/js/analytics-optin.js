@@ -1,4 +1,4 @@
-// Simple analytics opt-in banner logic
+// Enhanced analytics opt-in banner logic
 (function(){
   function render() {
     if (localStorage.getItem('analytics_enabled') === 'true') return;
@@ -9,14 +9,33 @@
     container.id = 'analytics-optin';
     container.innerHTML = '<div class="optin-inner">We use lightweight analytics to improve this site. <button id="accept-analytics">Enable</button> <button id="dismiss-analytics">Dismiss</button></div>';
     root.appendChild(container);
+
+    // Track that banner was shown
+    if (window.__firstPartyAnalytics) {
+      window.__firstPartyAnalytics.send('consent_banner_shown');
+    }
+
     document.getElementById('accept-analytics').addEventListener('click', function(){
       localStorage.setItem('analytics_enabled','true');
+
+      // Track consent acceptance
+      if (window.__firstPartyAnalytics) {
+        window.__firstPartyAnalytics.send('consent_accepted');
+      }
+
       // load analytics script
       var s = document.createElement('script'); s.src = '/assets/js/analytics.js'; s.defer = true; document.head.appendChild(s);
       container.remove();
     });
+
     document.getElementById('dismiss-analytics').addEventListener('click', function(){
       sessionStorage.setItem('analytics_optout_shown','true');
+
+      // Track consent dismissal
+      if (window.__firstPartyAnalytics) {
+        window.__firstPartyAnalytics.send('consent_dismissed');
+      }
+
       container.remove();
     });
   }

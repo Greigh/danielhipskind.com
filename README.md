@@ -10,7 +10,7 @@ A comprehensive web platform featuring a personal portfolio website built with N
 - **GitHub Integration**: Real-time project repository display via GitHub API
 - **Performance Optimized**: Advanced caching, CDN-ready static assets
 - **Analytics**: Privacy-focused, first-party analytics with opt-in consent
-- **Admin Dashboard**: Secure analytics management and export capabilities
+- **Admin Dashboard**: Modern unified framework with real-time monitoring and glass morphism design
 
 ### Infrastructure & Security
 
@@ -36,12 +36,13 @@ A comprehensive web platform featuring a personal portfolio website built with N
 - **Build Tools**: Custom webpack-based build system and Shell scripts
 - **PWA Features**: Service workers, app manifest, offline capability
 - **UI Framework**: Custom CSS with CSS Grid/Flexbox, responsive design
+- **Admin Framework**: Unified glass morphism design system with CSS variables and real-time components
 
 ### APIs & Integration
 
 - **GitHub API**: Custom proxy with retry/backoff and caching
 - **Analytics**: First-party analytics with Redis storage and file persistence
-- **Admin Interface**: Token-based authentication with export capabilities
+- **Admin Interface**: Multi-dashboard system with real-time monitoring, unified authentication, and comprehensive log management
 
 ### Infrastructure
 
@@ -53,11 +54,13 @@ A comprehensive web platform featuring a personal portfolio website built with N
 ## 📁 Project Structure
 
 ```
-├── public/                    # Static assets for portfolio site
+├── public/
 │   ├── admin/                # Admin dashboard interface
-│   │   ├── analytics.html    # Analytics management UI
-│   │   ├── analytics.js      # Admin functionality
-│   │   └── analytics.css     # Admin styling
+│   │   ├── admin-framework.css  # Unified CSS framework with glass morphism
+│   │   ├── index.html        # Main dashboard with real-time monitoring
+│   │   ├── analytics.html    # Enhanced analytics dashboard
+│   │   ├── login.html        # Modern authentication interface
+│   │   └── logs.html         # Complete log management system
 │   ├── assets/               # Core static assets
 │   │   ├── css/             # Stylesheets and components
 │   │   ├── js/              # Client-side JavaScript modules
@@ -88,9 +91,20 @@ A comprehensive web platform featuring a personal portfolio website built with N
 
 - **Privacy-First**: First-party analytics with explicit user opt-in
 - **Data Storage**: Dual persistence (Redis + daily rotating log files)
-- **Admin Dashboard**: Secure analytics viewing, filtering, and export
+- **Modern Admin Framework**: Unified glass morphism design system with CSS variables
+- **Real-time Dashboards**: Auto-refreshing interfaces with 30-second update intervals
+- **Enhanced UI/UX**: Professional admin interface with responsive design and dark mode
 - **Export Formats**: JSON (cursor-based pagination), CSV (streaming), RSS feeds
 - **Session Management**: Redis-backed admin sessions with secure token handling
+
+### Advanced Admin System
+
+- **Unified Design Framework**: Custom CSS framework with glass morphism effects and consistent styling
+- **Multi-dashboard Architecture**: Main dashboard, analytics, logs viewer, and authentication interfaces
+- **Real-time Monitoring**: Live system health scoring with intelligent status indicators
+- **Log Management System**: Complete log viewer with filtering, export, and real-time streaming
+- **Cross-dashboard Navigation**: Seamless navigation with breadcrumb system and quick actions
+- **Health Scoring Algorithm**: Intelligent system health calculation based on multiple metrics
 
 ### GitHub Integration
 
@@ -134,7 +148,7 @@ A comprehensive web platform featuring a personal portfolio website built with N
 - **[VSCode](https://code.visualstudio.com)**: Primary development environment
 - **[ForkLift 4](https://binarynights.com/)**: Advanced file management (macOS)
 - **[Core Shell](https://coreshell.app)**: Modern terminal experience (macOS)
-- **[Vivaldi](https://vivaldi.com)**: Feature-rich browser for testing
+- **[Chrome](https://www.google.com/chrome/)**: Feature-rich browser for testing
 
 ### Music for Coding 🎵
 - **[Spotify](https://spotify.com)**: Background music and focus playlists

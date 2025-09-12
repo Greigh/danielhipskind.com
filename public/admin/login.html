@@ -4,198 +4,118 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Admin Login - Daniel Hipskind</title>
+    <link rel="stylesheet" href="/admin/admin-framework.css" />
     <style>
-      body {
-        font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-        margin: 0;
-        padding: 0;
-        min-height: 100vh;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
+      /* Login-specific styles */
       .login-container {
-        background: white;
-        padding: 2rem;
-        border-radius: 8px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-        width: 100%;
-        max-width: 400px;
-        margin: 1rem;
+        max-width: 450px;
+        margin: 10vh auto;
+        background: var(--admin-card-bg);
+        backdrop-filter: var(--admin-glass-blur);
+        -webkit-backdrop-filter: var(--admin-glass-blur);
+        border: 1px solid var(--admin-glass-border);
+        border-radius: var(--admin-radius-xl);
+        box-shadow: var(--admin-glass-shadow);
+        padding: var(--admin-space-xl);
       }
 
       .login-header {
         text-align: center;
-        margin-bottom: 2rem;
+        margin-bottom: var(--admin-space-xl);
       }
 
       .login-header h1 {
-        color: #333;
-        margin: 0 0 0.5rem 0;
-        font-size: 1.5rem;
+        font-size: var(--admin-font-2xl);
+        font-weight: 700;
+        margin: 0 0 var(--admin-space-sm) 0;
+        background: linear-gradient(
+          120deg,
+          var(--admin-primary),
+          var(--admin-accent)
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
       }
 
       .login-header p {
-        color: #666;
+        color: var(--admin-text-secondary);
         margin: 0;
-        font-size: 0.9rem;
-      }
-
-      .form-group {
-        margin-bottom: 1rem;
-      }
-
-      .form-group label {
-        display: block;
-        margin-bottom: 0.5rem;
-        font-weight: 500;
-        color: #333;
-      }
-
-      .form-group input {
-        width: 100%;
-        padding: 0.75rem;
-        border: 2px solid #e1e5e9;
-        border-radius: 4px;
-        font-size: 1rem;
-        box-sizing: border-box;
-        transition: border-color 0.2s;
-      }
-
-      .form-group input:focus {
-        outline: none;
-        border-color: #667eea;
-      }
-
-      .login-btn {
-        width: 100%;
-        padding: 0.75rem;
-        background: #667eea;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        font-size: 1rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition: background 0.2s;
-        margin-bottom: 1rem;
-      }
-
-      .login-btn:hover {
-        background: #5a6fd8;
-      }
-
-      .login-btn:disabled {
-        background: #ccc;
-        cursor: not-allowed;
-      }
-
-      .alert {
-        padding: 0.75rem;
-        border-radius: 4px;
-        margin-bottom: 1rem;
-        font-size: 0.9rem;
-      }
-
-      .alert-error {
-        background: #fee;
-        border: 1px solid #fcc;
-        color: #c33;
-      }
-
-      .alert-success {
-        background: #efe;
-        border: 1px solid #cfc;
-        color: #3c3;
-      }
-
-      .alert-info {
-        background: #eef;
-        border: 1px solid #ccf;
-        color: #33c;
-      }
-
-      .loading {
-        display: inline-block;
-        width: 1rem;
-        height: 1rem;
-        border: 2px solid #fff;
-        border-radius: 50%;
-        border-top-color: transparent;
-        animation: spin 1s ease-in-out infinite;
-        margin-right: 0.5rem;
-      }
-
-      @keyframes spin {
-        to {
-          transform: rotate(360deg);
-        }
+        font-size: var(--admin-font-md);
       }
 
       .auth-methods {
-        margin-top: 1.5rem;
-        padding-top: 1.5rem;
-        border-top: 1px solid #eee;
+        margin-top: var(--admin-space-lg);
+        padding-top: var(--admin-space-lg);
+        border-top: 1px solid var(--admin-border);
       }
 
       .auth-methods h3 {
-        margin: 0 0 1rem 0;
-        font-size: 1rem;
-        color: #555;
+        margin: 0 0 var(--admin-space-md) 0;
+        font-size: var(--admin-font-lg);
+        color: var(--admin-text);
       }
 
       .auth-method {
-        margin-bottom: 0.5rem;
-        padding: 0.5rem;
-        background: #f8f9fa;
-        border-radius: 4px;
-        font-size: 0.85rem;
-        color: #666;
+        margin-bottom: var(--admin-space-sm);
+        padding: var(--admin-space-md);
+        background: var(--admin-primary-light);
+        border-radius: var(--admin-radius-md);
+        font-size: var(--admin-font-sm);
+        color: var(--admin-text-secondary);
       }
 
       .footer-links {
         text-align: center;
-        margin-top: 1.5rem;
-        padding-top: 1rem;
-        border-top: 1px solid #eee;
+        margin-top: var(--admin-space-lg);
+        padding-top: var(--admin-space-md);
+        border-top: 1px solid var(--admin-border);
       }
 
       .footer-links a {
-        color: #667eea;
+        color: var(--admin-primary);
         text-decoration: none;
-        font-size: 0.9rem;
+        font-size: var(--admin-font-sm);
+        transition: var(--admin-transition-fast);
       }
 
       .footer-links a:hover {
+        color: var(--admin-primary-hover);
         text-decoration: underline;
       }
     </style>
   </head>
-  <body>
+  <body class="admin-body">
     <div class="login-container">
       <div class="login-header">
-        <h1>Admin Login</h1>
-        <p>Access to analytics and admin tools</p>
+        <h1>🔐 Admin Login</h1>
+        <p>Access to analytics and administrative tools</p>
       </div>
 
       <div id="alert-container"></div>
 
       <form id="login-form">
-        <div class="form-group">
-          <label for="admin-secret">Admin Secret:</label>
+        <div class="admin-form-group">
+          <label for="admin-secret" class="admin-form-label"
+            >Admin Secret:</label
+          >
           <input
             type="password"
             id="admin-secret"
             name="admin-secret"
+            class="admin-form-input"
             placeholder="Enter your admin secret"
             required
           />
         </div>
 
-        <button type="submit" class="login-btn" id="login-btn">
-          <span id="login-text">Login</span>
+        <button
+          type="submit"
+          class="admin-btn admin-btn-lg"
+          id="login-btn"
+          style="width: 100%; margin-bottom: var(--admin-space-md)"
+        >
+          <span id="login-text">Login to Dashboard</span>
         </button>
       </form>
 
@@ -212,6 +132,14 @@
       </div>
 
       <div class="footer-links">
+        <a href="/admin/index.html">← Admin Dashboard</a>
+        <span
+          style="
+            margin: 0 var(--admin-space-sm);
+            color: var(--admin-text-light);
+          "
+          >|</span
+        >
         <a href="/">← Back to Main Site</a>
       </div>
     </div>
@@ -223,25 +151,49 @@
       const loginText = document.getElementById('login-text');
       const adminSecretInput = document.getElementById('admin-secret');
 
-      // Show alert message
+      // Enhanced alert styling using framework classes
       function showAlert(message, type = 'error') {
-        alertContainer.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+        const alertClass =
+          type === 'success'
+            ? 'admin-text-success'
+            : type === 'info'
+            ? 'admin-text-info'
+            : 'admin-text-error';
+        const bgClass =
+          type === 'success'
+            ? 'admin-bg-success'
+            : type === 'info'
+            ? 'admin-bg-info'
+            : 'admin-bg-error';
+
+        alertContainer.innerHTML = `
+          <div style="padding: var(--admin-space-md); border-radius: var(--admin-radius-md); margin-bottom: var(--admin-space-md);
+                      background: var(--status-${
+                        type === 'error' ? 'error' : type
+                      });
+                      color: white; font-size: var(--admin-font-sm);">
+            ${message}
+          </div>`;
+
         setTimeout(() => {
           alertContainer.innerHTML = '';
         }, 5000);
       }
 
-      // Set loading state
+      // Enhanced loading state with framework styling
       function setLoading(loading) {
         loginBtn.disabled = loading;
         if (loading) {
-          loginText.innerHTML = '<span class="loading"></span>Logging in...';
+          loginText.innerHTML =
+            '<span class="admin-loading"></span>Authenticating...';
+          loginBtn.style.opacity = '0.7';
         } else {
-          loginText.textContent = 'Login';
+          loginText.textContent = 'Login to Dashboard';
+          loginBtn.style.opacity = '1';
         }
       }
 
-      // Handle form submission
+      // Enhanced form submission
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
@@ -266,35 +218,40 @@
 
           if (response.status === 204) {
             showAlert(
-              'Login successful! Redirecting to analytics...',
+              '✅ Login successful! Redirecting to admin dashboard...',
               'success'
             );
             // Store token in sessionStorage for API calls
             sessionStorage.setItem('admin_token', 'cookie');
             setTimeout(() => {
-              window.location.href = '/admin/analytics.html';
+              window.location.href = '/admin/index.html';
             }, 1000);
           } else if (response.status === 401) {
-            showAlert('Invalid admin secret. Please check your credentials.');
+            showAlert(
+              '❌ Invalid admin secret. Please check your credentials.'
+            );
           } else if (response.status === 403) {
-            showAlert('Admin login is not enabled on this server.');
+            showAlert('🚫 Admin login is not enabled on this server.');
           } else if (response.status === 503) {
             showAlert(
-              'Session store unavailable. You can still use the token directly in analytics.'
+              '⚠️ Session store unavailable. Using token mode...',
+              'info'
             );
             // Store the token for direct API use
             sessionStorage.setItem('admin_token', secret);
             setTimeout(() => {
-              window.location.href = '/admin/analytics.html';
+              window.location.href = '/admin/index.html';
             }, 1000);
           } else {
             const errorData = await response.json().catch(() => ({}));
-            showAlert(errorData.error || `Login failed (${response.status})`);
+            showAlert(
+              errorData.error || `❌ Login failed (${response.status})`
+            );
           }
         } catch (error) {
           console.error('Login error:', error);
           showAlert(
-            'Network error. Please check your connection and try again.'
+            '🌐 Network error. Please check your connection and try again.'
           );
         } finally {
           setLoading(false);
@@ -306,11 +263,11 @@
         const existingToken = sessionStorage.getItem('admin_token');
         if (existingToken) {
           showAlert(
-            'You appear to be already logged in. Redirecting...',
+            'ℹ️ You appear to be already logged in. Redirecting...',
             'info'
           );
           setTimeout(() => {
-            window.location.href = '/admin/analytics.html';
+            window.location.href = '/admin/index.html';
           }, 1500);
         }
       });
