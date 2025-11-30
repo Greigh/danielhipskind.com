@@ -196,6 +196,13 @@ This project is licensed under the **BSD 3-Clause License**. See the [LICENSE](L
 
 For commercial use or questions about licensing, please [contact me](mailto:me@danielhipskind.com).
 
+## Other Associated Projects
+
+These are some of the associated projects that may have different licensing terms:
+
+- [Adams or Call Center Helper](https://github.com/Greigh/Adamas)
+- [Web Studio Express Template](https://github.com/Greigh/WebExpressStudioTemplate)
+
 ## 🤝 Contributing
 
 Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/Greigh/danielhipskind.com/issues).
