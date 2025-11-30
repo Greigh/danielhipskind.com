@@ -134,6 +134,34 @@ A comprehensive web platform featuring a personal portfolio website built with N
 - **SSH Security**: Key-based authentication with ssh-agent integration
 - **Build Validation**: Pre-deployment artifact verification
 - **Health Monitoring**: Post-deployment service validation
+- **Cloudflare Integration**: Automatic cache purging after successful deployment (optional)
+
+### Cloudflare Cache Purging
+
+The deployment script can automatically purge your Cloudflare cache after successful deployment to ensure visitors see the latest changes immediately.
+
+#### Setup
+
+1. **Get your Cloudflare API Token**:
+   - Go to [Cloudflare Dashboard](https://dash.cloudflare.com/profile/api-tokens)
+   - Create a new API Token with "Zone.Cache Purge" permission for your domain
+
+2. **Find your Zone ID**:
+   - In Cloudflare Dashboard, go to your domain → Overview
+   - The Zone ID is displayed in the right sidebar
+
+3. **Configure Environment Variables**:
+   ```bash
+   # In .env.deploy
+   CLOUDFLARE_API_TOKEN=your_api_token_here
+   CLOUDFLARE_ZONE_ID=your_zone_id_here
+   ```
+
+#### How it Works
+
+- After successful deployment verification, the script calls the Cloudflare API to purge the entire cache
+- If the environment variables are not set, cache purging is skipped (no error)
+- The purge operation is logged to the console
 
 ### Development Stack
 
