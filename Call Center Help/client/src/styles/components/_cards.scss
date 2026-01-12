@@ -1,0 +1,137 @@
+@use '../base/variables' as *;
+@use 'sass:map';
+
+// Card Components
+.card {
+  background: var(--white);
+  border-radius: 0.5rem;
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  transition: map.get($transitions, base);
+
+  &:hover {
+    box-shadow: var(--shadow-lg);
+  }
+}
+
+.card-header {
+  background: var(--gray-50);
+  padding: 1rem;
+  border-bottom: 1px solid var(--gray-200);
+
+  h3 {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--gray-900);
+  }
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+.card-footer {
+  background: var(--gray-50);
+  padding: 1rem;
+  border-top: 1px solid var(--gray-200);
+}
+
+// Settings cards
+.settings-section {
+  background: var(--card-bg);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+
+  h3 {
+    margin: 0 0 0.5rem 0;
+    color: var(--text);
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+
+  p {
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+  }
+}
+
+.setting-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border-color);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.setting-label {
+  font-weight: 500;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.setting-description {
+  font-size: 0.875rem;
+  color: var(--gray-500);
+  margin-top: 0.25rem;
+}
+
+// Dark mode
+[data-theme="dark"] {
+  .card {
+    background: var(--dark-surface);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+
+    &:hover {
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+    }
+  }
+
+  .card-header {
+    background: var(--dark-bg);
+    border-bottom-color: var(--dark-border);
+
+    h3 {
+      color: var(--dark-text);
+    }
+  }
+
+  .card-footer {
+    background: var(--dark-bg);
+    border-top-color: var(--dark-border);
+  }
+
+  .settings-section {
+    background: var(--dark-surface);
+    border-color: var(--dark-border);
+
+    h3 {
+      color: #90caf9;
+    }
+
+    p {
+      color: var(--dark-text-muted);
+    }
+  }
+
+  .setting-item {
+    border-bottom-color: var(--dark-border);
+  }
+
+  .setting-label {
+    color: var(--dark-text);
+  }
+
+  .setting-description {
+    color: var(--dark-text-muted);
+  }
+}

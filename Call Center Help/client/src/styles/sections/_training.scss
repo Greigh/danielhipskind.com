@@ -1,0 +1,176 @@
+@use '../base/variables' as *;
+@use 'sass:map';
+
+// Training & Practice Section
+#training-section {
+  .training-controls {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    button {
+      flex: 1;
+      min-width: 150px;
+      max-width: 200px;
+    }
+  }
+
+  .practice-session {
+    margin-top: 1rem;
+
+    .session-info {
+      background: var(--bg-hover);
+      padding: 1rem;
+      border-radius: 0.375rem;
+      border: 1px solid var(--border-color);
+      margin-bottom: 1rem;
+      text-align: center;
+
+      .session-title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--gray-800);
+        margin-bottom: 0.5rem;
+      }
+
+      .session-description {
+        color: var(--gray-600);
+        font-size: 0.875rem;
+        margin-bottom: 0.75rem;
+      }
+
+      .session-progress {
+        .progress-bar {
+          width: 100%;
+          height: 8px;
+          background: var(--gray-200);
+          border-radius: 4px;
+          overflow: hidden;
+          margin-bottom: 0.5rem;
+
+          .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-blue), var(--primary-blue-light));
+            border-radius: 4px;
+            transition: width 0.3s ease;
+          }
+        }
+
+        .progress-text {
+          font-size: 0.75rem;
+          color: var(--gray-500);
+        }
+      }
+    }
+
+    .practice-actions {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      flex-wrap: wrap;
+
+      button {
+        flex-shrink: 0;
+        min-width: 120px;
+      }
+    }
+  }
+
+  .training-modules {
+    margin-top: 1rem;
+
+    h4 {
+      margin-bottom: 0.75rem;
+      color: var(--gray-700);
+      font-size: 1.125rem;
+      text-align: center;
+    }
+
+    .modules-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+
+      .module-item {
+        background: var(--bg-hover);
+        padding: 1rem;
+        border-radius: 0.375rem;
+        border: 1px solid var(--border-color);
+        text-align: center;
+        transition: map.get($transitions, base);
+        cursor: pointer;
+
+        &:hover {
+          background: var(--white);
+          box-shadow: var(--shadow-sm);
+          transform: translateY(-2px);
+        }
+
+        .module-icon {
+          font-size: 2rem;
+          margin-bottom: 0.5rem;
+          display: block;
+        }
+
+        .module-title {
+          font-weight: 500;
+          color: var(--gray-800);
+          margin-bottom: 0.5rem;
+        }
+
+        .module-description {
+          font-size: 0.875rem;
+          color: var(--gray-600);
+          margin-bottom: 0.75rem;
+        }
+
+        .module-status {
+          font-size: 0.75rem;
+          color: var(--gray-500);
+
+          &.completed {
+            color: var(--success);
+          }
+
+          &.in-progress {
+            color: var(--warning);
+          }
+        }
+      }
+    }
+  }
+
+  .certifications {
+    margin-top: 1rem;
+    text-align: center;
+
+    .certifications-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      justify-content: center;
+      margin-top: 0.75rem;
+
+      .certification-item {
+        background: linear-gradient(135deg, var(--primary-blue), var(--primary-blue-light));
+        color: white;
+        padding: 0.75rem 1rem;
+        border-radius: 0.375rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        box-shadow: var(--shadow-sm);
+
+        &.earned {
+          background: linear-gradient(135deg, var(--success), #10b981);
+        }
+
+        &.locked {
+          background: var(--gray-300);
+          color: var(--gray-500);
+        }
+      }
+    }
+  }
+}

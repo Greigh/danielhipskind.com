@@ -1,0 +1,832 @@
+@use '../base/variables' as *;
+@use 'sass:map';
+
+// Settings SCSS — CLEARED STARTER
+// This file intentionally minimal: we'll rebuild from scratch, section-by-section.
+// Keep the page-level grid small and let components provide visuals; avoid
+// global overrides until we add precise rules required by the layout.
+
+
+#settings-view {
+  padding: 1.5rem;
+  min-height: calc(100vh - 120px);
+  box-sizing: border-box;
+
+  // Hide the individual section setting buttons on the settings page itself
+  .section-settings-btn {
+    display: none !important;
+  }
+
+  .settings-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--gray-100);
+
+    .title-container {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      h1 {
+        margin: 0;
+        font-size: map.get($font-sizes, 3xl);
+        font-weight: 700;
+        color: var(--primary-blue);
+      }
+
+      .edit-title-btn {
+        background: none;
+        border: none;
+        color: var(--gray-500);
+        cursor: pointer;
+        padding: 0.25rem;
+        border-radius: 0.125rem;
+        transition: all 0.2s ease;
+
+        &:hover {
+          background: var(--gray-100);
+          color: var(--gray-700);
+        }
+      }
+    }
+  }
+
+  .settings-container { max-width: var(--app-max-width, 1600px); width: 100%; margin: 0 auto; }
+
+  // Safety clamp for any inner grids inside the settings view: do not allow
+  // auto-fit or extra columns to produce 3+ narrow columns. Keep a readable
+  // two-column layout only (opt-in internals can still use .section-content--cols)
+  .settings-container :is(.timer-stats, .timers-container, .step-type-selector, .metrics-grid, .metrics-dashboard, .filter-grid, .insights-dashboard, .scripts-grid, .task-board) {
+    grid-template-columns: repeat(2, minmax(320px, 1fr)) !important;
+  }
+
+  .settings-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(320px, 1fr));
+    gap: 2rem;  // Increased from 1.5rem for better breathing room
+    align-items: start;
+
+    // keep the 3rd item full-width by default
+    > .settings-section:nth-child(3) { grid-column: 1 / -1; }
+  }
+
+  @media (max-width: map.get($breakpoints, sm)) {
+    .settings-grid { grid-template-columns: 1fr; }
+    .settings-header { flex-direction: column; align-items: flex-start; }
+  }
+
+  // Base section visuals — preserve the main-page look and spacing.
+  // Visual surface comes from shared `.card` components; keep these rules
+  // structural only (padding, stacked content default, optional multi-column).
+
+  .settings-section {
+    .section-header {
+      padding: 1rem;
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .section-header .title-container { flex: 1; }
+
+    .section-header .section-title {
+      margin: 0;
+      padding: 0;
+      display: block;
+      width: 100%;
+      box-sizing: border-box;
+      color: var(--text);
+      font-size: 1.125rem;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .section-content {
+      padding: 1.5rem;
+      display: grid;
+      grid-template-columns: 1fr; // single column by default
+      gap: 1.25rem;  // Increased from 1rem for better separation
+    }
+
+    .setting-item {
+      min-height: 70px;  // Increased from 60px for better touch targets
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem;  // Increased from 0.75rem
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 0.375rem;  // Slightly more rounded
+      transition: map.get($transitions, base);
+
+      &:hover {
+        background: var(--surface);
+        border-color: var(--primary-blue);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);  // Softer shadow
+      }
+
+      .setting-info {
+        flex: 1;
+
+        .setting-label {
+          font-weight: 500;
+          color: var(--text);
+          margin-bottom: 0.25rem;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+
+          .feature-status {
+            font-size: 0.75rem;
+            font-weight: 500;
+            padding: 3px 1.5rem;
+            border-radius: 0.375rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+
+            &.beta {
+              background: var(--warning-bg, #fef3c7);
+              color: var(--warning-text, #92400e);
+              border-color: var(--warning-border, #f59e0b);
+            }
+
+            &.coming-soon {
+              background: var(--gray-100, #f3f4f6);
+              color: var(--gray-600, #4b5563);
+              border-color: var(--gray-300, #d1d5db);
+              animation: pulse 2s infinite;
+            }
+
+            &:hover {
+              transform: translateY(-1px);
+              box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+            }
+          }
+        }
+
+        .setting-description {
+          font-size: 0.875rem;
+          color: var(--text-muted);
+        }
+      }
+
+      .setting-control {
+        flex-shrink: 0;
+
+        // Style disabled toggles
+        input[type="checkbox"]:disabled,
+        input[type="range"].slider-toggle:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+
+        /* Range slider styled to behave like a compact on/off toggle */
+        input[type="range"].slider-toggle {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 64px;
+          height: 28px;
+          background: transparent;
+          cursor: pointer;
+          padding: 0;
+        }
+
+        input[type="range"].slider-toggle:focus {
+          outline: none;
+        }
+
+        /* Track */
+        input[type="range"].slider-toggle::-webkit-slider-runnable-track {
+          height: 14px;
+          background: var(--border-color);
+          border-radius: 999px;
+        }
+
+        input[type="range"].slider-toggle::-moz-range-track {
+          height: 14px;
+          background: var(--border-color);
+          border-radius: 999px;
+        }
+
+        /* Thumb */
+        input[type="range"].slider-toggle::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          width: 22px;
+          height: 22px;
+          background: white;
+          border: 1px solid var(--border-color);
+          border-radius: 50%;
+          margin-top: -4px; /* center thumb */
+          box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        input[type="range"].slider-toggle::-moz-range-thumb {
+          width: 22px;
+          height: 22px;
+          background: white;
+          border: 1px solid var(--border-color);
+          border-radius: 50%;
+          box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        /* Visual state: using value attribute to indicate on/off. We'll color track via inline style update in JS when toggles change, but provide a default appearance */
+        input[type="range"].slider-toggle[value="1"]::-webkit-slider-runnable-track {
+          background: linear-gradient(90deg, var(--success-color), var(--primary-blue));
+        }
+
+        input[type="range"].slider-toggle[value="1"]::-moz-range-track {
+          background: linear-gradient(90deg, var(--success-color), var(--primary-blue));
+        }
+        /* Also support class-based visual state for broader browser compatibility */
+        input[type="range"].slider-toggle.slider-on::-webkit-slider-runnable-track {
+          background: linear-gradient(90deg, var(--success-color), var(--primary-blue));
+        }
+
+        input[type="range"].slider-toggle.slider-on::-moz-range-track {
+          background: linear-gradient(90deg, var(--success-color), var(--primary-blue));
+        }
+
+        /* Span-based visual toggle used by `.toggle-slider` (checkbox + visual span) */
+        label.switch {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        label.switch .hidden-toggle {
+          position: absolute !important;
+          width: 1px !important;
+          height: 1px !important;
+          padding: 0 !important;
+          margin: -1px !important;
+          overflow: hidden !important;
+          clip: rect(0 0 0 0) !important;
+          white-space: nowrap !important;
+          border: 0 !important;
+        }
+
+        .toggle-slider {
+          display: inline-block;
+          width: 64px;
+          height: 28px;
+          border-radius: 999px;
+          background: var(--border-color);
+          position: relative;
+          transition: background 0.18s ease, box-shadow 0.12s ease;
+          flex-shrink: 0;
+        }
+
+        .toggle-slider::after {
+          content: '';
+          position: absolute;
+          top: 3px;
+          left: 3px;
+          width: 22px;
+          height: 22px;
+          background: #fff;
+          border-radius: 50%;
+          box-shadow: 0 1px 2px rgba(0,0,0,0.12);
+          transition: transform 0.18s ease, left 0.18s ease;
+        }
+        .toggle-slider.slider-on,
+        input:checked + .toggle-slider {
+          background: linear-gradient(90deg, var(--success-color), var(--primary-blue));
+        }
+
+        .toggle-slider.slider-on::after,
+        input:checked + .toggle-slider::after {
+          left: calc(100% - 25px);
+          transform: translateX(0);
+        }
+
+        .toggle-slider:focus {
+          outline: 2px solid rgba(59,130,246,0.18);
+          outline-offset: 3px;
+        }
+      }
+    }
+
+    // allow an optional section-level heading appearance (rare)
+    > h3 { margin: 0 0 0.5rem 0; padding: 1rem; background: var(--card-bg); border-bottom: 1px solid var(--border-color); color: var(--primary-blue); }
+
+    // Settings groups for organizing related settings
+    .settings-group {
+      margin-bottom: 1.5rem;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      .settings-group-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 0.75rem;
+        padding: 0.75rem 1rem;
+        background: var(--surface);
+        border: 1px solid var(--border-color);
+        border-radius: 0.5rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:hover {
+          background: var(--card-bg);
+          border-color: var(--primary-blue);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .settings-group-title {
+          font-size: 1rem;
+          font-weight: 600;
+          color: var(--text);
+          margin: 0;
+        }
+
+        .group-toggle {
+          background: none;
+          border: none;
+          color: var(--text-muted);
+          cursor: pointer;
+          font-size: 1.25rem;
+          padding: 0.25rem;
+          border-radius: 0.25rem;
+          transition: all 0.2s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 2rem;
+          height: 2rem;
+
+          &:hover {
+            background: var(--gray-100);
+            color: var(--text);
+          }
+
+          &:focus {
+            outline: 2px solid var(--primary-blue);
+            outline-offset: 2px;
+          }
+
+          &[aria-expanded="true"] {
+            transform: rotate(90deg);
+          }
+        }
+      }
+
+      .settings-group-content {
+        overflow: hidden;
+        transition: all 0.3s ease;
+        max-height: 0;
+        opacity: 0;
+
+        &[aria-expanded="true"] {
+          max-height: 2000px; // Large enough for content
+          opacity: 1;
+        }
+
+        .setting-item {
+          margin-bottom: 0.75rem;
+
+          &:last-child {
+            margin-bottom: 0;
+          }
+        }
+      }
+
+      .settings-group-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text);
+        margin: 0 0 0.75rem 0;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      &.collapsible {
+        .settings-group-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 0.75rem;
+
+          .settings-group-title {
+            margin: 0;
+            border-bottom: none;
+            padding-bottom: 0;
+          }
+
+          .collapse-toggle {
+            background: none;
+            border: 1px solid var(--border-color);
+            border-radius: 0.375rem;
+            padding: 0.5rem 0.75rem;
+            color: var(--text);
+            cursor: pointer;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+
+            &:hover {
+              background: var(--surface);
+              border-color: var(--primary-blue);
+            }
+
+            .toggle-icon {
+              font-size: 0.75rem;
+              transition: transform 0.2s ease;
+            }
+
+            &[aria-expanded="true"] .toggle-icon {
+              transform: rotate(180deg);
+            }
+          }
+        }
+
+        .settings-group-content {
+          overflow: hidden;
+          transition: all 0.3s ease;
+
+          &.expanded {
+            max-height: 2000px; // Large enough for content
+          }
+
+          &.collapsed {
+            max-height: 0;
+          }
+        }
+      }
+    }
+  }
+
+  // Default: keep known inner-grids single column inside Settings unless explicitly opted in
+  .section-content .toggle-grid,
+  .section-content .export-options,
+  .section-content .appearance-grid,
+  .section-content .pattern-management,
+  .section-content .theme-buttons,
+  .section-content .metrics-grid,
+  .section-content .timer-stats,
+  .section-content .form-row {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+
+  // When a section opts into multi-column internals use the modifier
+  .section-content.section-content--cols .toggle-grid,
+  .section-content.section-content--cols .pattern-management,
+  .section-content.section-content--cols .export-options,
+  .section-content.section-content--cols .appearance-grid,
+  .section-content.section-content--cols .theme-buttons,
+  .section-content.section-content--cols .metrics-grid,
+  .section-content.section-content--cols .timer-stats,
+  .section-content.section-content--cols .form-row {
+    grid-template-columns: repeat(2, minmax(240px, 1fr)) !important;
+  }
+
+  // Two-column layout for section groups in Visible Sections
+  .section-groups-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-top: 0.75rem;
+  }
+
+  // Per-section specifics removed — keep this file focused on global
+  // settings layout and general rules only. Per-section visuals should live
+  // with component/section styles (e.g., _patterns.scss, _forms.scss).
+
+  // Settings subsection styling
+  .settings-subsection {
+    background: linear-gradient(135deg, var(--surface), var(--bg));
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin: 1rem 0;
+
+    h4 {
+      margin: 0 0 0.75rem 0;
+      color: var(--text);
+      font-size: 1.125rem;
+      font-weight: 600;
+    }
+  }
+
+  // Special styling for Export Options
+  .export-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+
+    .export-option {
+      display: flex;
+      align-items: center;
+      padding: 0.5rem;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 0.25rem;
+      transition: map.get($transitions, base);
+
+      &:hover {
+        border-color: var(--primary-blue);
+        background: var(--surface);
+      }
+
+      input[type="checkbox"] {
+        margin-right: 0.5rem;
+        accent-color: var(--primary-blue);
+      }
+
+      label {
+        font-size: 0.875rem;
+        color: var(--text);
+        cursor: pointer;
+        margin: 0;
+      }
+    }
+  }
+
+  // Special styling for CRM Connection
+  .crm-connection-item {
+    .setting-label {
+      color: var(--primary-blue);
+      font-weight: 600;
+    }
+
+    .setting-description {
+      color: var(--text-muted);
+    }
+
+    .setting-control {
+      .button {
+        background: linear-gradient(135deg, var(--primary-blue), var(--primary-blue-light));
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 0.25rem;
+        font-weight: 500;
+        transition: map.get($transitions, base);
+
+        &:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
+        }
+      }
+    }
+  }
+
+  // Data Management Section Styles
+  .data-management-intro {
+    background: var(--surface);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    border-left: 4px solid var(--primary-blue);
+    margin-bottom: 1.5rem;
+
+    p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+  }
+
+  .setting-group {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    .setting-group-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text);
+      margin: 0 0 0.5rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      &:before {
+        content: '📊';
+        font-size: 1.2rem;
+      }
+    }
+
+    .setting-group-description {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+      line-height: 1.4;
+    }
+  }
+
+  .data-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+
+    .stat-item {
+      background: var(--surface);
+      border: 1px solid var(--border-color);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      text-align: center;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: var(--card-bg);
+        border-color: var(--primary-blue);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      .stat-icon {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .stat-content {
+        .stat-number {
+          font-size: 1.5rem;
+          font-weight: 700;
+          color: var(--primary-blue);
+          margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+          font-size: 0.8rem;
+          color: var(--text-muted);
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          font-weight: 500;
+        }
+      }
+    }
+  }
+
+  // Button variants for data management
+  .btn-primary {
+    background: linear-gradient(135deg, var(--primary-blue), var(--primary-blue-light));
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(25, 118, 210, 0.3);
+      background: linear-gradient(135deg, var(--primary-blue-dark), var(--primary-blue));
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+
+  .btn-secondary {
+    background: linear-gradient(135deg, var(--success), var(--success-light, #4ade80));
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(34, 197, 94, 0.3);
+      background: linear-gradient(135deg, var(--success-dark, #22c55e), var(--success));
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--primary-blue);
+    border: 2px solid var(--primary-blue);
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    &:hover {
+      background: var(--primary-blue);
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(25, 118, 210, 0.3);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+
+  // Beta tag styling
+  .beta-tag {
+    display: inline-block;
+    background: #f59e0b;
+    color: #ffffff;
+    border: 1px solid #d97706;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 3px 1.5rem;
+    border-radius: 0.375rem;
+    margin-left: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
+    transition: all 0.2s ease;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 6px rgba(245, 158, 11, 0.4);
+    }
+  }
+}
+
+// Main page toggle labels (for feature status badges)
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  .feature-status {
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 3px 1.5rem;
+    border-radius: 0.375rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+
+    &.beta {
+      background: #f59e0b;
+      color: #ffffff;
+      border-color: #d97706;
+      font-weight: 600;
+      box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
+    }
+
+    &.coming-soon {
+      background: var(--gray-100, #f3f4f6);
+      color: var(--gray-600, #4b5563);
+      border-color: var(--gray-300, #d1d5db);
+      animation: pulse 2s infinite;
+    }
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    }
+  }
+}
+
+// Pulse animation for Coming Soon badges
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}

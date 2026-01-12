@@ -1,0 +1,40 @@
+@use '../base/variables' as *;
+@use 'sass:map';
+
+.copyright-footer {
+  background-color: var(--footer-bg);
+  padding: 0.75rem 0;
+  margin-top: auto;
+  width: 100%;
+  text-align: center;
+  font-size: 0.875rem;
+  border-top: 1px solid var(--border-color);
+  
+  p {
+    color: var(--footer-text);
+    margin: 0;
+    
+    a {
+      color: var(--primary-blue);
+      text-decoration: none;
+      
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+  
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+}
+
+// Dark theme support
+[data-theme="dark"] {
+  .copyright-footer {
+    background-color: var(--dark-surface);
+    border-top-color: var(--dark-border);
+  }
+}

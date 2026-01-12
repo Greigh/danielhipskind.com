@@ -1,0 +1,307 @@
+// API Integration Section
+@use '../base/variables' as *;
+@use 'sass:map';
+
+// API Integration Section
+.api-integration-section {
+  .api-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+
+    .api-status {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      .status-indicator {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+
+        &.active {
+          background-color: var(--success-color, #10b981);
+        }
+
+        &.inactive {
+          background-color: var(--error-color, #ef4444);
+        }
+      }
+    }
+  }
+
+  .api-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      text-align: center;
+
+      h4 {
+        margin: 0 0 0.5rem 0;
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+      }
+
+      .stat-value {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: var(--text-primary);
+      }
+    }
+  }
+
+  .api-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .endpoints-list,
+  .api-keys-list,
+  .webhooks-list,
+  .logs-list {
+    .empty-state {
+      text-align: center;
+      padding: 1.5rem;
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+  }
+
+  .endpoint-card,
+  .api-key-card,
+  .webhook-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+
+    .endpoint-info,
+    .key-info,
+    .webhook-info {
+      margin-bottom: 0.75rem;
+    }
+
+    .endpoint-method {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.125rem;
+      font-size: 0.75rem;
+      font-weight: bold;
+      text-transform: uppercase;
+
+      &.get {
+        background-color: var(--success-color, #10b981);
+        color: white;
+      }
+
+      &.post {
+        background-color: var(--warning-color, #f59e0b);
+        color: white;
+      }
+
+      &.put {
+        background-color: var(--info-color, #3b82f6);
+        color: white;
+      }
+
+      &.delete {
+        background-color: var(--error-color, #ef4444);
+        color: white;
+      }
+    }
+
+    .endpoint-details {
+      h5 {
+        margin: 0 0 0.25rem 0;
+        font-size: 1rem;
+      }
+
+      p {
+        margin: 0 0 0.5rem 0;
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+      }
+
+      .endpoint-meta {
+        display: flex;
+        gap: 1rem;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+      }
+    }
+
+    .endpoint-controls,
+    .key-controls,
+    .webhook-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .toggle {
+        position: relative;
+        display: inline-block;
+        width: 44px;
+        height: 24px;
+
+        input {
+          opacity: 0;
+          width: 0;
+          height: 0;
+        }
+
+        .toggle-slider {
+          position: absolute;
+          cursor: pointer;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: var(--border-color);
+          transition: 0.3s;
+          border-radius: 24px;
+
+          &:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+          }
+        }
+
+        input:checked + .toggle-slider {
+          background-color: var(--primary-color, #3b82f6);
+        }
+
+        input:checked + .toggle-slider:before {
+          transform: translateX(20px);
+        }
+      }
+
+      .btn-icon {
+        background: none;
+        border: none;
+        padding: 0.25rem;
+        cursor: pointer;
+        border-radius: 0.125rem;
+        color: var(--text-secondary);
+
+        &:hover {
+          background-color: var(--hover-bg);
+          color: var(--text-primary);
+        }
+
+        &.danger:hover {
+          color: var(--error-color);
+        }
+      }
+    }
+  }
+
+  .log-entry {
+    display: grid;
+    grid-template-columns: 60px 1fr 60px 120px;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.875rem;
+    align-items: center;
+
+    &.error {
+      background-color: rgba(239, 68, 68, 0.1);
+    }
+
+    &.success {
+      background-color: rgba(16, 185, 129, 0.1);
+    }
+
+    .log-method {
+      font-weight: bold;
+      text-align: center;
+
+      &.get {
+        color: var(--success-color, #10b981);
+      }
+
+      &.post {
+        color: var(--warning-color, #f59e0b);
+      }
+
+      &.put {
+        color: var(--info-color, #3b82f6);
+      }
+
+      &.delete {
+        color: var(--error-color, #ef4444);
+      }
+    }
+
+    .log-path {
+      font-family: var(--font-family-mono);
+    }
+
+    .log-status {
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .log-time {
+      text-align: right;
+      color: var(--text-secondary);
+      font-size: 0.75rem;
+    }
+  }
+}
+
+// Dark mode
+[data-theme="dark"] {
+  .api-integration-section {
+    .endpoint-card,
+    .api-key-card,
+    .webhook-card {
+      background: var(--card-bg);
+      border-color: var(--border-color);
+    }
+  }
+}
+
+// Mobile responsiveness
+@media (max-width: 768px) {
+  .api-integration-section {
+    .api-content {
+      grid-template-columns: 1fr;
+    }
+
+    .endpoint-meta {
+      flex-direction: column;
+      gap: 0.25rem !important;
+    }
+
+    .log-entry {
+      grid-template-columns: 50px 1fr 50px;
+      font-size: 0.75rem;
+
+      .log-time {
+        display: none;
+      }
+    }
+  }
+}

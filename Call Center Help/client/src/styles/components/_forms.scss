@@ -1,0 +1,363 @@
+@use '../base/variables' as *;
+@use 'sass:map';
+
+// Form Components
+input,
+textarea,
+select {
+  background: var(--white);
+  border: 2px solid var(--gray-200);
+  border-radius: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 1rem;
+  font-family: var(--font-sans); // Changed to CSS variable
+  color: var(--gray-900);
+  transition: map.get($transitions, base);
+  width: 100%;
+
+  &:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 1px var(--primary-blue);
+  }
+
+  &:disabled {
+    background: var(--gray-100);
+    border-color: var(--gray-200);
+    color: var(--gray-500);
+    cursor: not-allowed;
+  }
+
+  &::placeholder {
+    color: var(--gray-400);
+  }
+}
+
+textarea {
+  resize: vertical;
+  min-height: 100px;
+  font-family: $font-family-sans;
+}
+
+label {
+  display: block;
+  font-weight: 500;
+  color: var(--gray-700);
+  margin-bottom: 0.25rem;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.input-group {
+  display: flex;
+  gap: 0.5rem;
+  align-items: end;
+  margin-bottom: 1rem;
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-bottom: 0;
+  }
+
+  input {
+    flex: 1;
+  }
+
+  button {
+    flex-shrink: 0;
+  }
+}
+
+// Checkbox and radio styles
+input[type="checkbox"],
+input[type="radio"] {
+  width: auto;
+  margin-right: 0.5rem;
+  accent-color: var(--primary-blue);
+}
+
+/* Switch styling */
+.switch {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    min-width: 46px;
+    height: 24px;
+    margin: 2px 0;
+    cursor: pointer;
+
+    .hidden-toggle,
+    input[type="checkbox"] {
+        position: absolute !important;
+        width: 1px !important;
+        height: 1px !important;
+        padding: 0 !important;
+        margin: -1px !important;
+        overflow: hidden !important;
+        clip: rect(0 0 0 0) !important;
+        white-space: nowrap !important;
+        border: 0 !important;
+        opacity: 0;
+    }
+
+    /* Support both class naming conventions */
+    .slider,
+    .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 48px;
+        height: 24px;
+        background-color: var(--gray-300);
+        transition: .2s ease;
+        border-radius: 24px;
+        
+        &:before,
+        &:after {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            top: 3px; /* Explicit top alignment */
+            bottom: 3px;
+            background-color: white;
+            transition: .2s ease;
+            border-radius: 50%;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        &:hover:before,
+        &:hover:after {
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+    }
+
+    input:checked + .slider,
+    input:checked + .toggle-slider {
+        background: linear-gradient(90deg, var(--success-color), var(--primary-blue));
+        
+        &:before,
+        &:after {
+            transform: translateX(24px);
+        }
+    }
+    
+    input:focus + .slider,
+    input:focus + .toggle-slider {
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    }
+}
+
+/* Range control */
+.range-control {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+
+  input[type="range"] {
+    flex: 1;
+    height: 4px;
+    background: var(--gray-200);
+    border-radius: 9999px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    cursor: pointer;
+
+    &::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--primary-blue);
+      cursor: pointer;
+      transition: map.get($transitions, base);
+
+      &:hover {
+        transform: scale(1.2);
+      }
+    }
+
+    &::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border: none;
+      border-radius: 50%;
+      background: var(--primary-blue);
+      cursor: pointer;
+      transition: map.get($transitions, base);
+
+      &:hover {
+        transform: scale(1.2);
+      }
+    }
+  }
+
+  span {
+    min-width: 60px;
+    text-align: right;
+    font-family: $font-family-mono;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--gray-600);
+  }
+}
+
+// Dark mode
+[data-theme="dark"] {
+  input,
+  textarea,
+  select {
+    background: var(--dark-surface);
+    border-color: var(--dark-border);
+    color: var(--dark-text);
+
+    &:focus {
+      border-color: #90caf9;
+      box-shadow: 0 0 0 1px #90caf9;
+    }
+
+    &:disabled {
+      background: var(--dark-bg);
+      border-color: var(--dark-border);
+      color: var(--dark-text-muted);
+    }
+
+    &::placeholder {
+      color: var(--dark-text-muted);
+    }
+  }
+
+  label {
+    color: var(--dark-text);
+  }
+
+  .switch {
+    .slider {
+      background-color: var(--dark-border);
+      
+      &:before {
+        background-color: var(--gray-200);
+      }
+    }
+    
+    input:checked + .slider {
+      background-color: #90caf9;
+    }
+  }
+
+  .range-control {
+    input[type="range"] {
+      background: var(--dark-border);
+
+      &::-webkit-slider-thumb {
+        background: #90caf9;
+      }
+
+      &::-moz-range-thumb {
+        background: #90caf9;
+      }
+    }
+
+    span {
+      color: var(--dark-text-muted);
+    }
+  }
+}
+
+/* Setting item layout */
+.setting-item {
+    border-bottom: 1px solid var(--border-color);
+    padding: 12px 0;
+
+    .setting-info {
+        margin-bottom: 8px;
+
+        .setting-label {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text);
+            margin: 0 0 4px 0;
+        }
+
+        .setting-description {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+            margin: 0;
+        }
+    }
+
+    .setting-control {
+        display: flex;
+        align-items: center;
+    }
+}
+
+@media (max-width: map.get($breakpoints, sm)) {
+  input,
+  textarea,
+  select {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+  }
+  
+  .input-group {
+    flex-direction: column;
+    gap: 0.25rem;
+    
+    label {
+      width: 100%;
+    }
+    
+    button {
+      width: 100%;
+      margin-top: 0.25rem;
+    }
+  }
+  
+  .range-control {
+    flex-direction: column;
+    align-items: start;
+    
+    input[type="range"] {
+      width: 100%;
+    }
+    
+    span {
+      margin-top: 0.25rem;
+      align-self: flex-end;
+    }
+  }
+}
+
+// Toggle content layout for main page toggles
+.toggle-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 1rem;
+
+  .toggle-text {
+    flex: 1;
+    font-weight: 500;
+    color: var(--text);
+    margin: 0;
+  }
+
+  .switch {
+    flex-shrink: 0;
+    margin: 0;
+  }
+}

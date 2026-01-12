@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contact Us - Adamas</title>
+    <link rel="stylesheet" href="styles/main.css" />
+
+    <!-- SEO & Open Graph -->
+    <meta
+      name="description"
+      content="Contact Adamas support. We are here to help you with any questions or issues."
+    />
+    <meta
+      name="keywords"
+      content="contact, support, help, adamas, call center help"
+    />
+    <meta name="author" content="Daniel Hipskind" />
+
+    <!-- Open Graph (Facebook/LinkedIn) -->
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:url"
+      content="https://danielhipskind.com/adamas/contact"
+    />
+    <meta property="og:title" content="Contact Us | Adamas" />
+    <meta
+      property="og:description"
+      content="Get in touch with the Adamas team for support and inquiries."
+    />
+    <meta
+      property="og:image"
+      content="https://danielhipskind.com/adamas/og-image.png"
+    />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta
+      property="twitter:url"
+      content="https://danielhipskind.com/adamas/contact"
+    />
+    <meta property="twitter:title" content="Contact Us | Adamas" />
+    <meta
+      property="twitter:description"
+      content="Get in touch with the Adamas team for support and inquiries."
+    />
+    <meta
+      property="twitter:image"
+      content="https://danielhipskind.com/adamas/og-image.png"
+    />
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://danielhipskind.com/adamas/contact" />
+
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+  </head>
+  <body>
+    <div id="app">
+      <header class="app-header">
+        <div class="header-content">
+          <div class="app-title"><h1>💎 Adamas</h1></div>
+          <nav class="main-nav">
+            <a href="<%= htmlWebpackPlugin.files.publicPath %>" class="nav-tab"
+              >Main</a
+            >
+            <a
+              href="<%= htmlWebpackPlugin.files.publicPath %>privacy"
+              class="nav-tab"
+              >Privacy Policy</a
+            >
+            <a
+              href="<%= htmlWebpackPlugin.files.publicPath %>terms"
+              class="nav-tab"
+              >Terms of Use</a
+            >
+            <a
+              href="<%= htmlWebpackPlugin.files.publicPath %>contact"
+              class="nav-tab"
+              >Contact Us</a
+            >
+          </nav>
+        </div>
+      </header>
+      <main class="container card themed-static-page max-w-600 auto-margin">
+        <h2>Contact Us</h2>
+        <form id="contact-form" autocomplete="on" novalidate>
+          <div class="form-group">
+            <label for="contact-name">Name</label>
+            <input
+              type="text"
+              id="contact-name"
+              name="name"
+              required
+              autocomplete="name"
+            />
+          </div>
+          <div class="form-group">
+            <label for="contact-email">Email</label>
+            <input
+              type="email"
+              id="contact-email"
+              name="email"
+              required
+              autocomplete="email"
+            />
+          </div>
+          <div class="form-group">
+            <label for="contact-message">Message</label>
+            <textarea
+              id="contact-message"
+              name="message"
+              rows="5"
+              required
+            ></textarea>
+          </div>
+          <div class="form-group">
+            <div
+              class="g-recaptcha"
+              data-sitekey="6LdQ0hssAAAAAMWQrEq6044ftIH76l8pLAbHSjFx"
+            ></div>
+          </div>
+          <button type="submit" class="button" id="contact-submit-btn">
+            Send Message
+          </button>
+          <div id="contact-success" class="success-message"></div>
+          <div id="contact-error" class="error-message"></div>
+        </form>
+        <script src="js/contact.js"></script>
+      </main>
+      <footer class="copyright-footer">
+        <div class="container">
+          <p>
+            &copy; 2025 Daniel Hipskind.
+            <a href="privacy">Privacy Policy</a> &bull;
+            <a href="terms">Terms of Use</a> &bull;
+            <a href="contact">Contact Us</a>
+          </p>
+        </div>
+      </footer>
+    </div>
+    <script>
+      // Apply saved theme to static pages
+      (function () {
+        try {
+          const savedTheme = localStorage.getItem('theme') || 'light';
+          document.documentElement.setAttribute('data-theme', savedTheme);
+        } catch (e) {
+          // Fallback to light theme if localStorage is not available
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
+      })();
+    </script>
+  </body>
+</html>

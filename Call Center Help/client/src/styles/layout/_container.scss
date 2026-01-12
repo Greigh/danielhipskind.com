@@ -1,0 +1,352 @@
+@use '../base/variables' as *;
+@use 'sass:map';
+
+// Main app container
+#app {
+  max-width: var(--app-max-width, 1600px);
+  margin: 0 auto;
+  padding: 1.5rem;
+  background: var(--white);
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow-xl);
+  min-height: calc(100vh - #{map.get($spacing, 12)});
+}
+
+// Content sections
+.sortable-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;  // Increased from 1.5rem for less clutter
+  margin-top: 1.5rem;
+}
+
+/* Utility: safe grid variants that enforce a reasonable minimum column
+  width so grids can't collapse into many skinny columns. These are used
+  by settings JS so the layout remains readable while still honoring the
+  configured number of columns. */
+.sortable-container.grid-cols-1-safe { grid-template-columns: repeat(1, minmax(320px, 1fr)); }
+.sortable-container.grid-cols-2-safe { grid-template-columns: repeat(2, minmax(320px, 1fr)); }
+.sortable-container.grid-cols-3-safe { grid-template-columns: repeat(3, minmax(320px, 1fr)); }
+.sortable-container.grid-cols-4-safe { grid-template-columns: repeat(4, minmax(320px, 1fr)); }
+
+#stats-view .sortable-container {
+  display: grid;
+  // ensure columns don't collapse too narrow on large screens — keep two
+  // readable columns and allow collapse to single column via media queries
+  grid-template-columns: repeat(2, minmax(320px, 1fr));
+  gap: 2rem;  // Increased from 1.5rem
+  margin-top: 1.5rem;
+}
+
+[data-layout="grid"] .sortable-container {
+  display: grid;
+  // same safe minimum as above for any grid-layout mode
+  grid-template-columns: repeat(2, minmax(320px, 1fr));
+  gap: 2rem;  // Increased from 1.5rem
+  margin-top: 1.5rem;
+
+  .card {
+    min-height: 200px; // Ensure uniform height for all cards in grid layout
+  }
+}
+
+// On smaller screens, force vertical layout
+@media (max-width: map.get($breakpoints, md)) {
+  #stats-view .sortable-container,
+  [data-layout="grid"] .sortable-container {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+// Safety clamp: when a `.sortable-container` is controlling page layout we
+// intentionally keep inner grids to a conservative two-column maximum. Some
+// inner components (timer-stats, metrics dashboards, filter grids, etc.) use
+// `auto-fit` or 3+ columns for dense layouts. That creates a visual 3+ column
+// effect across sortable cards. Clamp common inner grids to two columns here
+// so the sortable layout stays consistent and matches the main app's two-column
+// design.
+.sortable-container :is(.timer-stats, .timers-container, .step-type-selector, .metrics-grid, .metrics-dashboard, .filter-grid, .insights-dashboard) {
+  // Prevent inner grids from collapsing so narrow columns can stack into three.
+  // Use a conservative minimum width so two columns remain readable and a
+  // third column won't fit on typical desktop widths.
+  grid-template-columns: repeat(2, minmax(260px, 1fr)) !important;
+}
+
+.draggable-section {
+  background: var(--white);
+  border-radius: 0.5rem;
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  transition: map.get($transitions, base);
+
+  &:hover {
+    box-shadow: var(--shadow-lg);
+  }
+
+  &.dragging {
+    opacity: 0.8;
+    transform: rotate(2deg);
+    box-shadow: var(--shadow-xl);
+  }
+}
+
+// Section header
+.section-header {
+  background: var(--gray-50);
+  padding: 1rem;
+  border-bottom: 1px solid var(--gray-200);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.section-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin: 0;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  transition: map.get($transitions, base);
+
+  &:hover {
+    background: var(--gray-100);
+  }
+
+  &.editing {
+    background: var(--primary-blue);
+    color: var(--white);
+  }
+}
+
+.section-controls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.drag-handle {
+  cursor: grab;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  transition: map.get($transitions, base);
+
+  &:hover {
+    background: var(--gray-200);
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+.minimize-btn,
+.popup-btn,
+.section-settings-btn {
+  background: none;
+  border: none;
+  font-size: 1.125rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  transition: map.get($transitions, base);
+  color: var(--gray-600);
+
+  &:hover {
+    background: var(--gray-200);
+    color: var(--gray-800);
+  }
+}
+
+// Title container for section header
+.title-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+// Edit title button
+.edit-title-btn {
+  background: none;
+  border: none;
+  font-size: 0.875rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  transition: map.get($transitions, base);
+  color: var(--gray-500);
+  opacity: 0;
+  transition: opacity map.get($transitions, base);
+
+  &:hover {
+    background: var(--gray-200);
+    color: var(--gray-700);
+  }
+}
+
+// Section header hover effects
+.section-header:hover .edit-title-btn {
+  opacity: 1;
+}
+
+// Title input field
+.title-input {
+  background: var(--white);
+  border: 2px solid var(--primary-blue);
+  border-radius: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--gray-900);
+  outline: none;
+  box-shadow: 0 0 0 1px var(--primary-blue);
+}
+
+// Section content
+.section-content {
+  padding: 1.5rem;
+
+  .minimized & {
+    display: none;
+  }
+}
+
+// Dark mode
+[data-theme='dark'] {
+  #app {
+    background: var(--dark-surface);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  }
+
+  .draggable-section {
+    background: var(--dark-surface);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+
+    &:hover {
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+    }
+  }
+
+  .section-header {
+    background: var(--dark-bg);
+    border-bottom-color: var(--dark-border);
+  }
+
+  .section-title {
+    color: var(--dark-text);
+
+    &:hover {
+      background: var(--dark-border);
+    }
+
+    &.editing {
+      background: #90caf9;
+      color: var(--dark-bg);
+    }
+  }
+
+  .drag-handle:hover {
+    background: var(--dark-border);
+  }
+
+  .minimize-btn,
+  .popup-btn {
+    color: var(--dark-text-muted);
+
+    &:hover {
+      background: var(--dark-border);
+      color: var(--dark-text);
+    }
+  }
+
+  .edit-title-btn {
+    color: var(--dark-text-muted);
+
+    &:hover {
+      background: var(--dark-border);
+      color: var(--dark-text);
+    }
+  }
+
+  .title-input {
+    background: var(--dark-surface);
+    border-color: #90caf9;
+    color: var(--dark-text);
+    box-shadow: 0 0 0 1px #90caf9;
+  }
+}
+
+// Responsive
+@media (max-width: map.get($breakpoints, lg)) {
+  .sortable-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: map.get($breakpoints, sm)) {
+  #app {
+    padding: 0.75rem;
+    margin: 0.25rem;
+    border-radius: 0.25rem;
+    min-height: calc(100vh - 0.5rem);
+  }
+
+  .sortable-container {
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+    padding: 0 !important; // Override any inline padding
+  }
+
+  .section-header {
+    padding: 0.5rem;
+  }
+
+  .section-title {
+    font-size: 1rem;
+  }
+
+  .section-content {
+    padding: 0.75rem;
+  }
+}
+
+// Mobile responsiveness
+@media (max-width: 600px) {
+  #app {
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    min-height: 100vh;
+  }
+  .sortable-container {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+  }
+  .draggable-section {
+    border-radius: 0.25rem;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 0.75rem;
+  }
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0.5rem;
+  }
+  .section-title {
+    font-size: 1rem;
+    padding: 0.5rem;
+  }
+}
+
+// Extra small devices
+@media (max-width: 480px) {
+  .section-controls {
+    gap: 0.25rem;
+  }
+
+  .title-container {
+    gap: 0.25rem;
+  }
+}

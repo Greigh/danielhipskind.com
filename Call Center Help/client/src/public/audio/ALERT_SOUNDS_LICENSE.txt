@@ -1,0 +1,20 @@
+Alert Sound Files for Call Center Helper
+========================================
+
+The following .mp3 files were downloaded from Mixkit (https://mixkit.co/free-sound-effects/):
+
+- 209-preview.mp3: https://mixkit.co/free-sound-effects/alarm/
+- 255-preview.mp3: https://mixkit.co/free-sound-effects/bell/
+- 133-preview.mp3: https://mixkit.co/free-sound-effects/chime/
+
+Direct download URLs:
+- https://assets.mixkit.co/active_storage/sfx/209/209-preview.mp3
+- https://assets.mixkit.co/active_storage/sfx/255/255-preview.mp3
+- https://assets.mixkit.co/active_storage/sfx/133/133-preview.mp3
+
+License:
+--------
+These sound effects are provided by Mixkit and are free to use for commercial and non-commercial projects. No attribution required. See the full license at:
+https://mixkit.co/license/
+
+If you use these sounds, you agree to the terms of the Mixkit Free License.

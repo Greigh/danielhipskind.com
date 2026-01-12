@@ -1,0 +1,227 @@
+// Performance Metrics Section
+@use '../base/variables' as *;
+@use 'sass:map';
+
+// Performance Metrics Section
+// Performance Metrics Section
+#performance-metrics {
+  .metrics-dashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: map.get($spacing, 5);
+    margin-bottom: 1.5rem;
+
+    .metric-card {
+      background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg-hover) 100%);
+      border: 1px solid var(--border-color);
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      text-align: center;
+      transition: map.get($transitions, base);
+      position: relative;
+      overflow: hidden;
+
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-blue), var(--primary-blue-light));
+        border-radius: 0.5rem 0.5rem 0 0;
+      }
+
+      &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+        border-color: var(--primary-blue);
+      }
+
+      .metric-icon {
+        width: 64px;
+        height: 64px;
+        margin: 0 auto 1rem;
+        background: linear-gradient(135deg, var(--primary-blue), var(--primary-blue-light));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
+      }
+
+      h3 {
+        margin: 0 0 0.75rem 0;
+        font-size: 1.125rem;
+        color: var(--text-color);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .metric-value {
+        font-size: map.get($font-sizes, '4xl');
+        font-weight: 800;
+        color: var(--primary-blue);
+        margin-bottom: 0.5rem;
+        display: block;
+        text-shadow: 0 2px 4px rgba(25, 118, 210, 0.2);
+      }
+
+      .metric-label {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+      }
+
+      .metric-change {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.125rem;
+
+        &.positive {
+          color: var(--success-color);
+          background: rgba(76, 175, 80, 0.1);
+
+          &::before {
+            content: '↗';
+          }
+        }
+
+        &.negative {
+          color: var(--error-color);
+          background: rgba(244, 67, 54, 0.1);
+
+          &::before {
+            content: '↘';
+          }
+        }
+
+        &.neutral {
+          color: var(--text-muted);
+          background: rgba(158, 158, 158, 0.1);
+        }
+      }
+    }
+  }
+
+  .performance-chart {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+
+      h3 {
+        margin: 0;
+        color: var(--text-color);
+        font-size: 1.125rem;
+        font-weight: 600;
+      }
+
+      .chart-controls {
+        display: flex;
+        gap: 0.5rem;
+
+        .control-btn {
+          background: var(--bg-hover);
+          border: 1px solid var(--border-color);
+          border-radius: 0.25rem;
+          padding: 0.5rem 0.75rem;
+          cursor: pointer;
+          font-size: 0.875rem;
+          color: var(--text-color);
+          transition: map.get($transitions, base);
+
+          &:hover {
+            background: var(--primary-blue);
+            color: white;
+            transform: translateY(-1px);
+          }
+        }
+      }
+    }
+
+    canvas {
+      max-width: 100%;
+      height: 350px;
+      background: linear-gradient(135deg, var(--bg-color) 0%, var(--bg-hover) 100%);
+      border: 1px solid var(--border-color);
+      border-radius: 0.25rem;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+  }
+}
+
+// Dark mode
+[data-theme="dark"] {
+  #performance-metrics {
+    .metrics-dashboard {
+      .metric-card {
+        background: linear-gradient(135deg, var(--dark-surface) 0%, var(--dark-bg) 100%);
+        border-color: var(--dark-border);
+
+        &::before {
+          background: linear-gradient(90deg, var(--primary-blue), var(--primary-blue-light));
+        }
+
+        &:hover {
+          box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        h3 {
+          color: var(--dark-text);
+        }
+
+        .metric-change {
+          &.positive {
+            background: rgba(76, 175, 80, 0.2);
+          }
+
+          &.negative {
+            background: rgba(244, 67, 54, 0.2);
+          }
+
+          &.neutral {
+            background: rgba(158, 158, 158, 0.2);
+          }
+        }
+      }
+    }
+
+    .performance-chart {
+      background: var(--dark-surface);
+      border-color: var(--dark-border);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+
+      .chart-header h3 {
+        color: var(--dark-text);
+      }
+
+      .chart-controls .control-btn {
+        background: var(--dark-surface);
+        border-color: var(--dark-border);
+        color: var(--dark-text);
+      }
+
+      canvas {
+        background: linear-gradient(135deg, var(--dark-bg) 0%, var(--dark-surface) 100%);
+        border-color: var(--dark-border);
+      }
+    }
+  }
+}

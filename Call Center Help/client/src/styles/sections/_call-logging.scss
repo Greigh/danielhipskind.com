@@ -1,0 +1,168 @@
+// Call Logging Section
+@use '../base/variables' as *;
+@use 'sass:map';
+
+// Call Logging Section
+#call-logging {
+  .call-log-form {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+
+      @media (max-width: map.get($breakpoints, sm)) {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    label {
+      font-weight: 500;
+      color: var(--text-color);
+    }
+
+    input, select, textarea {
+      padding: 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 0.25rem;
+      background: var(--bg-color);
+      color: var(--text-color);
+      font-size: 1rem;
+
+      &:focus {
+        outline: none;
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 2px rgba(var(--primary-blue-rgb), 0.2);
+      }
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+    .btn-sm {
+      padding: 0.45rem 0.7rem;
+      font-size: 0.9rem;
+      border-radius: 0.25rem;
+    }
+  }
+
+  .call-controls {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-start;
+
+    .button {
+      flex: 1;
+      min-width: 120px;
+
+      &.active {
+        background: var(--success-color);
+        color: white;
+      }
+
+      &.inactive {
+        background: var(--error-color);
+        color: white;
+      }
+    }
+  }
+
+  .call-history {
+    h4 {
+      margin-top: 0;
+      margin-bottom: 0.75rem;
+      font-size: 1rem;
+    }
+    .no-calls {
+      color: var(--text-muted);
+      padding: 0.5rem 0;
+      list-style: none;
+    }
+    .call-item {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 0.25rem;
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+
+      .call-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+
+        .caller-info {
+          h4 {
+            margin: 0;
+            color: var(--text-color);
+          }
+
+          .call-type {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            text-transform: capitalize;
+          }
+        }
+
+        .call-time {
+          text-align: right;
+          font-size: 0.875rem;
+          color: var(--text-muted);
+        }
+      }
+
+      .call-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+
+        .detail-item {
+          .label {
+            font-weight: 500;
+            color: var(--text-color);
+            font-size: 0.875rem;
+          }
+
+          .value {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+          }
+        }
+      }
+
+      .call-notes {
+        background: var(--bg-color);
+        border: 1px solid var(--border-color);
+        border-radius: 0.25rem;
+        padding: 0.75rem;
+        font-size: 0.875rem;
+        color: var(--text-color);
+        white-space: pre-wrap;
+      }
+    }
+  }
+}
+
+// Dark mode
+[data-theme="dark"] {
+  #call-logging {
+    .call-item {
+      background: var(--card-bg-dark);
+      border-color: var(--border-color-dark);
+    }
+  }
+}

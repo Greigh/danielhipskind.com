@@ -1,0 +1,388 @@
+@use '../base/variables' as *;
+@use 'sass:map';
+
+// Button Components
+.button,
+button:not(.nav-tab):not(.tab-button) {
+  background: linear-gradient(90deg, #3498db 60%, var(--primary-blue) 100%);
+  color: var(--white);
+  border: none;
+  border-radius: 0.25rem;
+  padding: 0.5rem map.get($spacing, 5);
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: map.get($transitions, base);
+  outline: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  &:hover:not(:disabled) {
+    background: linear-gradient(90deg, var(--primary-blue) 60%, #3498db 100%);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.3);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  &.loading {
+    position: relative;
+    color: transparent;
+
+    &::after {
+      content: '';
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      top: 50%;
+      left: 50%;
+      margin-left: -8px;
+      margin-top: -8px;
+      border: 2px solid transparent;
+      border-top: 2px solid currentColor;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+  }
+
+  // Button variants
+  &.btn-secondary {
+    background: var(--gray-500);
+
+    &:hover:not(:disabled) {
+      background: var(--gray-600);
+    }
+  }
+
+  &.btn-success {
+    background: var(--success);
+
+    &:hover:not(:disabled) {
+      background: #15803d;
+    }
+  }
+
+  &.btn-warning {
+    background: var(--warning);
+
+    &:hover:not(:disabled) {
+      background: #c2410c;
+    }
+  }
+
+  &.btn-danger {
+    background: var(--error);
+
+    &:hover:not(:disabled) {
+      background: #b91c1c;
+    }
+  }
+
+  &.btn-outline {
+    background: transparent;
+    color: var(--primary-blue);
+    border: 2px solid var(--primary-blue);
+
+    &:hover:not(:disabled) {
+      background: var(--primary-blue);
+      color: var(--white);
+    }
+  }
+
+  &.btn-sm {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.875rem;
+  }
+
+  &.btn-lg {
+    padding: 0.75rem 1.5rem;
+    font-size: 1.125rem;
+  }
+}
+
+// Specific button styles
+.delete-note-btn,
+.remove-step-btn {
+  background: var(--error);
+  color: var(--white);
+  border: none;
+  border-radius: 0.25rem;
+  padding: 0.25rem 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-left: 0.5rem;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+
+  &:hover:not(:disabled),
+  &:focus {
+    background: #b91c1c; // hardcoded darker red for hover
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.12);
+    outline: none;
+  }
+
+  &:active {
+    background: #991b1b; // even darker for active
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  // Add a trash icon or X
+  &::before {
+    content: '\2716'; // Unicode heavy X
+    font-size: 1.1em;
+    margin-right: 0.3em;
+    display: inline-block;
+    vertical-align: middle;
+  }
+}
+
+.edit-note-btn,
+.save-note-btn {
+  background: var(--primary-blue);
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+}
+
+.copy-note-btn,
+.cancel-edit-btn {
+  background: var(--gray-500);
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+}
+
+// Scroll to top button
+.scroll-top-btn {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  width: 40px;
+  height: 40px;
+  background: var(--primary-blue);
+  color: var(--white);
+  border: none;
+  border-radius: 9999px;
+  font-size: 1.25rem;
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-lg);
+  z-index: map.get($z-index, tooltip);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    background: var(--primary-blue-dark);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// File upload button styling
+.file-upload-btn {
+  background: linear-gradient(90deg, #3498db 60%, var(--primary-blue) 100%);
+  color: var(--white);
+  border: none;
+  border-radius: 0.25rem;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: map.get($transitions, base);
+  outline: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+
+  &:hover:not(:disabled) {
+    background: linear-gradient(90deg, var(--primary-blue) 60%, #3498db 100%);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.3);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+}
+
+// Pattern management action buttons (compact styling for table actions)
+.move-up-btn,
+.move-down-btn,
+.edit-pattern-btn,
+.delete-pattern-btn,
+.save-edit-btn,
+.cancel-edit-btn {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+  border-radius: 0.125rem;
+  padding: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: map.get($transitions, base);
+  outline: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin: 0 0.25rem;
+
+  &:hover:not(:disabled) {
+    background: var(--surface);
+    color: var(--text);
+    border-color: var(--primary-blue);
+    transform: scale(1.05);
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.3);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+}
+
+.delete-pattern-btn {
+  &:hover:not(:disabled) {
+    background: var(--error);
+    color: var(--white);
+    border-color: var(--error);
+  }
+}
+
+.save-edit-btn {
+  background: var(--success);
+  color: var(--white);
+  border-color: var(--success);
+
+  &:hover:not(:disabled) {
+    background: #15803d;
+    border-color: #15803d;
+  }
+}
+
+.cancel-edit-btn {
+  background: var(--gray-500);
+  color: var(--white);
+  border-color: var(--gray-500);
+
+  &:hover:not(:disabled) {
+    background: var(--gray-600);
+    border-color: var(--gray-600);
+  }
+}
+
+// Dark mode
+[data-theme='dark'] {
+  .button,
+  button:not(.nav-tab):not(.tab-button) {
+    &.btn-outline {
+      color: #90caf9;
+      border-color: #90caf9;
+
+      &:hover:not(:disabled) {
+        background: #90caf9;
+        color: var(--dark-bg);
+      }
+    }
+  }
+
+  .scroll-top-btn {
+    background: #90caf9;
+    color: var(--dark-bg);
+
+    &:hover {
+      background: #42a5f5;
+    }
+  }
+
+  // Pattern management action buttons dark mode
+  .move-up-btn,
+  .move-down-btn,
+  .edit-pattern-btn,
+  .delete-pattern-btn,
+  .save-edit-btn,
+  .cancel-edit-btn {
+    background: transparent;
+    color: var(--dark-text-muted);
+    border-color: var(--dark-border);
+
+    &:hover:not(:disabled) {
+      background: var(--dark-surface);
+      color: var(--dark-text);
+      border-color: #90caf9;
+    }
+  }
+
+  .delete-pattern-btn {
+    &:hover:not(:disabled) {
+      background: #f87171;
+      color: var(--white);
+      border-color: #f87171;
+    }
+  }
+
+  .save-edit-btn {
+    background: #4ade80;
+    color: var(--white);
+    border-color: #4ade80;
+
+    &:hover:not(:disabled) {
+      background: #22c55e;
+      border-color: #22c55e;
+    }
+  }
+
+  .cancel-edit-btn {
+    background: var(--dark-border);
+    color: var(--dark-text);
+    border-color: var(--dark-border);
+
+    &:hover:not(:disabled) {
+      background: #6b7280;
+      border-color: #6b7280;
+    }
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

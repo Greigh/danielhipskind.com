@@ -1,0 +1,302 @@
+// Main SCSS file - imports all other styles
+@use 'sass:map';
+
+// Base styles (must come first)
+@use 'base/variables';
+@use 'base/reset';
+@use 'base/typography';
+@use 'base/utilities';
+
+// Sections
+@use 'sections/ai-insights';
+@use 'sections/analytics';
+@use 'sections/api-integration';
+@use 'sections/callflow';
+@use 'sections/camera';
+@use 'sections/crm';
+@use 'sections/dashboards';
+@use 'sections/email';
+@use 'sections/multichannel';
+@use 'sections/notes';
+@use 'sections/patterns';
+@use 'sections/performance';
+@use 'sections/qa';
+@use 'sections/settings';
+@use 'sections/telephony';
+@use 'sections/timer';
+@use 'sections/training';
+@use 'sections/voice-commands';
+@use 'sections/workflows';
+
+// Layout
+@use 'layout/container';
+@use 'layout/grid';
+@use 'layout/header';
+@use 'layout/footer';
+
+// Components
+@use 'components/buttons';
+@use 'components/cards';
+@use 'components/forms';
+@use 'components/modals';
+@use 'components/tabs';
+@use 'components/instance-controls';
+@use 'components/toasts';
+@use 'components/quick-actions';
+@use 'components/settings-search';
+@use 'components/welcome';
+
+// Features
+@use 'features/draggable';
+@use 'features/floating';
+@use 'features/themes';
+@use 'features/auth';
+@use 'features/dark-mode-overrides';
+@use 'features/scripts';
+@use 'features/voice-recording';
+@use 'features/collaboration';
+@use 'features/call-logging';
+@use 'features/tasks';
+@use 'features/reporting';
+
+// Vendor overrides (last)
+@use 'vendor/third-party';
+
+// Global body styles
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-sans); // Changed to CSS variable
+  background: var(--gray-50);
+  color: var(--gray-900);
+  line-height: 1.6;
+}
+
+// Dark mode for body
+[data-theme='dark'] {
+  body {
+    background: var(--dark-bg);
+    color: var(--dark-text);
+  }
+}
+
+// Themed static page for privacy, terms, contact
+.themed-static-page {
+  background: var(--gray-50);
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow-lg);
+  padding: 1.5rem;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  color: var(--gray-900);
+  font-size: 1rem;
+  line-height: 1.7;
+  text-align: left;
+
+  h2 {
+    margin-bottom: 2rem;
+  }
+
+  h3 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  p {
+    margin-bottom: 1.5rem;
+  }
+
+  ul,
+  ol {
+    margin-bottom: 1.5rem;
+  }
+
+  li {
+    margin-bottom: 0.5rem;
+  }
+
+  ul {
+    list-style: disc;
+    padding-left: 1.5rem;
+  }
+
+  ol {
+    list-style: decimal;
+    padding-left: 1.5rem;
+  }
+}
+
+[data-theme='dark'] .themed-static-page {
+  background: var(--dark-surface);
+  color: var(--gray-100);
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--dark-border);
+}
+
+[data-theme='dark'] .themed-static-page a {
+  color: #90caf9;
+  text-decoration: underline;
+}
+
+[data-theme='dark'] .themed-static-page a:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+  .themed-static-page {
+    padding: 0.5rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+  }
+}
+
+// Update notification styles
+.update-notification {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 1000;
+  max-width: 400px;
+  background: var(--gray-900);
+  color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  animation: slideIn 0.3s ease-out;
+
+  .update-notification-content {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+  }
+
+  .update-notification-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+  }
+
+  .update-notification-text {
+    flex: 1;
+  }
+
+  .update-notification-title {
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .update-notification-message {
+    font-size: 0.875rem;
+    color: var(--gray-300);
+  }
+
+  .update-notification-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .update-btn {
+    padding: 0.5rem 0.75rem;
+    border: none;
+    border-radius: 0.125rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &.update-refresh {
+      background: var(--primary-blue);
+      color: white;
+
+      &:hover {
+        background: #1565c0; // Darker blue
+      }
+    }
+
+    &.update-dismiss {
+      background: var(--gray-700);
+      color: var(--gray-200);
+
+      &:hover {
+        background: var(--gray-600);
+      }
+    }
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse-green {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes pulse-red {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes warning-pulse {
+  0%,
+  100% {
+    box-shadow: 0 8px 32px rgba(220, 38, 38, 0.2);
+  }
+  50% {
+    box-shadow: 0 8px 32px rgba(220, 38, 38, 0.4);
+  }
+}
+
+@keyframes expired-pulse {
+  0% {
+    box-shadow: 0 8px 32px rgba(220, 38, 38, 0.3);
+  }
+  50% {
+    box-shadow: 0 12px 40px rgba(220, 38, 38, 0.5);
+  }
+  100% {
+    box-shadow: 0 8px 32px rgba(220, 38, 38, 0.3);
+  }
+}
+
+// Dark mode adjustments
+body.dark-mode {
+  .update-notification {
+    background: var(--gray-800);
+    color: var(--gray-100);
+
+    .update-notification-message {
+      color: var(--gray-400);
+    }
+
+    .update-btn.update-dismiss {
+      background: var(--gray-600);
+      color: var(--gray-300);
+
+      &:hover {
+        background: var(--gray-500);
+      }
+    }
+  }
+}

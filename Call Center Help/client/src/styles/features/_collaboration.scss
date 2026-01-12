@@ -1,0 +1,305 @@
+// Team Collaboration Feature Styles
+.chat-interface {
+  display: flex;
+  flex-direction: column;
+  height: 500px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  overflow: hidden;
+
+  .chat-messages {
+    flex: 1;
+    padding: 0.75rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    .chat-message {
+      max-width: 80%;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.5rem;
+      position: relative;
+
+      &.own-message {
+        align-self: flex-end;
+        background: var(--primary-blue);
+        color: white;
+        border-bottom-right-radius: 0.125rem;
+
+        .message-header {
+          color: rgba(255, 255, 255, 0.8);
+        }
+      }
+
+      &.other-message {
+        align-self: flex-start;
+        background: var(--bg);
+        border: 1px solid var(--border-color);
+        color: var(--text);
+        border-bottom-left-radius: 0.125rem;
+
+        .message-header {
+          color: var(--text-muted);
+        }
+      }
+
+      .message-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.25rem;
+        font-size: 0.75rem;
+
+        .message-sender {
+          font-weight: 600;
+        }
+
+        .message-time {
+          opacity: 0.7;
+        }
+      }
+
+      .message-content {
+        line-height: 1.4;
+        word-wrap: break-word;
+      }
+
+      .message-status {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        margin-top: 0.25rem;
+        font-size: 0.75rem;
+        opacity: 0.7;
+
+        .status-icon {
+          font-size: 0.875rem;
+        }
+      }
+    }
+
+    // Typing indicator
+    .typing-indicator {
+      align-self: flex-start;
+      background: var(--bg);
+      border: 1px solid var(--border-color);
+      border-radius: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+
+      .typing-dots {
+        display: flex;
+        gap: 2px;
+
+        .dot {
+          width: 4px;
+          height: 4px;
+          border-radius: 50%;
+          background: var(--text-muted);
+          animation: typing 1.4s infinite;
+
+          &:nth-child(2) {
+            animation-delay: 0.2s;
+          }
+
+          &:nth-child(3) {
+            animation-delay: 0.4s;
+          }
+        }
+      }
+    }
+  }
+
+  .chat-input {
+    border-top: 1px solid var(--border-color);
+    padding: 0.75rem;
+    background: var(--bg);
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-end;
+
+    input[type="text"] {
+      flex: 1;
+      padding: 2.5rem 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 0.5rem;
+      background: var(--card-bg);
+      color: var(--text);
+      font-size: 1rem;
+      resize: none;
+
+      &:focus {
+        outline: none;
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      }
+
+      &::placeholder {
+        color: var(--text-muted);
+      }
+    }
+
+    .btn-send {
+      padding: 2.5rem 0.75rem;
+      background: var(--primary-blue);
+      color: white;
+      border: 1px solid var(--primary-blue);
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+
+      &:hover:not(:disabled) {
+        background: var(--primary-blue-dark, #2563eb);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+      }
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .send-icon {
+        font-size: 1.125rem;
+      }
+    }
+  }
+}
+
+.team-members {
+  margin-top: 1rem;
+
+  h4 {
+    margin: 0 0 0.75rem 0;
+    color: var(--text);
+    font-size: 1.125rem;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.5rem;
+
+    .team-member {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 0.5rem;
+      padding: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+
+      &:hover {
+        border-color: var(--primary-blue);
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+      }
+
+      .member-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--primary-blue);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 1.125rem;
+        flex-shrink: 0;
+      }
+
+      .member-info {
+        flex: 1;
+
+        .member-name {
+          font-weight: 600;
+          color: var(--text);
+          margin-bottom: 2px;
+        }
+
+        .member-role {
+          font-size: 0.875rem;
+          color: var(--text-muted);
+        }
+      }
+
+      .member-status {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        border: 2px solid var(--card-bg);
+        flex-shrink: 0;
+
+        &.status-online {
+          background: var(--success);
+        }
+
+        &.status-away {
+          background: var(--warning);
+        }
+
+        &.status-offline {
+          background: var(--gray-400);
+        }
+      }
+    }
+  }
+}
+
+@keyframes typing {
+  0%, 60%, 100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  30% {
+    transform: translateY(-10px);
+    opacity: 1;
+  }
+}
+
+// Dark mode overrides
+[data-theme="dark"] {
+  .chat-interface {
+    .chat-messages .chat-message {
+      &.other-message {
+        background: var(--dark-bg);
+        border-color: var(--border-color);
+      }
+    }
+
+    .chat-input {
+      background: var(--dark-bg);
+      border-color: var(--border-color);
+
+      input[type="text"] {
+        background: var(--card-bg);
+        border-color: var(--border-color);
+
+        &:focus {
+          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+      }
+    }
+  }
+
+  .team-members ul .team-member {
+    &:hover {
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+    }
+  }
+}

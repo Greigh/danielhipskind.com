@@ -1,0 +1,270 @@
+// CRM Integration Section
+@use '../base/variables' as *;
+@use 'sass:map';
+
+// CRM Integration Section
+#crm-integration {
+  .crm-config {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+
+      label {
+        font-weight: 500;
+        color: var(--text-color);
+        font-size: 0.875rem;
+      }
+
+      select {
+        padding: 0.5rem 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 0.25rem;
+        background: var(--bg-color);
+        color: var(--text-color);
+
+        &:focus {
+          outline: none;
+          border-color: var(--primary-blue);
+        }
+      }
+    }
+  }
+
+  .crm-config {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+
+    .config-section {
+      margin-bottom: 1rem;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      h4 {
+        margin: 0 0 0.75rem 0;
+        color: var(--text-color);
+        font-size: 1rem;
+      }
+
+      .form-group {
+        display: grid;
+        grid-template-columns: 200px 1fr;
+        gap: 0.75rem;
+        align-items: center;
+        margin-bottom: 0.75rem;
+
+        label {
+          font-weight: 500;
+          color: var(--text-color);
+        }
+
+        input, select {
+          padding: 0.5rem 0.75rem;
+          border: 1px solid var(--border-color);
+          border-radius: 0.25rem;
+          background: var(--bg-color);
+          color: var(--text-color);
+
+          &:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+          }
+
+          &.error {
+            border-color: var(--error-color);
+            background: rgba(239, 68, 68, 0.05);
+          }
+        }
+
+        .error-message {
+          color: var(--error-color);
+          font-size: 0.75rem;
+          margin-top: 0.25rem;
+          font-weight: 500;
+        }
+      }
+    }
+  }
+
+  .customer-search {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+
+    .search-form {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+
+      input {
+        flex: 1;
+        padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 0.25rem;
+        background: var(--bg-color);
+        color: var(--text-color);
+
+        &:focus {
+          outline: none;
+          border-color: var(--primary-blue);
+        }
+      }
+
+      .button {
+        padding: 0.75rem 1rem;
+        white-space: nowrap;
+      }
+    }
+
+    .search-results {
+      .customer-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 0.25rem;
+        margin-bottom: 0.5rem;
+        background: var(--bg-color);
+        cursor: pointer;
+
+        &:hover {
+          background: var(--hover-bg);
+        }
+
+        .customer-info {
+          h4 {
+            margin: 0 0 0.25rem 0;
+            color: var(--text-color);
+          }
+
+          .customer-details {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+          }
+        }
+
+        .customer-actions {
+          display: flex;
+          gap: 0.5rem;
+
+          .button {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+          }
+        }
+      }
+    }
+  }
+
+  .recent-interactions {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    padding: 1rem;
+
+    .interaction-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem;
+      border-bottom: 1px solid var(--border-color);
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      .interaction-info {
+        h5 {
+          margin: 0 0 0.25rem 0;
+          color: var(--text-color);
+          font-size: 1rem;
+        }
+
+        .interaction-meta {
+          font-size: 0.875rem;
+          color: var(--text-muted);
+        }
+      }
+
+      .interaction-status {
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.125rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        text-transform: uppercase;
+
+        &.completed {
+          background: var(--success-color);
+          color: white;
+        }
+
+        &.pending {
+          background: var(--warning-color);
+          color: white;
+        }
+
+        &.failed {
+          background: var(--error-color);
+          color: white;
+        }
+      }
+    }
+  }
+}
+
+// Demo mode indicator
+.demo-indicator {
+  display: inline-block;
+  margin-left: 0.5rem;
+
+  .demo-badge {
+    background: linear-gradient(135deg, #ff6b35, #f7931e);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.125rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(255, 107, 53, 0.3);
+    animation: pulse 2s infinite;
+  }
+}
+
+// Dark mode
+[data-theme="dark"] {
+  #crm-integration {
+    .crm-config, .customer-search, .recent-interactions {
+      background: var(--card-bg-dark);
+      border-color: var(--border-color-dark);
+    }
+
+    .customer-item, .interaction-item {
+      background: var(--bg-color-dark);
+      border-color: var(--border-color-dark);
+
+      &:hover {
+        background: var(--hover-bg-dark);
+      }
+    }
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}

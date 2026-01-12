@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Privacy Policy - Call Center Helper</title>
+    <link rel="stylesheet" href="styles/main.css" />
+
+    <!-- SEO & Open Graph -->
+    <meta
+      name="description"
+      content="Adamas Privacy Policy. Learn how we handle and protect your data."
+    />
+    <meta
+      name="keywords"
+      content="privacy policy, data protection, adamas, gdpr"
+    />
+    <meta name="author" content="Daniel Hipskind" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:url"
+      content="https://danielhipskind.com/adamas/privacy"
+    />
+    <meta property="og:title" content="Privacy Policy | Adamas" />
+    <meta
+      property="og:description"
+      content="Transparency about how Adamas collects and uses your data."
+    />
+    <meta
+      property="og:image"
+      content="https://danielhipskind.com/adamas/og-image.png"
+    />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:title" content="Privacy Policy | Adamas" />
+    <meta
+      property="twitter:description"
+      content="Transparency about how Adamas collects and uses your data."
+    />
+    <meta
+      property="twitter:image"
+      content="https://danielhipskind.com/adamas/og-image.png"
+    />
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://danielhipskind.com/adamas/privacy" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="app-header">
+        <div class="header-content">
+          <div class="app-title"><h1>💎 Adamas</h1></div>
+          <nav class="main-nav">
+            <a href="<%= htmlWebpackPlugin.files.publicPath %>" class="nav-tab"
+              >Main</a
+            >
+            <a
+              href="<%= htmlWebpackPlugin.files.publicPath %>privacy"
+              class="nav-tab"
+              >Privacy Policy</a
+            >
+            <a
+              href="<%= htmlWebpackPlugin.files.publicPath %>terms"
+              class="nav-tab"
+              >Terms of Use</a
+            >
+            <a
+              href="<%= htmlWebpackPlugin.files.publicPath %>contact"
+              class="nav-tab"
+              >Contact Us</a
+            >
+          </nav>
+        </div>
+      </header>
+      <main class="container card themed-static-page max-w-600 auto-margin">
+        <h2>Privacy Policy</h2>
+        <p><em>Last updated: December 1, 2025</em></p>
+
+        <h3>Information We Collect</h3>
+        <p>
+          Adamas is designed with privacy in mind. Most application data,
+          including notes, patterns, settings, and user preferences, remains
+          stored locally on your device using your browser's local storage and
+          is never transmitted to our servers.
+        </p>
+        <p>
+          <strong
+            >We do not collect any personal information from anonymous
+            users.</strong
+          >
+          Server-side data collection only occurs when you create and log into
+          an Adamas account for advanced features:
+        </p>
+        <ul>
+          <li>
+            <strong>User Account Information:</strong> Username, email, and
+            encrypted password for authentication purposes
+          </li>
+          <li>
+            <strong>Twilio SMS Integration:</strong> Account credentials
+            (Account SID, Auth Token, phone number) are stored securely on our
+            servers for SMS functionality, but only when you explicitly
+            configure this feature
+          </li>
+        </ul>
+        <p>
+          All integration credentials are encrypted and associated only with
+          your specific user account. You can view, modify, or delete this
+          information at any time through your account settings, or delete your
+          account entirely to remove all server-stored data.
+        </p>
+
+        <h3>Anonymous Usage</h3>
+        <p>
+          You can use Adamas without creating an account or logging in. When
+          used anonymously:
+        </p>
+        <ul>
+          <li>
+            <strong>No personal information is collected or stored</strong>
+          </li>
+          <li><strong>No data is transmitted to our servers</strong></li>
+          <li><strong>All functionality works entirely offline</strong></li>
+          <li>
+            <strong
+              >Advanced features like SMS integration are not available</strong
+            >
+          </li>
+          <li><strong>Your privacy is completely protected</strong></li>
+        </ul>
+        <p>
+          Anonymous usage provides full access to core call center tools
+          including number formatting, call logging, notes, timers, and basic
+          settings.
+        </p>
+
+        <h3>Local Storage Usage</h3>
+        <p>
+          The application uses browser local storage (which never leaves your
+          browser) to save your:
+        </p>
+        <ul>
+          <li>
+            <strong>Number Formatter Data:</strong> Custom formatting patterns
+            for account numbers, phone numbers, Social Security Numbers (SSNs),
+            and other sensitive numerical data
+          </li>
+          <li>Call notes and conversation records</li>
+          <li>Application settings and preferences</li>
+          <li>Timer configurations</li>
+          <li>Theme selections</li>
+          <li>Other user interface customizations</li>
+        </ul>
+        <p>
+          This data never leaves your device and is not accessible to us or any
+          third parties.
+          <strong
+            >For anonymous users, this is the only data storage used.</strong
+          >
+        </p>
+        <p>
+          Integration credentials (such as Twilio API keys) are only stored
+          securely on our servers when you are logged into a Call Center Helper
+          account and explicitly configure these advanced features through the
+          authenticated settings interface.
+        </p>
+
+        <h3>Number Formatter and Sensitive Data</h3>
+        <p>
+          The Number Formatter feature allows you to create and apply custom
+          formatting patterns to various types of sensitive numerical data. This
+          includes:
+        </p>
+        <ul>
+          <li>
+            <strong>Phone Numbers:</strong> Formatting for domestic and
+            international numbers
+          </li>
+          <li>
+            <strong>Account Numbers:</strong> Bank accounts, credit cards,
+            customer IDs
+          </li>
+          <li>
+            <strong>Social Security Numbers (SSNs):</strong> US Social Security
+            Numbers
+          </li>
+          <li>
+            <strong>Other Sensitive Data:</strong> Tax IDs, license numbers,
+            policy numbers, etc.
+          </li>
+        </ul>
+        <p>
+          <strong>Privacy Protection:</strong> All formatting patterns and the
+          data you input for formatting remain stored locally on your device
+          only. No sensitive numerical data or formatting patterns are ever
+          transmitted to our servers or third parties. The Number Formatter
+          operates entirely offline and within your browser's secure
+          environment.
+        </p>
+        <p>
+          You are responsible for ensuring compliance with applicable data
+          protection laws (such as HIPAA, GDPR, CCPA) when handling sensitive
+          information through the Number Formatter. We recommend using this
+          feature only with data you have proper authorization to process.
+        </p>
+
+        <h3>CRM Integration and API Keys</h3>
+        <p>
+          Call Center Helper supports integration with various CRM systems
+          (Cisco Finesse, Five9, Salesforce, Zendesk, HubSpot, and Microsoft
+          Dynamics 365). When you configure CRM connections:
+        </p>
+        <ul>
+          <li>API keys and credentials are stored locally in your browser</li>
+          <li>Sensitive information is never transmitted to our servers</li>
+          <li>You can disconnect and clear stored credentials at any time</li>
+          <li>Demo mode is available when CRM systems are unreachable</li>
+        </ul>
+        <p>
+          All CRM API calls are made directly from your browser to the CRM
+          provider's servers. We do not proxy, log, or store any CRM data.
+        </p>
+
+        <h3>SMS and Twilio Integration</h3>
+        <p>
+          Call Center Helper supports SMS messaging through Twilio integration
+          for authenticated users only.
+          <strong>This feature is not available to anonymous users.</strong>
+          When you log into your Call Center Helper account and configure SMS
+          functionality:
+        </p>
+        <ul>
+          <li>
+            Your Twilio Account SID, Auth Token, and phone number are stored
+            securely on our servers, encrypted and associated only with your
+            user account
+          </li>
+          <li>
+            SMS message content is transmitted directly to Twilio's servers for
+            delivery and is not stored or logged by us
+          </li>
+          <li>
+            Phone numbers you send SMS messages to are processed temporarily
+            during message delivery and are not retained after transmission
+          </li>
+          <li>
+            You have full control to configure, modify, or remove your Twilio
+            credentials at any time through the Settings page
+          </li>
+          <li>
+            SMS functionality requires your explicit setup and cannot be used
+            without your Twilio account configuration
+          </li>
+        </ul>
+        <p>
+          All SMS communications are handled securely through Twilio's encrypted
+          API. We do not have access to your SMS message content, delivery
+          status, or recipient information beyond what is necessary for the
+          immediate transmission process.
+        </p>
+
+        <h3>Cookies and Tracking</h3>
+        <p>
+          We do not use cookies, tracking pixels, analytics services, or any
+          form of user tracking. Your browsing activity is not monitored or
+          recorded by us.
+        </p>
+
+        <h3>Data Security</h3>
+        <p>
+          Since all data is stored locally on your device, security depends on
+          your device's security measures. We recommend:
+        </p>
+        <ul>
+          <li>Using strong device passwords</li>
+          <li>Keeping your browser and operating system updated</li>
+          <li>Using antivirus software</li>
+          <li>Being cautious with shared devices</li>
+        </ul>
+
+        <h3>Cloudflare Services</h3>
+        <p>
+          We use Cloudflare to provide content delivery network (CDN) services,
+          DDoS protection, and web security for our application. When you access
+          Call Center Helper:
+        </p>
+        <ul>
+          <li>
+            Cloudflare may collect standard web server logs including IP
+            addresses, browser information, and access timestamps
+          </li>
+          <li>
+            This information is used solely for security, performance, and
+            analytics purposes to protect and optimize our service
+          </li>
+          <li>
+            Cloudflare's data collection and privacy practices are governed by
+            their own
+            <a href="https://www.cloudflare.com/privacy/" target="_blank"
+              >Privacy Policy</a
+            >
+          </li>
+          <li>
+            We have configured Cloudflare to minimize data collection and
+            respect user privacy
+          </li>
+          <li>
+            Cloudflare data is not combined with any personal information we may
+            collect from authenticated users
+          </li>
+        </ul>
+        <p>
+          Cloudflare helps ensure the security and reliability of our service
+          while maintaining your privacy. Their services do not affect the local
+          storage of your data or our server-side data collection policies.
+        </p>
+
+        <h3>Children's Privacy</h3>
+        <p>
+          This application is not intended for children under 13 years of age.
+          We do not knowingly collect any information from children under 13.
+        </p>
+
+        <h3>Changes to This Privacy Policy</h3>
+        <p>
+          We may update this Privacy Policy from time to time. Any changes will
+          be reflected on this page with an updated "Last updated" date.
+        </p>
+
+        <h3>Contact Us</h3>
+        <p>
+          If you have any questions about this Privacy Policy, please contact us
+          through our
+          <a href="contact">contact page</a>.
+        </p>
+      </main>
+      <footer class="copyright-footer">
+        <div class="container">
+          <p>
+            &copy; 2025 Daniel Hipskind.
+            <a href="privacy">Privacy Policy</a> &bull;
+            <a href="terms">Terms of Use</a> &bull;
+            <a href="contact">Contact</a>
+          </p>
+        </div>
+      </footer>
+    </div>
+    <script>
+      // Apply saved theme to static pages
+      (function () {
+        try {
+          const savedTheme = localStorage.getItem('theme') || 'light';
+          document.documentElement.setAttribute('data-theme', savedTheme);
+        } catch (e) {
+          // Fallback to light theme if localStorage is not available
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
+      })();
+    </script>
+  </body>
+</html>

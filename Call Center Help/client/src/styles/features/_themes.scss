@@ -1,0 +1,151 @@
+@use '../base/variables' as *;
+@use 'sass:map';
+
+// Theme switching functionality
+body {
+  transition: background-color map.get($transitions, base), color map.get($transitions, base);
+}
+
+// Theme transition for all elements
+* {
+  transition: 
+    background-color map.get($transitions, base),
+    border-color map.get($transitions, base),
+    color map.get($transitions, base),
+    box-shadow map.get($transitions, base);
+}
+
+// Theme indicator
+.theme-indicator {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  background: var(--primary-blue);
+  color: var(--white);
+  padding: 0.5rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: map.get($transitions, base);
+  z-index: map.get($z-index, tooltip);
+  pointer-events: none;
+
+  &.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Dark theme styles
+[data-theme="dark"] {
+  body {
+    background: var(--dark-bg);
+    color: var(--dark-text);
+  }
+
+  .theme-indicator {
+    background: #90caf9;
+    color: var(--dark-bg);
+  }
+
+  // Override any remaining light mode styles
+  @supports (scrollbar-width: thin) {
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: var(--dark-border) var(--dark-bg);
+    }
+  }
+
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: var(--dark-bg);
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: var(--dark-border);
+    border-radius: 4px;
+
+    &:hover {
+      background: var(--dark-text-muted);
+    }
+  }
+
+  *::-webkit-scrollbar-corner {
+    background: var(--dark-bg);
+  }
+}
+
+// Theme preference detection
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --background-color: #121212;
+    --text-color: #ffffff;
+    --primary-color: #bb86fc;
+    --secondary-color: #03dac6;
+    --error-color: #cf6679;
+  }
+}
+
+// High contrast mode support
+@media (prefers-contrast: high) {
+  :root {
+    --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.2);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.2);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.2);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.2);
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    border-width: 2px;
+  }
+}
+
+// Reduced motion support
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .floating-window {
+    animation: none;
+  }
+}
+
+// Print styles
+@media print {
+  .floating-overlay,
+  .floating-window,
+  .drag-handle,
+  .popup-btn,
+  .minimize-btn,
+  .section-controls {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  .draggable-section {
+    break-inside: avoid;
+    box-shadow: none !important;
+    border: 1px solid #ccc;
+  }
+}

@@ -1,0 +1,57 @@
+@use '../base/variables' as *;
+@use 'sass:map';
+
+// Voice Commands Section
+#voice-commands {
+  .voice-controls {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+
+    button {
+      flex: 1;
+      min-width: 120px;
+    }
+  }
+
+  .voice-status {
+    background: var(--bg-hover);
+    padding: 0.75rem;
+    border-radius: 0.375rem;
+    border: 1px solid var(--border-color);
+    margin-bottom: 1rem;
+    font-weight: 500;
+    color: var(--gray-700);
+    text-align: center;
+  }
+
+  .voice-commands-list {
+    h4 {
+      margin-bottom: 0.75rem;
+      color: var(--gray-700);
+      font-size: 1.125rem;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+
+      li {
+        background: var(--bg-hover);
+        padding: 0.75rem;
+        margin-bottom: 0.5rem;
+        border-radius: 0.375rem;
+        border-left: 4px solid var(--primary-blue);
+        font-family: $font-family-mono;
+        font-size: 0.875rem;
+        color: var(--gray-700);
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
+  }
+}

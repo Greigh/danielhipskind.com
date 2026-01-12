@@ -1,0 +1,412 @@
+@use '../base/variables' as *;
+@use 'sass:map';
+
+// Call Flow Builder Section
+#call-flow-builder {
+  .tab-content {
+    padding: 1.5rem;
+  }
+
+  .flow-step-input {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .flow-steps {
+    min-height: 200px;
+  }
+
+  .flow-step {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: var(--gray-50);
+    border-radius: 0.25rem;
+    margin-bottom: 0.5rem;
+    border-left: 4px solid var(--primary-blue);
+    transition: map.get($transitions, base);
+
+    &:hover {
+      background: var(--gray-100);
+      transform: translateX(4px);
+    }
+  }
+
+  .step-number {
+    background: var(--primary-blue);
+    color: var(--white);
+    border-radius: 9999px;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.875rem;
+    flex-shrink: 0;
+  }
+
+  .step-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: 1rem;
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+
+    &:focus {
+      background: var(--white);
+      box-shadow: 0 0 0 2px var(--primary-blue);
+    }
+  }
+
+  .bulk-add-area {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--gray-200);
+  }
+
+  .bulk-steps-textarea {
+    width: 100%;
+    min-height: 120px;
+    margin-bottom: 0.75rem;
+    font-family: $font-family-sans;
+    resize: vertical;
+  }
+
+  .empty-steps-msg {
+    text-align: center;
+    color: var(--gray-500);
+    font-style: italic;
+    padding: 2rem;
+    border: 2px dashed var(--gray-200);
+    border-radius: 0.25rem;
+  }
+
+  // Flow steps list styling
+  .flow-steps-list {
+    margin: 1.5rem 0;
+    padding-left: 0.5rem;
+
+    .flow-step-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.75rem;
+      padding: 0.8rem 1rem;
+      border-radius: 0.25rem;
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+
+      &::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 4px;
+        background: var(--primary-blue);
+      }
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+      }
+
+      &.completed {
+        background: #f0fdf4;
+        border-color: var(--success);
+
+        &::after {
+          background: var(--success);
+        }
+
+        .step-text {
+          text-decoration: line-through;
+          color: rgba(22, 163, 74, 0.6);
+        }
+
+        .step-number {
+          background: var(--success);
+        }
+      }
+    }
+
+    .step-checkbox {
+      position: relative;
+      width: 22px;
+      height: 22px;
+      margin-right: 1rem;
+      flex-shrink: 0;
+
+      input {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+        height: 0;
+        width: 0;
+      }
+
+      .checkmark {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 22px;
+        width: 22px;
+        background-color: transparent;
+        border: 2px solid var(--gray-300);
+        border-radius: 4px;
+        transition: all 0.2s ease;
+
+        &:after {
+          content: "";
+          position: absolute;
+          display: none;
+          left: 6px;
+          top: 2px;
+          width: 6px;
+          height: 11px;
+          border: solid white;
+          border-width: 0 2px 2px 0;
+          transform: rotate(45deg);
+        }
+      }
+
+      input:checked ~ .checkmark {
+        background-color: var(--success);
+        border-color: var(--success);
+
+        &:after {
+          display: block;
+        }
+      }
+
+      &:hover .checkmark {
+        border-color: var(--success);
+        background-color: rgba(22, 163, 74, 0.1);
+      }
+    }
+
+    .step-text {
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+
+    .step-number {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      margin-right: 12px;
+      font-size: 0.875rem;
+      font-weight: 700;
+      background-color: var(--primary-blue);
+      border-radius: 50%;
+      flex-shrink: 0;
+      transition: background-color 0.2s ease;
+    }
+  }
+
+  // Flow header styling
+  .flow-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--gray-200);
+
+    h3 {
+      margin: 0;
+      font-size: 1.125rem;
+      color: var(--primary-blue);
+      position: relative;
+      padding-left: 1.5rem;
+
+      &::before {
+        content: "📋";
+        font-size: 1.2rem;
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+    }
+
+    #clear-checkmarks {
+      padding: 0.4rem 0.75rem;
+      font-size: 0.875rem;
+      background: linear-gradient(90deg, var(--gray-500) 60%, var(--gray-600) 100%);
+      border-radius: 9999px;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: linear-gradient(90deg, var(--gray-600) 60%, var(--gray-700) 100%);
+        transform: translateY(-1px);
+      }
+    }
+  }
+
+  // Progress indicator
+  .flow-progress {
+    margin-bottom: 1.5rem;
+    background: var(--gray-50);
+    padding: 1rem;
+    border-radius: 0.25rem;
+    border: 1px solid var(--gray-200);
+
+    .progress-bar {
+      height: 8px;
+      border-radius: 9999px;
+      overflow: hidden;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary-blue-light) 0%, var(--primary-blue) 100%);
+      transition: width 0.3s ease;
+      border-radius: 9999px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .progress-text {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.875rem;
+      margin-top: 0.5rem;
+    }
+  }
+
+  // Empty state
+  .empty-steps-msg {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 3rem 2rem;
+    text-align: center;
+
+    &:before {
+      content: "📋";
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+  }
+}
+
+/* Hide generated flow placeholder when empty to avoid awkward spacing */
+.generated-flow:empty {
+  display: none;
+}
+
+[data-theme="dark"] .flow-progress {
+  background: var(--dark-surface);
+  border-color: var(--dark-border);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+
+  .progress-bar {
+    background-color: var(--dark-border);
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+
+  .progress-fill {
+    background: linear-gradient(90deg, var(--primary-blue) 0%, var(--primary-blue-light) 100%);
+    box-shadow: 0 0 15px rgba(144, 202, 249, 0.5);
+  }
+
+  .progress-text {
+    color: var(--dark-text);
+  }
+}
+
+[data-theme="dark"] .flow-steps-list .flow-step-item {
+  background: var(--dark-surface);
+  border-color: var(--dark-border);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+
+  &::after {
+    background: var(--primary-blue-light);
+    box-shadow: 0 0 10px rgba(144, 202, 249, 0.6);
+  }
+
+  &:hover {
+    background: var(--dark-bg);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-3px);
+    border-color: var(--primary-blue-light);
+  }
+
+  &.completed {
+    background: rgba(22, 163, 74, 0.2);
+    border-color: rgba(22, 163, 74, 0.4);
+
+    &::after {
+      background: var(--success);
+      box-shadow: 0 0 10px rgba(22, 163, 74, 0.6);
+    }
+
+    .step-text {
+      color: var(--dark-text-muted);
+    }
+
+    .step-number {
+      background: var(--success);
+      box-shadow: 0 0 10px rgba(22, 163, 74, 0.6);
+    }
+  }
+}
+
+[data-theme="dark"] .step-checkbox {
+  .checkmark {
+    border-color: var(--dark-border);
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+
+    &:after {
+      border-color: var(--dark-bg);
+    }
+  }
+
+  &:hover .checkmark {
+    border-color: var(--success);
+    background-color: rgba(22, 163, 74, 0.2);
+  }
+}
+
+[data-theme="dark"] .step-text {
+  color: var(--dark-text);
+}
+
+@media (max-width: map.get($breakpoints, sm)) {
+  #call-flow-builder {
+    .tab-content {
+      padding: 0.75rem;
+    }
+    
+    .flow-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+      
+      #clear-checkmarks {
+        align-self: flex-end;
+      }
+    }
+    
+    .flow-step-item {
+      padding: 0.5rem;
+      
+      .step-text {
+        font-size: 0.875rem;
+      }
+    }
+    
+    .flow-progress {
+      padding: 0.5rem;
+    }
+  }
+}

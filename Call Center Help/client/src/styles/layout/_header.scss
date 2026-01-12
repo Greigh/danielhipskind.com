@@ -1,0 +1,280 @@
+@use '../base/variables' as *;
+@use 'sass:map';
+
+// App Header & Navigation
+.app-header {
+  background: linear-gradient(
+    135deg,
+    var(--primary-blue) 0%,
+    var(--primary-blue-dark) 25%,
+    var(--primary-blue) 50%,
+    var(--primary-blue-dark) 75%,
+    var(--primary-blue) 100%
+  );
+  color: var(--white);
+  padding: 0;
+  margin: -24px -24px 24px -24px;
+  border-radius: 0.5rem 0.5rem 0 0;
+  box-shadow: var(--shadow-lg), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+  }
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.5rem;
+  max-width: 100%;
+}
+
+.app-title {
+  h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--white);
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    .beta-badge {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--primary-blue);
+      background: var(--white);
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      vertical-align: middle;
+      transform: translateY(-1px);
+    }
+  }
+}
+
+.main-nav {
+  display: flex;
+  gap: 0.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.nav-tab {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 0.5rem;
+  padding: 1rem 1rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--white);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg), 0 0 20px rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.25);
+
+    &::before {
+      left: 100%;
+    }
+  }
+
+  &.active {
+    background: var(--white);
+    color: var(--primary-blue);
+    font-weight: 600;
+    box-shadow: var(--shadow-xl), 0 0 25px rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: translateY(-1px);
+
+    &:hover {
+      background: var(--gray-50);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-xl), 0 0 30px rgba(255, 255, 255, 0.4);
+    }
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+  }
+}
+
+// Dark mode
+[data-theme='dark'] {
+  .app-header {
+    background: linear-gradient(
+      135deg,
+      var(--dark-surface) 0%,
+      var(--dark-bg) 25%,
+      var(--dark-surface) 50%,
+      var(--dark-bg) 75%,
+      var(--dark-surface) 100%
+    );
+    box-shadow: var(--shadow-xl), 0 0 0 1px rgba(144, 202, 249, 0.1) inset;
+
+    &::before {
+      background: radial-gradient(circle at 20% 80%, rgba(144, 202, 249, 0.1) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 20%, rgba(144, 202, 249, 0.05) 0%, transparent 50%);
+    }
+  }
+
+  .app-title h1 {
+    color: var(--dark-text);
+  }
+
+  .nav-tab {
+    background: rgba(144, 202, 249, 0.1);
+    color: rgba(226, 232, 240, 0.8);
+    border-color: rgba(144, 202, 249, 0.15);
+
+    &::before {
+      background: linear-gradient(90deg, transparent, rgba(144, 202, 249, 0.2), transparent);
+    }
+
+    &:hover {
+      background: rgba(144, 202, 249, 0.2);
+      color: var(--dark-text);
+      box-shadow: var(--shadow-lg), 0 0 20px rgba(144, 202, 249, 0.1);
+      border-color: rgba(144, 202, 249, 0.25);
+    }
+
+    &.active {
+      background: #90caf9;
+      color: var(--dark-surface);
+      border-color: rgba(144, 202, 249, 0.4);
+      box-shadow: var(--shadow-xl), 0 0 25px rgba(144, 202, 249, 0.3);
+
+      &:hover {
+        background: #81c1f7;
+        box-shadow: var(--shadow-xl), 0 0 30px rgba(144, 202, 249, 0.4);
+      }
+    }
+
+    &:focus {
+      box-shadow: 0 0 0 3px rgba(144, 202, 249, 0.3);
+    }
+  }
+}
+
+// Responsive
+@media (max-width: map.get($breakpoints, md)) {
+  .header-content {
+    flex-direction: column;
+    gap: 0.75rem;
+    text-align: center;
+  }
+
+  .app-title h1 {
+    font-size: 1.25rem;
+    text-align: center;
+  }
+
+  .main-nav {
+    justify-content: center;
+    width: 100%;
+
+    .nav-tab {
+      flex: 1;
+      text-align: center;
+      padding: 2.5rem 0.75rem;
+    }
+  }
+}
+
+// Update your media queries for better small screen support
+@media (max-width: map.get($breakpoints, sm)) {
+  .app-header {
+    margin: -#{0.75rem} -#{0.75rem} #{map.get(
+        $spacing,
+        3
+      )} -#{0.75rem};
+  }
+
+  .header-content {
+    padding: 0.75rem;
+  }
+
+  .app-title h1 {
+    font-size: 1.125rem;
+  }
+}
+
+// Extra small devices
+@media (max-width: 480px) {
+  .app-title h1 {
+    font-size: 1rem;
+  }
+
+  .main-nav {
+    gap: 0.25rem;
+  }
+
+  .nav-tab {
+    padding: 0.5rem 0.5rem;
+    font-size: 0.75rem;
+  }
+}
+
+// Mobile responsiveness
+@media (max-width: 600px) {
+  .app-header {
+    margin: -8px -8px 12px -8px;
+    border-radius: 0.25rem 0.25rem 0 0;
+    padding: 0;
+  }
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0.5rem 0.5rem;
+  }
+  .app-title h1 {
+    font-size: 1.125rem;
+    text-align: left;
+  }
+  .main-nav {
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+  .nav-tab {
+    width: 100%;
+    font-size: 0.875rem;
+    padding: 2.5rem 0.75rem;
+    justify-content: center;
+  }
+}

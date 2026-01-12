@@ -1,0 +1,198 @@
+@use '../base/variables' as *;
+@use 'sass:map';
+
+// Display utilities
+.hidden { display: none !important; }
+.block { display: block !important; }
+.inline { display: inline !important; }
+.inline-block { display: inline-block !important; }
+.flex { display: flex !important; }
+.inline-flex { display: inline-flex !important; }
+.grid { display: grid !important; }
+
+// Flexbox utilities
+.flex-col { flex-direction: column; }
+.flex-row { flex-direction: row; }
+.items-center { align-items: center; }
+.items-start { align-items: flex-start; }
+.items-end { align-items: flex-end; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.justify-start { justify-content: flex-start; }
+.justify-end { justify-content: flex-end; }
+
+// Spacing utilities
+.gap-1 { gap: 0.25rem; }
+.gap-2 { gap: 0.5rem; }
+.gap-3 { gap: 0.75rem; }
+.gap-4 { gap: 1rem; }
+.gap-6 { gap: 1.5rem; }
+
+// Margin utilities
+.m-0 { margin: 0 !important; }
+.mt-4 { margin-top: 1rem; }
+.mb-4 { margin-bottom: 1rem; }
+.ml-4 { margin-left: 1rem; }
+.mr-4 { margin-right: 1rem; }
+
+// Padding utilities
+.p-0 { padding: 0 !important; }
+.p-4 { padding: 1rem; }
+.pt-4 { padding-top: 1rem; }
+.pb-4 { padding-bottom: 1rem; }
+.pl-4 { padding-left: 1rem; }
+.pr-4 { padding-right: 1rem; }
+
+// Border radius utilities
+.rounded { border-radius: 0.25rem; }
+.rounded-lg { border-radius: 0.5rem; }
+.rounded-xl { border-radius: 0.75rem; }
+.rounded-full { border-radius: 9999px; }
+
+// Width utilities
+.w-full { width: 100%; }
+
+// Container utilities
+.max-w-600 { 
+  max-width: 600px; 
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.auto-margin { 
+  margin: 2rem auto; 
+}
+
+// Build date styles
+.build-date {
+  font-size: 0.9em;
+  color: var(--gray-400);
+}
+
+// Message utilities
+.success-message {
+  display: none;
+  margin-top: 1rem;
+  color: var(--success);
+}
+
+.error-message {
+  display: none;
+  margin-top: 1rem;
+  color: var(--error);
+}
+
+// Flex gap utilities
+.flex-gap-10 {
+  display: flex;
+  gap: 10px;
+}
+
+// Margin utilities extended
+.mb-2 { margin-bottom: 0.5rem; }
+.mb-1 { margin-bottom: 0.25rem; }
+.mb-10 { margin-bottom: 10px; }
+.mb-8 { margin-bottom: 8px; }
+.mb-4px { margin-bottom: 4px; }
+
+// Display utilities with width
+.block-w-full {
+  display: block;
+  width: 100%;
+}
+
+.block-w-full-mb-8 {
+  display: block;
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+// Tooltip wrapper
+.tooltip-wrapper {
+  position: relative;
+  display: inline-block;
+  margin-left: 4px;
+}
+
+.tooltip-text {
+  visibility: hidden;
+  background: var(--gray-900);
+  color: var(--white);
+  text-align: center;
+  border-radius: 4px;
+  padding: 6px 8px;
+  position: absolute;
+  z-index: 10;
+  bottom: 125%;
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: 0.875rem;
+  box-shadow: var(--shadow-md);
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: var(--gray-900) transparent transparent transparent;
+  }
+}
+
+.tooltip-wrapper:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+// Custom sound option
+.custom-sound-option {
+  display: none;
+  width: 100%;
+}
+
+.block-mb-4px {
+  display: block;
+  margin-bottom: 4px;
+}
+
+// Shadow utilities
+.shadow-sm { box-shadow: var(--shadow-sm); }
+.shadow-md { box-shadow: var(--shadow-md); }
+.shadow-lg { box-shadow: var(--shadow-lg); }
+.shadow-xl { box-shadow: var(--shadow-xl); }
+
+// Color utilities
+.text-primary { color: var(--primary-blue); }
+.text-success { color: var(--success); }
+.text-warning { color: var(--warning); }
+.text-error { color: var(--error); }
+.text-muted { color: var(--gray-500); }
+
+// Background utilities
+.bg-primary { background-color: var(--primary-blue); }
+.bg-success { background-color: var(--success); }
+.bg-warning { background-color: var(--warning); }
+.bg-error { background-color: var(--error); }
+.bg-gray-50 { background-color: var(--gray-50); }
+.bg-white { background-color: var(--white); }
+
+// Width utilities
+.w-full { width: 100%; }
+.w-auto { width: auto; }
+
+// Cursor utilities
+.cursor-pointer { cursor: pointer; }
+.cursor-not-allowed { cursor: not-allowed; }
+
+// Opacity utilities
+.opacity-50 { opacity: 0.5; }
+.opacity-75 { opacity: 0.75; }
+
+// Transition utilities
+.transition { transition: map.get($transitions, base); }
+.transition-fast { transition: map.get($transitions, fast); }
+.transition-slow { transition: map.get($transitions, slow); }

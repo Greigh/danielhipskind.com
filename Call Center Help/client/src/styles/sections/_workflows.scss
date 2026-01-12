@@ -1,0 +1,500 @@
+// Automated Workflows Section
+@use '../base/variables' as *;
+@use 'sass:map';
+
+#automated-workflows {
+  .workflow-builder {
+    margin-bottom: 1.5rem;
+
+    .workflow-steps {
+      min-height: 200px;
+      border: 2px dashed var(--border-color);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      background: var(--bg-hover);
+      transition: map.get($transitions, base);
+
+      &:hover {
+        border-color: var(--primary-blue);
+        background: rgba(var(--primary-blue-rgb, 25, 118, 210), 0.05);
+      }
+
+      .workflow-step {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 0.25rem;
+        padding: 0.75rem;
+        margin-bottom: 0.75rem;
+        position: relative;
+        transition: map.get($transitions, base);
+
+        &:hover {
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          transform: translateY(-1px);
+        }
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+
+        .step-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 0.5rem;
+
+          .step-number {
+            background: var(--primary-blue);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.875rem;
+          }
+
+          .step-type {
+            font-weight: 600;
+            color: var(--text-color);
+            text-transform: capitalize;
+            flex: 1;
+            margin-left: 0.5rem;
+
+            &::before {
+              content: '';
+              display: inline-block;
+              width: 12px;
+              height: 12px;
+              border-radius: 50%;
+              margin-right: 0.5rem;
+              background: var(--primary-blue);
+            }
+
+            &.call::before { background: var(--success); }
+            &.email::before { background: var(--warning); }
+            &.task::before { background: var(--info); }
+            &.wait::before { background: var(--gray-400); }
+            &.condition::before { background: var(--secondary-orange); }
+            &.notification::before { background: var(--secondary-green); }
+          }
+
+          .btn-danger {
+            background: var(--error);
+            color: white;
+            border: none;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: map.get($transitions, base);
+
+            &:hover {
+              background: var(--error-dark, #b91c1c);
+            }
+          }
+        }
+
+        .step-config {
+          font-size: 0.875rem;
+          color: var(--text-muted);
+
+          div {
+            margin-bottom: 0.25rem;
+
+            &:last-child {
+              margin-bottom: 0;
+            }
+
+            strong {
+              color: var(--text-color);
+              margin-right: 0.25rem;
+            }
+          }
+        }
+
+        .step-actions {
+          position: absolute;
+          top: 0.5rem;
+          right: 0.5rem;
+          display: flex;
+          gap: 0.25rem;
+          opacity: 0;
+          transition: opacity 0.2s;
+
+          .step-action-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 0.25rem;
+            color: var(--text-muted);
+            transition: map.get($transitions, base);
+
+            &:hover {
+              background: var(--bg-hover);
+              color: var(--text-color);
+            }
+          }
+        }
+
+        &:hover .step-actions {
+          opacity: 1;
+        }
+      }
+
+      .empty-workflow {
+        text-align: center;
+        color: var(--text-muted);
+        padding: 1.5rem 0;
+
+        .empty-icon {
+          font-size: 48px;
+          margin-bottom: 0.5rem;
+          opacity: 0.5;
+        }
+
+        p {
+          margin: 0;
+          font-size: 1rem;
+        }
+      }
+    }
+
+    .builder-actions {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+
+      .button {
+        background: var(--primary-blue);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 0.25rem;
+        cursor: pointer;
+        font-weight: 500;
+        transition: map.get($transitions, base);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+
+        &:hover {
+          background: var(--primary-blue-dark);
+          transform: translateY(-1px);
+        }
+
+        &:active {
+          transform: translateY(0);
+        }
+
+        &.btn-secondary {
+          background: var(--gray-500);
+          color: white;
+
+          &:hover {
+            background: var(--gray-600);
+          }
+        }
+
+        &.btn-success {
+          background: var(--success);
+          color: white;
+
+          &:hover {
+            background: var(--success-dark, #15803d);
+          }
+        }
+      }
+    }
+  }
+
+  .active-workflows {
+    h4 {
+      margin: 0 0 0.75rem 0;
+      color: var(--text-color);
+      font-size: 1.125rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      &::before {
+        content: '⚙️';
+        font-size: 1.25rem;
+      }
+    }
+
+    .workflow-item {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 0.25rem;
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: map.get($transitions, base);
+
+      &:hover {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      .workflow-info {
+        flex: 1;
+
+        strong {
+          display: block;
+          color: var(--text-color);
+          font-size: 1rem;
+          margin-bottom: 0.25rem;
+        }
+
+        span {
+          color: var(--text-muted);
+          font-size: 0.875rem;
+        }
+      }
+
+      .workflow-actions {
+        display: flex;
+        gap: 0.25rem;
+
+        .button {
+          padding: 0.25rem 0.5rem;
+          border: 1px solid var(--border-color);
+          border-radius: 0.25rem;
+          background: var(--card-bg);
+          color: var(--text-color);
+          cursor: pointer;
+          font-size: 0.875rem;
+          transition: map.get($transitions, base);
+
+          &:hover {
+            background: var(--bg-hover);
+          }
+
+          &.btn-danger {
+            border-color: var(--error);
+            color: var(--error);
+
+            &:hover {
+              background: var(--error);
+              color: white;
+            }
+          }
+
+          &.btn-secondary {
+            border-color: var(--gray-400);
+            color: var(--text-muted);
+
+            &:hover {
+              background: var(--gray-100);
+              color: var(--text-color);
+            }
+          }
+        }
+      }
+    }
+
+    .no-workflows {
+      text-align: center;
+      color: var(--text-muted);
+      padding: 1.5rem 0;
+      border: 2px dashed var(--border-color);
+      border-radius: 0.5rem;
+
+      p {
+        margin: 0;
+        font-size: 1rem;
+      }
+    }
+  }
+
+  .step-type-selector {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+
+    .step-type-option {
+      background: var(--card-bg);
+      border: 2px solid var(--border-color);
+      border-radius: 0.25rem;
+      padding: 0.75rem;
+      text-align: center;
+      cursor: pointer;
+      transition: map.get($transitions, base);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+
+      &:hover {
+        border-color: var(--primary-blue);
+        background: rgba(var(--primary-blue-rgb, 25, 118, 210), 0.05);
+        transform: translateY(-2px);
+      }
+
+      &.selected {
+        border-color: var(--primary-blue);
+        background: var(--primary-blue);
+        color: white;
+      }
+
+      .step-icon {
+        font-size: 24px;
+      }
+
+      .step-label {
+        font-weight: 500;
+        font-size: 0.875rem;
+      }
+
+      .step-description {
+        font-size: 0.75rem;
+        opacity: 0.8;
+        margin-top: -#{0.25rem};
+      }
+    }
+  }
+
+  .step-config-form {
+    background: var(--bg-hover);
+    border: 1px solid var(--border-color);
+    border-radius: 0.25rem;
+    padding: 1rem;
+    margin-top: 0.75rem;
+
+    .form-group {
+      margin-bottom: 0.75rem;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 0.25rem;
+        font-weight: 500;
+        color: var(--text-color);
+        font-size: 0.875rem;
+      }
+
+      input, select, textarea {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid var(--border-color);
+        border-radius: 0.25rem;
+        background: var(--card-bg);
+        color: var(--text-color);
+        font-size: 1rem;
+        transition: map.get($transitions, base);
+
+        &:focus {
+          outline: none;
+          border-color: var(--primary-blue);
+          box-shadow: 0 0 0 2px rgba(var(--primary-blue-rgb, 25, 118, 210), 0.2);
+        }
+      }
+
+      textarea {
+        resize: vertical;
+        min-height: 80px;
+      }
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: flex-end;
+      margin-top: 1rem;
+
+      .button {
+        padding: 0.5rem 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: 0.25rem;
+        background: var(--card-bg);
+        color: var(--text-color);
+        cursor: pointer;
+        font-weight: 500;
+        transition: map.get($transitions, base);
+
+        &:hover {
+          background: var(--bg-hover);
+        }
+
+        &.btn-primary {
+          background: var(--primary-blue);
+          color: white;
+          border-color: var(--primary-blue);
+
+          &:hover {
+            background: var(--primary-blue-dark);
+          }
+        }
+      }
+    }
+  }
+
+  .workflow-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+
+    .modal-content {
+      background: var(--card-bg);
+      border-radius: 0.5rem;
+      padding: map.get($spacing, 5);
+      max-width: 500px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+
+        h3 {
+          margin: 0;
+          color: var(--text-color);
+        }
+
+        .close-btn {
+          background: none;
+          border: none;
+          font-size: 24px;
+          cursor: pointer;
+          color: var(--text-muted);
+          padding: 0;
+          width: 30px;
+          height: 30px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+
+          &:hover {
+            background: var(--bg-hover);
+            color: var(--text-color);
+          }
+        }
+      }
+    }
+  }
+}

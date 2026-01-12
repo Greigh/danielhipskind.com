@@ -1,0 +1,1912 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Settings - Adamas</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💎</text></svg>"
+    />
+    <link rel="stylesheet" href="<%= htmlWebpackPlugin.files.publicPath %>styles/main.css" />
+
+    <!-- SEO & Open Graph -->
+    <meta name="description" content="Configure your Adamas workspace. Manage roles, integrations, and preferences." />
+    <meta name="keywords" content="settings, configuration, preferences, adamas, customization" />
+    
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://danielhipskind.com/adamas/settings" />
+    <meta property="og:title" content="Settings | Adamas" />
+    <meta property="og:description" content="Customize your Adamas experience to fit your workflow." />
+    <meta property="og:image" content="https://danielhipskind.com/adamas/og-image.png" />
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:title" content="Settings | Adamas" />
+    <meta property="twitter:description" content="Customize your Adamas experience to fit your workflow." />
+    <meta property="twitter:image" content="https://danielhipskind.com/adamas/og-image.png" />
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://danielhipskind.com/adamas/settings" />
+
+  </head>
+  <body>
+    <div id="app">
+      <!-- Update the main app header -->
+      <header class="app-header">
+        <div class="header-content">
+        </div>
+      </header>
+
+      <!-- Settings View -->
+      <div id="settings-view" class="app-view">
+        <div class="settings-header container">
+            <h1>App Settings</h1>
+          </div>
+        <div class="container settings-container">
+          <div class="sortable-container">
+            <div class="settings-grid">
+            <!-- Account Settings Section (Auth Only) -->
+            <section id="account-settings-section" class="card settings-section toggleable-section draggable-section" data-section="account" style="display: none;">
+              <div class="section-header">
+                <div class="drag-handle">⋮⋮</div>
+                <h2 class="section-title">Account Settings</h2>
+                <div class="section-controls">
+                  <button class="edit-title-btn" title="Edit Title">✎</button>
+                  <button class="float-btn" title="Float">⧉</button>
+                </div>
+              </div>
+              <div class="section-content section-content--cols">
+                
+                <!-- Profile Update -->
+                <div class="settings-group">
+                  <h4 class="settings-group-title">Profile Information</h4>
+                  <form id="update-profile-form" class="settings-form">
+                    <div class="setting-item">
+                      <div class="setting-info">
+                        <label for="account-username" class="setting-label">Username</label>
+                      </div>
+                      <div class="setting-control">
+                        <input type="text" id="account-username" name="username" class="form-input" autocomplete="username" />
+                      </div>
+                    </div>
+                    <div class="setting-item">
+                      <div class="setting-info">
+                        <label for="account-email" class="setting-label">Email</label>
+                      </div>
+                      <div class="setting-control">
+                        <input type="email" id="account-email" name="email" class="form-input" autocomplete="email" />
+                      </div>
+                    </div>
+                    <div class="form-actions">
+                      <button type="submit" class="btn btn-primary">Update Profile</button>
+                    </div>
+                  </form>
+                </div>
+
+                <!-- Password Update -->
+                 <div class="settings-group" style="margin-top: 1.5rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+                  <h4 class="settings-group-title">Change Password</h4>
+                  <form id="change-password-form" class="settings-form">
+                    <div class="setting-item">
+                      <div class="setting-info">
+                        <label for="current-password" class="setting-label">Current Password</label>
+                      </div>
+                      <div class="setting-control">
+                        <input type="password" id="current-password" name="currentPassword" class="form-input" autocomplete="current-password" />
+                      </div>
+                    </div>
+                    <div class="setting-item">
+                      <div class="setting-info">
+                        <label for="new-password" class="setting-label">New Password</label>
+                      </div>
+                      <div class="setting-control">
+                        <input type="password" id="new-password" name="newPassword" class="form-input" autocomplete="new-password" />
+                      </div>
+                    </div>
+                    <div class="form-actions">
+                      <button type="submit" class="btn btn-secondary">Change Password</button>
+                    </div>
+                  </form>
+                </div>
+
+              </div>
+            </section>
+
+            <!-- Appearance Section -->
+            <section class="card settings-section toggleable-section draggable-section" data-section="appearance">
+              <div class="section-header">
+                <div class="drag-handle">⋮⋮</div>
+                  <h2 class="section-title">Appearance</h2>
+                </div>
+                <div class="section-controls">
+                  <button class="edit-title-btn" title="Edit Title">✎</button>
+                  <button class="float-btn" title="Float">⧉</button>
+                </div>
+              </div>
+                    <div class="section-content section-content--cols">
+                  <div class="setting-info">
+                    <div class="setting-label">Theme</div>
+                    <div class="setting-description">
+                      Choose your preferred color scheme
+                    </div>
+                  </div>
+                  <div class="setting-control">
+                    <select id="theme-select" name="theme-select" aria-label="Theme">
+                      <option value="dark">Dark</option>
+                      <option value="auto">Auto</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="setting-item">
+                  <div class="setting-info">
+                    <div class="setting-label">Font Size</div>
+                    <div class="setting-description">
+                      Adjust the base font size for better readability
+                    </div>
+                  </div>
+                  <div class="setting-control">
+                    <select id="font-size-select" name="font-size-select" aria-label="Font Size">
+                      <option value="small">Small</option>
+                      <option value="medium">Medium</option>
+                      <option value="large">Large</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="setting-item">
+                  <div class="setting-info">
+                    <div class="setting-label">Compact Mode</div>
+                    <div class="setting-description">
+                      Reduce spacing and padding for more content on screen
+                    </div>
+                  </div>
+                  <div class="setting-control">
+                    <label class="switch" for="compact-mode-toggle">
+                      <input
+                        type="checkbox"
+                        id="compact-mode-toggle"
+                        name="compact-mode-toggle"
+                        aria-label="Compact Mode"
+                      />
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Call Logging Configuration -->
+            <section class="card settings-section toggleable-section draggable-section" data-section="call-logging-config">
+              <div class="section-header">
+                <div class="drag-handle">⋮⋮</div>
+                <div class="title-container">
+                  <h2 class="section-title">Call Logging</h2>
+                </div>
+                <div class="section-controls">
+                  <button class="edit-title-btn" title="Edit Title">✎</button>
+                  <button class="float-btn" title="Float">⧉</button>
+                </div>
+              </div>
+              <div class="section-content section-content--cols">
+                <div class="setting-item">
+                  <div class="setting-info">
+                    <div class="setting-label">Verification Fields</div>
+                    <div class="setting-description">
+                      Show checkboxes for verifying caller details (Name, DOB, Address, SSN)
+                    </div>
+                  </div>
+                  <div class="setting-control">
+                    <label class="switch" for="toggle-call-logging-verification">
+                      <input
+                        type="checkbox"
+                        id="toggle-call-logging-verification"
+                        name="toggle-call-logging-verification"
+                        aria-label="Verification Fields"
+                      />
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="setting-item">
+                  <div class="setting-info">
+                    <div class="setting-label">Sensitive Data</div>
+                    <div class="setting-description">
+                      Enable fields for Account Number and SSN (masked)
+                    </div>
+                  </div>
+                  <div class="setting-control">
+                    <label class="switch" for="toggle-call-logging-sensitive">
+                      <input
+                        type="checkbox"
+                        id="toggle-call-logging-sensitive"
+                        name="toggle-call-logging-sensitive"
+                        aria-label="Sensitive Data"
+                      />
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+
+                  <div class="setting-item">
+                     <div class="setting-info">
+                       <div class="setting-label">Note Templates</div>
+                       <div class="setting-description">Enable quick-insert note templates</div>
+                     </div>
+                    <div class="setting-control">
+                      <label class="switch" for="toggle-call-logging-templates">
+                        <input type="checkbox" id="toggle-call-logging-templates" name="toggle-call-logging-templates" aria-label="Note Templates">
+                        <span class="slider"></span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <!-- Advanced Configuration Trigger -->
+                  <div class="setting-item" style="margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+                    <div class="setting-info">
+                      <div class="setting-label">Advanced Configuration</div>
+                      <div class="setting-description">Manage templates and custom form fields</div>
+                    </div>
+                    <div class="setting-control">
+                      <button id="open-call-settings-btn" class="button btn-secondary">Configure...</button>
+                    </div>
+                  </div>
+              </div>
+            </section>
+
+   <!-- Modal moved to index.html -->
+
+            <!-- Visible Sections -->
+            <section class="card settings-section toggleable-section draggable-section" data-section="visible-sections">
+              <div class="section-header">
+                <div class="drag-handle">⋮⋮</div>
+                <div class="title-container">
+                  <h2 class="section-title">Visible Sections</h2>
+                </div>
+                <div class="section-controls">
+                  <button class="edit-title-btn" title="Edit Title">✎</button>
+                  <button class="float-btn" title="Float">⧉</button>
+                </div>
+              </div>
+              <div class="section-content section-content--cols">
+                <!-- Search and Quick Actions -->
+                <div class="visible-sections-controls">
+                  <div class="search-container">
+                    <input type="text" id="sections-search" placeholder="Search sections..." class="search-input" autocomplete="off">
+                    <span class="search-icon">🔍</span>
+                  </div>
+                  <div class="quick-actions">
+                    <button class="btn btn-sm" id="expand-all-groups">Expand All</button>
+                    <button class="btn btn-sm" id="collapse-all-groups">Collapse All</button>
+                  </div>
+                </div>
+
+                <div class="setting-item minimal-mode-item">
+                  <div class="setting-info">
+                    <div class="setting-icon">✨</div>
+                    <div class="setting-content">
+                      <div class="setting-label">Minimal Mode</div>
+                      <div class="setting-description">
+                        Show only essential sections (Pattern Formatter, Notes, Timer) to reduce clutter and focus on core functionality
+                      </div>
+                    </div>
+                  </div>
+                  <div class="setting-control">
+                    <label class="switch" for="toggle-minimal-mode">
+                      <input
+                        type="checkbox"
+                        id="toggle-minimal-mode"
+                        name="toggle-minimal-mode"
+                        aria-label="Minimal Mode"
+                        autocomplete="off"
+                      />
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Core Sections -->
+                <div class="settings-group core-sections">
+                  <div class="settings-group-header">
+                    <div class="group-icon">⭐</div>
+                    <div class="group-info">
+                      <h4 class="settings-group-title">Core Tools</h4>
+                      <div class="group-description">Essential tools for daily call center operations</div>
+                    </div>
+                    <div class="group-actions">
+                      <button class="group-toggle" data-group="core">Enable All</button>
+                    </div>
+                  </div>
+                  <div class="settings-group-content">
+
+
+                    <div class="setting-item">
+                      <div class="setting-info">
+                        <div class="setting-icon">📝</div>
+                        <div class="setting-content">
+                          <div class="setting-label">Notes</div>
+                          <div class="setting-description">
+                            Take timestamped notes during calls with automatic saving and organization
+                          </div>
+                        </div>
+                      </div>
+                      <div class="setting-control">
+                        <label class="switch" for="toggle-notes">
+                          <input
+                            type="checkbox"
+                            id="toggle-notes"
+                            name="toggle-notes"
+                            class="hidden-toggle"
+                            aria-label="Notes"
+                            autocomplete="off"
+                          />
+                          <span class="toggle-slider" aria-hidden="true"></span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div class="setting-item">
+                      <div class="setting-info">
+                        <div class="setting-icon">⏱️</div>
+                        <div class="setting-content">
+                          <div class="setting-label">Hold Timer</div>
+                          <div class="setting-description">
+                            Track call hold times with statistics, history, and customizable alerts
+                          </div>
+                        </div>
+                      </div>
+                      <div class="setting-control">
+                        <label class="switch" for="toggle-holdtimer">
+                          <input
+                            type="checkbox"
+                            id="toggle-holdtimer"
+                            name="toggle-holdtimer"
+                            class="hidden-toggle"
+                            aria-label="Hold Timer"
+                            autocomplete="off"
+                          />
+                          <span class="toggle-slider" aria-hidden="true"></span>
+                        </label>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+
+                <!-- Communication Sections -->
+                <div class="settings-group collapsible" id="communication-sections-group">
+                  <div class="settings-group-header">
+                    <div class="group-icon">📞</div>
+                    <div class="group-info">
+                      <h4 class="settings-group-title">Communication</h4>
+                      <div class="group-description">Tools for managing customer interactions and workflows</div>
+                    </div>
+                    <div class="group-actions">
+                      <button class="group-toggle" data-group="communication">Enable All</button>
+                      <button class="collapse-toggle" id="toggle-communication-sections" aria-expanded="false" aria-controls="communication-sections-content">
+                        <span class="toggle-icon">▼</span>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="settings-group-content" id="communication-sections-content" style="display: none;">
+
+                    <div class="setting-item">
+                      <div class="setting-info">
+                        <div class="setting-icon">📋</div>
+                        <div class="setting-content">
+                          <div class="setting-label">Call Flow Builder</div>
+                          <div class="setting-description">
+                            Create and manage step-by-step call handling procedures with checklists
+                          </div>
+                        </div>
+                      </div>
+                      <div class="setting-control">
+                        <label class="switch" for="toggle-callflow">
+                          <input
+                            type="checkbox"
+                            id="toggle-callflow"
+                            name="toggle-callflow"
+                            class="hidden-toggle"
+                            aria-label="Call Flow Builder"
+                            autocomplete="off"
+                          />
+                          <span class="toggle-slider" aria-hidden="true"></span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div class="setting-item">
+                      <div class="setting-info">
+                        <div class="setting-icon">📊</div>
+                        <div class="setting-content">
+                          <div class="setting-label">Call Logging</div>
+                          <div class="setting-description">
+                            Log call details, track customer interactions, and maintain call history
+                          </div>
+                        </div>
+                      </div>
+                      <div class="setting-control">
+                        <label class="switch" for="toggle-calllogging">
+                          <input
+                            type="checkbox"
+                            id="toggle-calllogging"
+                            name="toggle-calllogging"
+                            class="hidden-toggle"
+                            aria-label="Call Logging"
+                            autocomplete="off"
+                          />
+                          <span class="toggle-slider" aria-hidden="true"></span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div class="setting-item">
+                      <div class="setting-info">
+                        <div class="setting-icon">📜</div>
+                        <div class="setting-content">
+                          <div class="setting-label">Scripts</div>
+                          <div class="setting-description">
+                            Access pre-written call scripts and conversation guides
+                          </div>
+                        </div>
+                      </div>
+                      <div class="setting-control">
+                        <label class="switch" for="toggle-scripts">
+                          <input
+                            type="checkbox"
+                            id="toggle-scripts"
+                            name="toggle-scripts"
+                            class="hidden-toggle"
+                            aria-label="Scripts"
+                            autocomplete="off"
+                          />
+                          <span class="toggle-slider" aria-hidden="true"></span>
+                        </label>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+
+                <!-- Productivity Sections -->
+                <div class="settings-group collapsible" id="productivity-sections-group">
+                  <div class="settings-group-header">
+                    <div class="group-icon">⚡</div>
+                    <div class="group-info">
+                      <h4 class="settings-group-title">Productivity</h4>
+                      <div class="group-description">Tools to enhance efficiency and task management</div>
+                    </div>
+                    <div class="group-actions">
+                      <button class="group-toggle" data-group="productivity">Enable All</button>
+                      <button class="collapse-toggle" id="toggle-productivity-sections" aria-expanded="false" aria-controls="productivity-sections-content">
+                        <span class="toggle-icon">▼</span>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="settings-group-content" id="productivity-sections-content" style="display: none;">
+
+                    <div class="setting-item">
+                      <div class="setting-info">
+                        <div class="setting-icon">✅</div>
+                        <div class="setting-content">
+                          <div class="setting-label">Tasks</div>
+                          <div class="setting-description">
+                            Create and track tasks with priority levels and completion status
+                          </div>
+                        </div>
+                      </div>
+                      <div class="setting-control">
+                        <label class="switch" for="toggle-tasks">
+                          <input
+                            type="checkbox"
+                            id="toggle-tasks"
+                            name="toggle-tasks"
+                            class="hidden-toggle"
+                            aria-label="Tasks"
+                            autocomplete="off"
+                          />
+                          <span class="toggle-slider" aria-hidden="true"></span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div class="setting-item">
+                      <div class="setting-info">
+                        <div class="setting-icon">⏰</div>
+                        <div class="setting-content">
+                          <div class="setting-label">Time Tracking</div>
+                          <div class="setting-description">
+                            Track time spent on calls and tasks with billing integration
+                          </div>
+                        </div>
+                      </div>
+                      <div class="setting-control">
+                        <label class="switch" for="toggle-time-tracking">
+                          <input
+                            type="checkbox"
+                            id="toggle-time-tracking"
+                            name="toggle-time-tracking"
+                            aria-label="Time Tracking"
+                          />
+                          <span class="slider"></span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div class="setting-item">
+                      <div class="setting-info">
+                        <div class="setting-icon">🎙️</div>
+                        <div class="setting-content">
+                          <div class="setting-label">Voice Recording</div>
+                          <div class="setting-description">
+                            Record and manage call audio with quality assurance tools
+                          </div>
+                        </div>
+                      </div>
+                      <div class="setting-control">
+                        <label class="switch" for="toggle-voicerecording">
+                          <input
+                            type="checkbox"
+                            id="toggle-voicerecording"
+                            name="toggle-voicerecording"
+                            aria-label="Voice Recording"
+                          />
+                          <span class="toggle-slider"></span>
+                        </label>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+
+                <!-- Analytics Sections -->
+                <div class="settings-group collapsible" id="analytics-sections-group">
+                  <div class="settings-group-header">
+                    <div class="group-icon">📈</div>
+                    <div class="group-info">
+                      <h4 class="settings-group-title">Analytics & Insights</h4>
+                      <div class="group-description">Performance metrics and data analysis tools</div>
+                    </div>
+                    <div class="group-actions">
+                      <button class="group-toggle" data-group="analytics">Enable All</button>
+                      <button class="collapse-toggle" id="toggle-analytics-sections" aria-expanded="false" aria-controls="analytics-sections-content">
+                        <span class="toggle-icon">▼</span>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="settings-group-content" id="analytics-sections-content" style="display: none;">
+
+                    <div class="setting-item">
+                      <div class="setting-info">
+                        <div class="setting-icon">📊</div>
+                        <div class="setting-content">
+                          <div class="setting-label">Stats Dashboard</div>
+                          <div class="setting-description">
+                            View performance metrics, call statistics, and analytics dashboard
+                          </div>
+                        </div>
+                      </div>
+                      <div class="setting-control">
+                        <label class="switch" for="toggle-analytics">
+                          <input
+                            type="checkbox"
+                            id="toggle-analytics"
+                            name="toggle-analytics"
+                            aria-label="Stats"
+                            autocomplete="off"
+                          />
+                          <span class="slider"></span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div class="setting-item">
+                      <div class="setting-info">
+                        <div class="setting-icon">📈</div>
+                        <div class="setting-content">
+                          <div class="setting-label">Advanced Analytics</div>
+                          <div class="setting-description">
+                            Detailed reporting with charts, trends, and performance insights
+                          </div>
+                        </div>
+                      </div>
+                      <div class="setting-control">
+                        <label class="switch" for="toggle-advanced-analytics">
+                          <input
+                            type="checkbox"
+                            id="toggle-advanced-analytics"
+                            name="toggle-advanced-analytics"
+                            aria-label="Advanced Analytics"
+                            autocomplete="off"
+                          />
+                          <span class="slider"></span>
+                        </label>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+
+                <!-- Communication Features -->
+                <div class="settings-group">
+                  <div class="settings-group-header">
+                    <h4 class="settings-group-title">Communication</h4>
+                    <button class="group-toggle" aria-expanded="false" aria-controls="communication-group">▶</button>
+                  </div>
+                  <div class="settings-group-content" id="communication-group">
+                    <div class="setting-item">
+                      <div class="setting-info">
+                        <div class="setting-label">Multichannel</div>
+                        <div class="setting-description">
+                          Show the multichannel section
+                        </div>
+                      </div>
+                      <div class="setting-control">
+                        <label class="switch" for="toggle-multichannel">
+                          <input
+                            type="checkbox"
+                            id="toggle-multichannel"
+                            name="toggle-multichannel"
+                            aria-label="Multichannel"
+                            autocomplete="off"
+                          />
+                          <span class="slider"></span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div class="setting-item">
+                      <div class="setting-info">
+                        <div class="setting-label">Telephony</div>
+                        <div class="setting-description">
+                          Show the telephony section
+                        </div>
+                      </div>
+                      <div class="setting-control">
+                        <label class="switch" for="toggle-telephony">
+                          <input
+                            type="checkbox"
+                            id="toggle-telephony"
+                            name="toggle-telephony"
+                            aria-label="Telephony"
+                            autocomplete="off"
+                          />
+                          <span class="slider"></span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div class="setting-item">
+                      <div class="setting-info">
+                        <div class="setting-label">Email</div>
+                        <div class="setting-description">
+                          Show the email section
+                        </div>
+                      </div>
+                      <div class="setting-control">
+                        <label class="switch" for="toggle-email">
+                          <input
+                            type="checkbox"
+                            id="toggle-email"
+                            name="toggle-email"
+                            aria-label="Email"
+                            autocomplete="off"
+                          />
+                          <span class="slider"></span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div class="setting-item">
+                      <div class="setting-info">
+                        <div class="setting-label">Twilio Integration</div>
+                        <div class="setting-description">
+                          Show the Twilio SMS integration section
+                        </div>
+                      </div>
+                      <div class="setting-control">
+                        <label class="switch" for="toggle-twilio">
+                          <input
+                            type="checkbox"
+                            id="toggle-twilio"
+                            name="toggle-twilio"
+                            aria-label="Twilio Integration"
+                            autocomplete="off"
+                          />
+                          <span class="slider"></span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Productivity Features -->
+                <div class="settings-group">
+                  <div class="settings-group-header">
+                    <h4 class="settings-group-title">Productivity</h4>
+                    <button class="group-toggle" aria-expanded="false" aria-controls="productivity-group">▶</button>
+                  </div>
+                  <div class="settings-group-content" id="productivity-group">
+                    <div class="setting-item">
+                      <div class="setting-info">
+                        <div class="setting-label">Workflows</div>
+                        <div class="setting-description">
+                          Show the workflows section
+                        </div>
+                      </div>
+                      <div class="setting-control">
+                        <label class="switch" for="toggle-workflows">
+                          <input
+                            type="checkbox"
+                            id="toggle-workflows"
+                            name="toggle-workflows"
+                            aria-label="Workflows"
+                            autocomplete="off"
+                          />
+                          <span class="slider"></span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div class="setting-item">
+                      <div class="setting-info">
+                        <div class="setting-label">Time Tracking</div>
+                        <div class="setting-description">
+                          Show the time tracking section
+                        </div>
+                      </div>
+                      <div class="setting-control">
+                        <label class="switch" for="toggle-time-tracking">
+                          <input
+                            type="checkbox"
+                            id="toggle-time-tracking"
+                            name="toggle-time-tracking"
+                            aria-label="Time Tracking"
+                            autocomplete="off"
+                          />
+                          <span class="slider"></span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div class="setting-item">
+                      <div class="setting-info">
+                        <div class="setting-label">Voice Commands</div>
+                        <div class="setting-description">
+                          Show the voice commands section
+                        </div>
+                      </div>
+                      <div class="setting-control">
+                        <label class="switch" for="toggle-voice-commands">
+                          <input
+                            type="checkbox"
+                            id="toggle-voice-commands"
+                            name="toggle-voice-commands"
+                            aria-label="Voice Commands"
+                            autocomplete="off"
+                          />
+                          <span class="slider"></span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div class="setting-item">
+                      <div class="setting-info">
+                        <div class="setting-label">Scripts</div>
+                        <div class="setting-description">
+                          Show the scripts section
+                        </div>
+                      </div>
+                      <div class="setting-control">
+                        <label class="switch" for="toggle-scripts">
+                          <input
+                            type="checkbox"
+                            id="toggle-scripts"
+                            name="toggle-scripts"
+                            aria-label="Scripts"
+                            autocomplete="off"
+                          />
+                          <span class="slider"></span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div class="setting-item">
+                      <div class="setting-info">
+                        <div class="setting-label">Tasks</div>
+                        <div class="setting-description">
+                          Show the tasks section
+                        </div>
+                      </div>
+                      <div class="setting-control">
+                        <label class="switch" for="toggle-tasks">
+                          <input
+                            type="checkbox"
+                            id="toggle-tasks"
+                            name="toggle-tasks"
+                            aria-label="Tasks"
+                            autocomplete="off"
+                          />
+                          <span class="slider"></span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Knowledge & Learning Features -->
+                <div class="settings-group">
+                  <div class="settings-group-header">
+                    <h4 class="settings-group-title">Knowledge & Learning</h4>
+                    <button class="group-toggle" aria-expanded="false" aria-controls="knowledge-group">▶</button>
+                  </div>
+                  <div class="settings-group-content" id="knowledge-group">
+                    <div class="setting-item">
+                      <div class="setting-info">
+                        <div class="setting-label">Knowledge Base</div>
+                        <div class="setting-description">
+                          Show the knowledge base section
+                        </div>
+                      </div>
+                      <div class="setting-control">
+                        <label class="switch" for="toggle-knowledge-base">
+                          <input
+                            type="checkbox"
+                            id="toggle-knowledge-base"
+                            name="toggle-knowledge-base"
+                            aria-label="Knowledge Base"
+                            autocomplete="off"
+                          />
+                          <span class="slider"></span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div class="setting-item">
+                      <div class="setting-info">
+                        <div class="setting-label">Training</div>
+                        <div class="setting-description">
+                          Show the training section
+                        </div>
+                      </div>
+                      <div class="setting-control">
+                        <label class="switch" for="toggle-training">
+                          <input
+                            type="checkbox"
+                            id="toggle-training"
+                            name="toggle-training"
+                            aria-label="Training"
+                            autocomplete="off"
+                          />
+                          <span class="slider"></span>
+                        </label>
+                      </div>
+                    </div>
+
+             <!-- API Integration Section -->
+            <section class="card settings-section toggleable-section draggable-section" data-section="api-integration" id="api-integration-section">
+              <div class="section-header">
+                <div class="drag-handle">⋮⋮</div>
+                <div class="title-container">
+                  <h2 class="section-title">API Integration</h2>
+                </div>
+                <div class="section-controls">
+                  <button class="edit-title-btn" title="Edit Title">✎</button>
+                  <button class="float-btn" title="Float">⧉</button>
+                </div>
+              </div>
+              <div class="section-content">
+                  <div id="api-integration-container"></div>
+              </div>
+            </section>
+                    <div class="setting-item">
+                      <div class="setting-info">
+                        <div class="setting-label">Feedback</div>
+                        <div class="setting-description">
+                          Show the feedback section
+                        </div>
+                      </div>
+                      <div class="setting-control">
+                        <label class="switch" for="toggle-feedback">
+                          <input
+                            type="checkbox"
+                            id="toggle-feedback"
+                            name="toggle-feedback"
+                            aria-label="Feedback"
+                            autocomplete="off"
+                          />
+                          <span class="slider"></span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Advanced Features -->
+                <div class="settings-group">
+                  <div class="settings-group-header">
+                    <h4 class="settings-group-title">Advanced</h4>
+                    <button class="group-toggle" aria-expanded="false" aria-controls="advanced-group">▶</button>
+                  </div>
+                  <div class="settings-group-content" id="advanced-group">
+                    <div class="setting-item">
+                      <div class="setting-info">
+                        <div class="setting-label">Advanced Analytics</div>
+                        <div class="setting-description">
+                          Show the advanced analytics section
+                        </div>
+                      </div>
+                      <div class="setting-control">
+                        <label class="switch" for="toggle-advanced-analytics">
+                          <input
+                            type="checkbox"
+                            id="toggle-advanced-analytics"
+                            name="toggle-advanced-analytics"
+                            aria-label="Advanced Analytics"
+                            autocomplete="off"
+                          />
+                          <span class="slider"></span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div class="setting-item">
+                      <div class="setting-info">
+                        <div class="setting-label">API Integration</div>
+                        <div class="setting-description">
+                          Show the API integration section
+                        </div>
+                      </div>
+                      <div class="setting-control">
+                        <label class="switch" for="toggle-api-integration">
+                          <input
+                            type="checkbox"
+                            id="toggle-api-integration"
+                            name="toggle-api-integration"
+                            aria-label="API Integration"
+                            autocomplete="off"
+                          />
+                          <span class="slider"></span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div class="setting-item">
+                      <div class="setting-info">
+                        <div class="setting-label">Camera</div>
+                        <div class="setting-description">
+                          Show the camera section
+                        </div>
+                      </div>
+                      <div class="setting-control">
+                        <label class="switch" for="toggle-camera">
+                          <input
+                            type="checkbox"
+                            id="toggle-camera"
+                            name="toggle-camera"
+                            aria-label="Camera"
+                            autocomplete="off"
+                          />
+                          <span class="slider"></span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div class="setting-item">
+                      <div class="setting-info">
+                        <div class="setting-label">Voice Recording</div>
+                        <div class="setting-description">
+                          Show the voice recording section
+                        </div>
+                      </div>
+                      <div class="setting-control">
+                        <label class="switch" for="toggle-voicerecording">
+                          <input
+                            type="checkbox"
+                            id="toggle-voicerecording"
+                            name="toggle-voicerecording"
+                            aria-label="Voice Recording"
+                            autocomplete="off"
+                          />
+                          <span class="slider"></span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Collaboration Features -->
+                <div class="settings-group">
+                  <div class="settings-group-header">
+                    <h4 class="settings-group-title">Collaboration</h4>
+                    <button class="group-toggle" aria-expanded="false" aria-controls="collaboration-group">▶</button>
+                  </div>
+                  <div class="settings-group-content" id="collaboration-group">
+                    <div class="setting-item">
+                      <div class="setting-info">
+                        <div class="setting-label">Call Logging</div>
+                        <div class="setting-description">
+                          Show the call logging section
+                        </div>
+                      </div>
+                      <div class="setting-control">
+                        <label class="switch" for="toggle-calllogging">
+                          <input
+                            type="checkbox"
+                            id="toggle-calllogging"
+                            name="toggle-calllogging"
+                            aria-label="Call Logging"
+                            autocomplete="off"
+                          />
+                          <span class="slider"></span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div class="setting-item">
+                      <div class="setting-info">
+                        <div class="setting-label">Collaboration</div>
+                        <div class="setting-description">
+                          Show the collaboration section
+                        </div>
+                      </div>
+                      <div class="setting-control">
+                        <label class="switch" for="toggle-collaboration">
+                          <input
+                            type="checkbox"
+                            id="toggle-collaboration"
+                            name="toggle-collaboration"
+                            aria-label="Collaboration"
+                            autocomplete="off"
+                          />
+                          <span class="slider"></span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+
+
+            <!-- Audio Settings -->
+            <section class="card settings-section toggleable-section draggable-section" data-section="audio">
+              <div class="section-header">
+                <div class="drag-handle">⋮⋮</div>
+                <div class="title-container">
+                  <h2 class="section-title">Audio</h2>
+                </div>
+                <div class="section-controls">
+                  <button class="edit-title-btn" title="Edit Title">✎</button>
+                  <button class="float-btn" title="Float">⧉</button>
+                </div>
+              </div>
+              <div class="section-content section-content--cols">
+                <div class="setting-item">
+                  <div class="setting-info">
+                    <div class="setting-label">Alert Sounds</div>
+                    <div class="setting-description">
+                      Enable audio alerts for call events and notifications
+                    </div>
+                  </div>
+                  <div class="setting-control">
+                    <label class="switch" for="alert-sounds-toggle">
+                      <input
+                        type="checkbox"
+                        id="alert-sounds-toggle"
+                        name="alert-sounds-toggle"
+                        aria-label="Alert Sounds"
+                        autocomplete="off"
+                      />
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+
+
+
+                <div class="setting-item">
+                  <div class="setting-info">
+                    <div class="setting-label">Volume</div>
+                    <div class="setting-description">
+                      Adjust the volume level for audio alerts
+                    </div>
+                  </div>
+                  <div class="setting-control">
+                    <input
+                      type="range"
+                      id="volume-slider"
+                      name="volume-slider"
+                      min="0"
+                      max="100"
+                      value="50"
+                      aria-label="Volume"
+                    />
+                  </div>
+                </div>
+
+                <div class="setting-item">
+                  <div class="setting-info">
+                    <div class="setting-label">Test Sound</div>
+                    <div class="setting-description">
+                      Play a test sound to check your audio settings
+                    </div>
+                  </div>
+                  <div class="setting-control">
+                    <button id="test-sound-btn" class="button btn-sm">
+                      🔊
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- CRM Integration Settings -->
+            <section class="card settings-section toggleable-section draggable-section" data-section="crm">
+              <div class="section-header">
+                <div class="drag-handle">⋮⋮</div>
+                <div class="title-container">
+                  <h2 class="section-title">CRM Integration</h2>
+                </div>
+                <div class="section-controls">
+                  <button class="edit-title-btn" title="Edit Title">✎</button>
+                  <button class="float-btn" title="Float">⧉</button>
+                </div>
+              </div>
+              <div class="section-content section-content--cols">
+                <div class="setting-item">
+                  <div class="setting-info">
+                    <div class="setting-label">CRM Provider</div>
+                    <div class="setting-description">
+                      Select your CRM system for integration
+                    </div>
+                  </div>
+                  <div class="setting-control">
+                    <select id="crm-provider" name="crm-provider" aria-label="CRM Provider" autocomplete="off">
+                      <option value="none">None</option>
+                      <option value="salesforce">Salesforce</option>
+                      <option value="hubspot">HubSpot</option>
+                      <option value="dynamics">Dynamics 365</option>
+                      <option value="zendesk">Zendesk</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="crm-config" id="salesforce-config" style="display: none;">
+                  <h4>Salesforce Configuration</h4>
+                  <div class="setting-item">
+                    <div class="setting-info">
+                      <div class="setting-label">Instance URL</div>
+                      <div class="setting-description">
+                        Your Salesforce instance URL (e.g., https://yourcompany.my.salesforce.com)
+                      </div>
+                    </div>
+                    <div class="setting-control">
+                      <input
+                        type="url"
+                        id="salesforce-url"
+                        name="salesforce-url"
+                        placeholder="https://yourcompany.my.salesforce.com"
+                        aria-label="Salesforce URL"
+                        autocomplete="off"
+                      />
+                    </div>
+                  </div>
+
+                  <div class="setting-item">
+                    <div class="setting-info">
+                      <div class="setting-label">Username</div>
+                      <div class="setting-description">
+                        Your Salesforce username
+                      </div>
+                    </div>
+                    <div class="setting-control">
+                      <input
+                        type="text"
+                        id="salesforce-username"
+                        name="salesforce-username"
+                        placeholder="username@company.com"
+                        aria-label="Salesforce Username"
+                        autocomplete="username"
+                      />
+                    </div>
+                  </div>
+
+                  <div class="setting-item">
+                    <div class="setting-info">
+                      <div class="setting-label">Password</div>
+                      <div class="setting-description">
+                        Your Salesforce password
+                      </div>
+                    </div>
+                    <div class="setting-control">
+                      <input
+                        type="password"
+                        id="salesforce-password"
+                        name="salesforce-password"
+                        placeholder="Your Password"
+                        aria-label="Salesforce Password"
+                        autocomplete="current-password"
+                      />
+                    </div>
+                  </div>
+
+                  <div class="setting-item">
+                    <div class="setting-info">
+                      <div class="setting-label">Security Token</div>
+                      <div class="setting-description">
+                        Your Salesforce security token
+                      </div>
+                    </div>
+                    <div class="setting-control">
+                      <input
+                        type="password"
+                        id="salesforce-token"
+                        name="salesforce-token"
+                        placeholder="Your Security Token"
+                        aria-label="Salesforce Security Token"
+                        autocomplete="off"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Cisco Finesse Configuration -->
+                <div id="finesse-config-form" class="crm-provider-config hidden">
+                  <h4>Cisco Finesse Configuration</h4>
+                  <div class="setting-item">
+                    <div class="setting-info">
+                      <div class="setting-label">Finesse Server URL</div>
+                      <div class="setting-description">Your Cisco Finesse server URL (e.g., https://finesse-server:8445)</div>
+                    </div>
+                    <div class="setting-control">
+                      <input type="url" id="finesse-url" name="finesse-url" placeholder="https://finesse-server:8445" aria-label="Finesse server URL" autocomplete="off" />
+                    </div>
+                  </div>
+                  <div class="setting-item">
+                    <div class="setting-info">
+                      <div class="setting-label">Agent Username</div>
+                      <div class="setting-description">Your Cisco Finesse agent username</div>
+                    </div>
+                    <div class="setting-control">
+                      <input type="text" id="finesse-username" name="finesse-username" placeholder="agent_username" aria-label="Finesse agent username" autocomplete="username" />
+                    </div>
+                  </div>
+                  <div class="setting-item">
+                    <div class="setting-info">
+                      <div class="setting-label">Agent Password</div>
+                      <div class="setting-description">Your Cisco Finesse agent password</div>
+                    </div>
+                    <div class="setting-control">
+                      <input type="password" id="finesse-password" name="finesse-password" placeholder="Enter password" aria-label="Finesse agent password" autocomplete="current-password" />
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Five9 Configuration -->
+                <div id="five9-config-form" class="crm-provider-config hidden">
+                  <div class="setting-item">
+                    <div class="setting-info">
+                      <div class="setting-label">Five9 Domain</div>
+                      <div class="setting-description">Your Five9 domain (e.g., yourcompany.five9.com)</div>
+                    </div>
+                    <div class="setting-control">
+                      <input type="text" id="five9-domain" name="five9-domain" placeholder="yourcompany.five9.com" aria-label="Five9 domain" autocomplete="off" />
+                    </div>
+                  </div>
+                  <div class="setting-item">
+                    <div class="setting-info">
+                      <div class="setting-label">API Username</div>
+                      <div class="setting-description">Your Five9 API username</div>
+                    </div>
+                    <div class="setting-control">
+                      <input type="text" id="five9-username" name="five9-username" placeholder="api_username" aria-label="Five9 API username" autocomplete="username" />
+                    </div>
+                  </div>
+                  <div class="setting-item">
+                    <div class="setting-info">
+                      <div class="setting-label">API Password</div>
+                      <div class="setting-description">Your Five9 API password</div>
+                    </div>
+                    <div class="setting-control">
+                      <input type="password" id="five9-password" name="five9-password" placeholder="Enter password" aria-label="Five9 API password" autocomplete="current-password" />
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Salesforce Configuration -->
+                <div id="salesforce-config-form" class="crm-provider-config hidden">
+                  <div class="setting-item">
+                    <div class="setting-info">
+                      <div class="setting-label">Salesforce Instance URL</div>
+                      <div class="setting-description">Your Salesforce instance URL (e.g., https://yourcompany.my.salesforce.com)</div>
+                    </div>
+                    <div class="setting-control">
+                        <input type="url" id="salesforce-url-alt" name="salesforce-url-alt" placeholder="https://yourcompany.my.salesforce.com" aria-label="Salesforce instance URL" autocomplete="off" />
+                      </div>
+                  </div>
+                  <div class="setting-item">
+                    <div class="setting-info">
+                      <div class="setting-label">Consumer Key</div>
+                      <div class="setting-description">Your Salesforce Connected App Consumer Key</div>
+                    </div>
+                    <div class="setting-control">
+                      <input type="text" id="salesforce-consumer-key" name="salesforce-consumer-key" placeholder="Your Consumer Key" aria-label="Salesforce Consumer Key" autocomplete="off" />
+                    </div>
+                  </div>
+                  <div class="setting-item">
+                    <div class="setting-info">
+                      <div class="setting-label">Consumer Secret</div>
+                      <div class="setting-description">Your Salesforce Connected App Consumer Secret</div>
+                    </div>
+                    <div class="setting-control">
+                      <input type="password" id="salesforce-consumer-secret" name="salesforce-consumer-secret" placeholder="Your Consumer Secret" aria-label="Salesforce Consumer Secret" autocomplete="current-password" />
+                    </div>
+                  </div>
+                  <div class="setting-item">
+                    <div class="setting-info">
+                      <div class="setting-label">Username</div>
+                      <div class="setting-description">Your Salesforce username</div>
+                    </div>
+                    <div class="setting-control">
+                      <input type="email" id="salesforce-username-alt" name="salesforce-username-alt" placeholder="user@company.com" aria-label="Salesforce username" autocomplete="username" />
+                    </div>
+                  </div>
+                  <div class="setting-item">
+                    <div class="setting-info">
+                      <div class="setting-label">Password</div>
+                      <div class="setting-description">Your Salesforce password + security token (if required)</div>
+                    </div>
+                    <div class="setting-control">
+                      <input type="password" id="salesforce-password-alt" name="salesforce-password-alt" placeholder="password + security_token" aria-label="Salesforce password and security token" autocomplete="current-password" />
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Zendesk Configuration -->
+                <div id="zendesk-config-form" class="crm-provider-config hidden">
+                  <div class="setting-item">
+                    <div class="setting-info">
+                      <div class="setting-label">Zendesk Subdomain</div>
+                      <div class="setting-description">Your Zendesk subdomain (e.g., yourcompany.zendesk.com)</div>
+                    </div>
+                    <div class="setting-control">
+                      <input type="text" id="zendesk-subdomain" name="zendesk-subdomain" placeholder="yourcompany" aria-label="Zendesk subdomain" autocomplete="off" />
+                    </div>
+                  </div>
+                  <div class="setting-item">
+                    <div class="setting-info">
+                      <div class="setting-label">API Token</div>
+                      <div class="setting-description">Your Zendesk API token (generate from Admin > API)</div>
+                    </div>
+                    <div class="setting-control">
+                      <input type="password" id="zendesk-api-token" name="zendesk-api-token" placeholder="Your API token" aria-label="Zendesk API token" autocomplete="current-password" />
+                    </div>
+                  </div>
+                  <div class="setting-item">
+                    <div class="setting-info">
+                      <div class="setting-label">Email Address</div>
+                      <div class="setting-description">The email address associated with your Zendesk account</div>
+                    </div>
+                    <div class="setting-control">
+                      <input type="email" id="zendesk-email" name="zendesk-email" placeholder="admin@company.com" aria-label="Zendesk email" autocomplete="username" />
+                    </div>
+                  </div>
+                </div>
+
+                <!-- HubSpot Configuration -->
+                <div id="hubspot-config-form" class="crm-provider-config hidden">
+                  <input type="text" id="hubspot-username" name="hubspot-username" autocomplete="username" style="display: none;" aria-hidden="true" />
+                  <div class="setting-item">
+                    <div class="setting-info">
+                      <div class="setting-label">HubSpot API Key</div>
+                      <div class="setting-description">Your HubSpot API key (found in Settings > Integrations > API Key)</div>
+                    </div>
+                    <div class="setting-control">
+                      <input type="password" id="hubspot-api-key" name="hubspot-api-key" placeholder="Your HubSpot API key" aria-label="HubSpot API key" autocomplete="current-password" />
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Microsoft Dynamics 365 Configuration -->
+                <div id="dynamics-config-form" class="crm-provider-config hidden">
+                  <div class="setting-item">
+                    <div class="setting-info">
+                      <div class="setting-label">Dynamics 365 URL</div>
+                      <div class="setting-description">Your Dynamics 365 organization URL (e.g., https://yourorg.crm.dynamics.com)</div>
+                    </div>
+                    <div class="setting-control">
+                      <input type="url" id="dynamics-url" name="dynamics-url" placeholder="https://yourorg.crm.dynamics.com" aria-label="Dynamics 365 URL" autocomplete="off" />
+                    </div>
+                  </div>
+                  <div class="setting-item">
+                    <div class="setting-info">
+                      <div class="setting-label">Client ID</div>
+                      <div class="setting-description">Your Azure AD application client ID</div>
+                    </div>
+                    <div class="setting-control">
+                      <input type="text" id="dynamics-client-id" name="dynamics-client-id" placeholder="Your Client ID" aria-label="Dynamics Client ID" autocomplete="off" />
+                    </div>
+                  </div>
+                  <div class="setting-item">
+                    <div class="setting-info">
+                      <div class="setting-label">Tenant ID</div>
+                      <div class="setting-description">Your Azure AD tenant ID</div>
+                    </div>
+                    <div class="setting-control">
+                      <input type="text" id="dynamics-tenant-id" name="dynamics-tenant-id" placeholder="Your Tenant ID" aria-label="Dynamics Tenant ID" autocomplete="off" />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="crm-config" id="hubspot-config" style="display: none;">
+                  <h4>HubSpot Configuration</h4>
+                  <div class="setting-item">
+                    <div class="setting-info">
+                      <div class="setting-label">API Key</div>
+                      <div class="setting-description">
+                        Your HubSpot API key
+                      </div>
+                    </div>
+                    <div class="setting-control">
+                      <input
+                        type="password"
+                        id="hubspot-api-key-alt"
+                        name="hubspot-api-key-alt"
+                        placeholder="Your API Key"
+                        aria-label="HubSpot API Key"
+                        autocomplete="off"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="crm-config" id="dynamics-config" style="display: none;">
+                  <h4>Dynamics 365 Configuration</h4>
+                  <div class="setting-item">
+                    <div class="setting-info">
+                      <div class="setting-label">Dynamics 365 URL</div>
+                      <div class="setting-description">
+                        Your Dynamics 365 organization URL (e.g.,
+                        https://yourorg.crm.dynamics.com)
+                      </div>
+                    </div>
+                    <div class="setting-control">
+                      <input
+                        type="url"
+                        id="dynamics-url-alt"
+                        name="dynamics-url-alt"
+                        placeholder="https://yourorg.crm.dynamics.com"
+                        aria-label="Dynamics 365 URL"
+                        autocomplete="off"
+                      />
+                    </div>
+                  </div>
+
+                  <div class="setting-item">
+                    <div class="setting-info">
+                      <div class="setting-label">Client ID</div>
+                      <div class="setting-description">
+                        Your Azure AD application client ID
+                      </div>
+                    </div>
+                    <div class="setting-control">
+                      <input
+                        type="text"
+                        id="dynamics-client-id-alt"
+                        name="dynamics-client-id-alt"
+                        placeholder="Your Client ID"
+                        aria-label="Dynamics Client ID"
+                        autocomplete="off"
+                      />
+                    </div>
+                  </div>
+
+                  <div class="setting-item">
+                    <div class="setting-info">
+                      <div class="setting-label">Client Secret</div>
+                      <div class="setting-description">
+                        Your Azure AD application client secret
+                      </div>
+                    </div>
+                    <div class="setting-control">
+                      <input
+                        type="password"
+                        id="dynamics-client-secret-alt"
+                        name="dynamics-client-secret-alt"
+                        placeholder="Your Client Secret"
+                        aria-label="Dynamics Client Secret"
+                        autocomplete="off"
+                      />
+                    </div>
+                  </div>
+
+                  <div class="setting-item">
+                    <div class="setting-info">
+                      <div class="setting-label">Tenant ID</div>
+                      <div class="setting-description">
+                        Your Azure AD tenant ID
+                      </div>
+                    </div>
+                    <div class="setting-control">
+                      <input
+                        type="text"
+                        id="dynamics-tenant-id-alt"
+                        name="dynamics-tenant-id-alt"
+                        placeholder="Your Tenant ID"
+                        aria-label="Dynamics Tenant ID"
+                        autocomplete="off"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="setting-item">
+                  <div class="setting-info">
+                    <div class="setting-label">CRM Connection</div>
+                    <div class="setting-description">
+                      Connect to your CRM system to enable contact lookup and call
+                      logging
+                    </div>
+                  </div>
+                  <div class="setting-control">
+                    <button id="connect-crm" class="button btn-sm">
+                      Connect to CRM
+                    </button>
+                    <button id="debug-crm" class="button btn-sm btn-secondary" title="Test CRM connection with detailed logging">
+                      Debug
+                    </button>
+                    <div id="demo-mode-indicator" class="demo-indicator" style="display: none;">
+                      <span class="demo-badge">DEMO MODE</span>
+                    </div>
+                    <div id="crm-status" class="status-text">
+                      Status: Disconnected
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Twilio Integration Settings -->
+            <section class="card settings-section toggleable-section draggable-section" data-section="twilio">
+              <div class="section-header">
+                <div class="drag-handle">⋮⋮</div>
+                <div class="title-container">
+                  <h2 class="section-title">Twilio Integration</h2>
+                </div>
+                <div class="section-controls">
+                  <button class="edit-title-btn" title="Edit Title">✎</button>
+                  <button class="float-btn" title="Float">⧉</button>
+                </div>
+              </div>
+              <div class="section-content section-content--cols">
+                <div class="setting-item">
+                  <div class="setting-info">
+                    <div class="setting-label">Twilio Status</div>
+                    <div class="setting-description">
+                      Configure your Twilio account to enable SMS functionality
+                    </div>
+                  </div>
+                  <div class="setting-control">
+                    <div id="twilio-status" class="status-text">
+                      Status: Not Configured
+                    </div>
+                    <button id="test-twilio" class="button btn-sm btn-secondary" style="display: none;">
+                      Test SMS
+                    </button>
+                  </div>
+                </div>
+
+                <div class="setting-item">
+                  <div class="setting-info">
+                    <div class="setting-label">Account SID</div>
+                    <div class="setting-description">
+                      Your Twilio Account SID (starts with AC...)
+                    </div>
+                  </div>
+                  <div class="setting-control">
+                    <input
+                      type="password"
+                      id="twilio-account-sid"
+                      name="twilio-account-sid"
+                      placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                      aria-label="Twilio Account SID"
+                      autocomplete="off"
+                    />
+                  </div>
+                </div>
+
+                <div class="setting-item">
+                  <div class="setting-info">
+                    <div class="setting-label">Auth Token</div>
+                    <div class="setting-description">
+                      Your Twilio Auth Token (keep this secret!)
+                    </div>
+                  </div>
+                  <div class="setting-control">
+                    <input
+                      type="password"
+                      id="twilio-auth-token"
+                      name="twilio-auth-token"
+                      placeholder="Your Auth Token"
+                      aria-label="Twilio Auth Token"
+                      autocomplete="off"
+                    />
+                  </div>
+                </div>
+
+                <div class="setting-item">
+                  <div class="setting-info">
+                    <div class="setting-label">Phone Number</div>
+                    <div class="setting-description">
+                      Your Twilio phone number in E.164 format (e.g., +1234567890)
+                    </div>
+                  </div>
+                  <div class="setting-control">
+                    <input
+                      type="tel"
+                      id="twilio-phone-number"
+                      name="twilio-phone-number"
+                      placeholder="+1234567890"
+                      aria-label="Twilio Phone Number"
+                      autocomplete="tel"
+                    />
+                  </div>
+                </div>
+
+                <div class="setting-item">
+                  <div class="setting-info">
+                    <div class="setting-label">Save Settings</div>
+                    <div class="setting-description">
+                      Save your Twilio configuration to enable SMS functionality
+                    </div>
+                  </div>
+                  <div class="setting-control">
+                    <button id="save-twilio-settings" class="button btn-sm">
+                      Save Twilio Settings
+                    </button>
+                    <div id="twilio-save-status" class="status-text" style="margin-top: 0.5rem;"></div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Data Management -->
+            <section class="card settings-section toggleable-section draggable-section" data-section="data-management">
+              <div class="section-header">
+                <div class="drag-handle">⋮⋮</div>
+                <div class="title-container">
+                  <h2 class="section-title">Data Management</h2>
+                </div>
+                <div class="section-controls">
+                  <button class="edit-title-btn" title="Edit Title">✎</button>
+                  <button class="float-btn" title="Float">⧉</button>
+                </div>
+              </div>
+              <div class="section-content section-content--cols">
+                <div class="data-management-intro">
+                  <p>Manage your application data including patterns, steps, notes, and settings. Export your data for backup or transfer to another device.</p>
+                </div>
+
+                <!-- Export Options -->
+                <div class="setting-group">
+                  <h4 class="setting-group-title">Export Data</h4>
+                  <p class="setting-group-description">Select which data to include in your export</p>
+
+                  <div class="setting-item">
+                    <div class="setting-info">
+                      <div class="setting-icon">📋</div>
+                      <div class="setting-content">
+                        <div class="setting-label">Patterns</div>
+                        <div class="setting-description">
+                          Include number formatting patterns in the export
+                        </div>
+                      </div>
+                    </div>
+                    <div class="setting-control">
+                      <label class="switch" for="export-patterns">
+                        <input
+                          type="checkbox"
+                          id="export-patterns"
+                          name="export-patterns"
+                          aria-label="Export Patterns"
+                          checked
+                          autocomplete="off"
+                        />
+                        <span class="slider"></span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div class="setting-item">
+                    <div class="setting-info">
+                      <div class="setting-icon">📝</div>
+                      <div class="setting-content">
+                        <div class="setting-label">Steps</div>
+                        <div class="setting-description">
+                          Include call flow steps in the export
+                        </div>
+                      </div>
+                    </div>
+                    <div class="setting-control">
+                      <label class="switch" for="export-steps">
+                        <input
+                          type="checkbox"
+                          id="export-steps"
+                          name="export-steps"
+                          aria-label="Export Steps"
+                          checked
+                          autocomplete="off"
+                        />
+                        <span class="slider"></span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div class="setting-item">
+                    <div class="setting-info">
+                      <div class="setting-icon">📓</div>
+                      <div class="setting-content">
+                        <div class="setting-label">Notes</div>
+                        <div class="setting-description">
+                          Include saved notes in the export
+                        </div>
+                      </div>
+                    </div>
+                    <div class="setting-control">
+                      <label class="switch" for="export-notes">
+                        <input
+                          type="checkbox"
+                          id="export-notes"
+                          name="export-notes"
+                          aria-label="Export Notes"
+                          checked
+                          autocomplete="off"
+                        />
+                        <span class="slider"></span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div class="setting-item">
+                    <div class="setting-info">
+                      <div class="setting-icon">⚙️</div>
+                      <div class="setting-content">
+                        <div class="setting-label">Settings</div>
+                        <div class="setting-description">
+                          Include application settings and preferences in the export
+                        </div>
+                      </div>
+                    </div>
+                    <div class="setting-control">
+                      <label class="switch" for="export-settings">
+                        <input
+                          type="checkbox"
+                          id="export-settings"
+                          name="export-settings"
+                          aria-label="Export Settings"
+                          checked
+                          autocomplete="off"
+                        />
+                        <span class="slider"></span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div class="setting-item">
+                    <div class="setting-info">
+                      <div class="setting-label">Export Data</div>
+                      <div class="setting-description">
+                        Download your selected data as a JSON file for backup or transfer
+                      </div>
+                    </div>
+                    <div class="setting-control">
+                      <button id="export-data-btn" class="button btn-primary">
+                        📥 Export Data
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Import Options -->
+                <div class="setting-group">
+                  <h4 class="setting-group-title">Import Data</h4>
+                  <p class="setting-group-description">Restore data from a previously exported backup file</p>
+
+                  <div class="setting-item">
+                    <div class="setting-info">
+                      <div class="setting-label">Import Data</div>
+                      <div class="setting-description">
+                        Select a backup file to restore your data. This will merge with existing data.
+                      </div>
+                    </div>
+                    <div class="setting-control">
+                      <button id="import-data-btn" class="button btn-secondary">
+                        📤 Import Data
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="setting-item">
+                    <div class="setting-info">
+                      <div class="setting-label">Create Backup</div>
+                      <div class="setting-description">
+                        Create a complete backup of all your data for safekeeping
+                      </div>
+                    </div>
+                    <div class="setting-control">
+                      <button id="restore-data-btn" class="button btn-outline">
+                        💾 Create Backup
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Data Statistics -->
+                <div class="setting-group">
+                  <h4 class="setting-group-title">Data Overview</h4>
+                  <p class="setting-group-description">Quick view of your stored data</p>
+
+                  <div class="data-stats-grid">
+                    <div class="stat-item">
+                      <div class="stat-icon">📋</div>
+                      <div class="stat-content">
+                        <div class="stat-number" id="patterns-count">-</div>
+                        <div class="stat-label">Patterns</div>
+                      </div>
+                    </div>
+
+                    <div class="stat-item">
+                      <div class="stat-icon">📝</div>
+                      <div class="stat-content">
+                        <div class="stat-number" id="steps-count">-</div>
+                        <div class="stat-label">Steps</div>
+                      </div>
+                    </div>
+
+                    <div class="stat-item">
+                      <div class="stat-icon">📓</div>
+                      <div class="stat-content">
+                        <div class="stat-number" id="notes-count">-</div>
+                        <div class="stat-label">Notes</div>
+                      </div>
+                    </div>
+
+                    <div class="stat-item">
+                      <div class="stat-icon">⚙️</div>
+                      <div class="stat-content">
+                        <div class="stat-number" id="settings-size">-</div>
+                        <div class="stat-label">Settings</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Mobile companion removed -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="copyright-footer">
+        <div class="container">
+          <p>
+            &copy; 2025 Daniel Hipskind.
+            <a href="privacy">Privacy Policy</a> &bull;
+            <a href="terms">Terms of Use</a> &bull;
+            <a href="contact">Contact</a>
+          </p>
+        </div>
+      </footer>
+    </div>
+    <script src="js/main.js"></script>
+  </body>
+</html>

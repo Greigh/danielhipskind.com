@@ -1,0 +1,119 @@
+@use '../base/variables' as *;
+@use 'sass:map';
+
+// Draggable functionality styles
+.draggable-section {
+  position: relative;
+  transition: map.get($transitions, base);
+
+  &.dragging {
+    opacity: 0.8;
+    transform: rotate(2deg) scale(1.02);
+    box-shadow: var(--shadow-xl);
+    z-index: map.get($z-index, modal);
+    cursor: grabbing;
+  }
+
+  &.drag-over {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+  }
+}
+
+.drag-handle {
+  cursor: grab;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  transition: map.get($transitions, base);
+  color: var(--gray-500);
+  font-size: 1.125rem;
+
+  &:hover {
+    background: var(--gray-200);
+    color: var(--gray-700);
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  // Drag handle icon
+  &::before {
+    content: "⋮⋮";
+    letter-spacing: -2px;
+  }
+}
+
+.drag-placeholder {
+  border: 2px dashed var(--primary-blue);
+  background: rgba(25, 118, 210, 0.05);
+  border-radius: 0.5rem;
+  padding: 2rem;
+  text-align: center;
+  color: var(--primary-blue);
+  font-weight: 500;
+  transition: map.get($transitions, base);
+
+  &::after {
+    content: "Drop section here";
+  }
+}
+
+.drop-zone {
+  min-height: 200px;
+  border: 2px dashed transparent;
+  border-radius: 0.5rem;
+  transition: map.get($transitions, base);
+
+  &.drag-over {
+    border-color: var(--primary-blue);
+    background: rgba(25, 118, 210, 0.05);
+  }
+}
+
+// Sortable list styles
+.sortable-list {
+  .sortable-item {
+    cursor: move;
+    transition: map.get($transitions, base);
+
+    &.dragging {
+      opacity: 0.5;
+      transform: rotate(5deg);
+    }
+
+    &.drag-over {
+      border-top: 3px solid var(--primary-blue);
+    }
+  }
+}
+
+// Dark mode
+[data-theme="dark"] {
+  .drag-handle {
+    color: var(--dark-text-muted);
+
+    &:hover {
+      background: var(--dark-border);
+      color: var(--dark-text);
+    }
+  }
+
+  .drag-placeholder {
+    border-color: #90caf9;
+    background: rgba(144, 202, 249, 0.05);
+    color: #90caf9;
+  }
+
+  .drop-zone.drag-over {
+    border-color: #90caf9;
+    background: rgba(144, 202, 249, 0.05);
+  }
+
+  .sortable-list .sortable-item.drag-over {
+    border-top-color: #90caf9;
+  }
+}

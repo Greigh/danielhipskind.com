@@ -1,0 +1,447 @@
+// Custom Dashboards Section
+@use '../base/variables' as *;
+@use 'sass:map';
+
+// Custom Dashboards Section
+#custom-dashboards {
+  .dashboard-builder {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    padding: map.get($spacing, 5);
+    margin-bottom: 1.5rem;
+
+    .builder-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+
+      .builder-title {
+        h3 {
+          margin: 0;
+          color: var(--text-color);
+          font-size: 1.125rem;
+        }
+
+        p {
+          margin: 0.25rem 0 0 0;
+          color: var(--text-muted);
+          font-size: 0.875rem;
+        }
+      }
+
+      .builder-actions {
+        display: flex;
+        gap: 0.5rem;
+
+        .action-btn {
+          padding: 0.5rem 0.75rem;
+          border: 1px solid var(--border-color);
+          border-radius: 0.25rem;
+          background: var(--bg-hover);
+          color: var(--text-color);
+          cursor: pointer;
+          font-size: 0.875rem;
+          transition: map.get($transitions, base);
+
+          &:hover {
+            background: var(--primary-blue);
+            color: white;
+            border-color: var(--primary-blue);
+          }
+
+          &.save-btn {
+            background: var(--success-color);
+            color: white;
+            border-color: var(--success-color);
+
+            &:hover {
+              background: var(--success-color-dark);
+            }
+          }
+        }
+      }
+    }
+
+    .widget-palette {
+      margin-bottom: 1rem;
+
+      .palette-header {
+        margin-bottom: 0.75rem;
+
+        h4 {
+          margin: 0;
+          color: var(--text-color);
+          font-size: 1rem;
+        }
+      }
+
+      .widget-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 0.75rem;
+
+        .widget-item {
+          background: var(--bg-color);
+          border: 2px dashed var(--border-color);
+          border-radius: 0.25rem;
+          padding: 0.75rem;
+          text-align: center;
+          cursor: grab;
+          transition: map.get($transitions, base);
+
+          &:hover {
+            border-color: var(--primary-blue);
+            background: var(--bg-hover);
+          }
+
+          .widget-icon {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+          }
+
+          .widget-name {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-color);
+            margin: 0;
+          }
+
+          .widget-desc {
+            font-size: map.get($font-sizes, 'xs');
+            color: var(--text-muted);
+            margin: 0.25rem 0 0 0;
+          }
+        }
+      }
+    }
+
+    .dashboard-canvas {
+      min-height: 400px;
+      background: var(--bg-color);
+      border: 2px dashed var(--border-color);
+      border-radius: 0.25rem;
+      padding: 1rem;
+      position: relative;
+
+      .canvas-placeholder {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        color: var(--text-muted);
+
+        .placeholder-icon {
+          font-size: map.get($font-sizes, '4xl');
+          margin-bottom: 0.75rem;
+          opacity: 0.5;
+        }
+
+        h4 {
+          margin: 0 0 0.5rem 0;
+          color: var(--text-color);
+        }
+
+        p {
+          margin: 0;
+          font-size: 1rem;
+        }
+      }
+
+      .dashboard-widget {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 0.25rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        position: relative;
+        cursor: move;
+
+        &:hover {
+          box-shadow: var(--shadow-lg);
+        }
+
+        .widget-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 0.75rem;
+
+          .widget-title {
+            font-weight: 600;
+            color: var(--text-color);
+            margin: 0;
+          }
+
+          .widget-controls {
+            display: flex;
+            gap: 0.25rem;
+
+            .control-btn {
+              background: transparent;
+              border: none;
+              width: 24px;
+              height: 24px;
+              border-radius: 50%;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 0.875rem;
+              transition: map.get($transitions, base);
+
+              &:hover {
+                background: var(--bg-hover);
+              }
+
+              &.delete {
+                color: var(--error-color);
+
+                &:hover {
+                  background: var(--error-color);
+                  color: white;
+                }
+              }
+            }
+          }
+        }
+
+        .widget-content {
+          .widget-placeholder {
+            height: 100px;
+            background: var(--bg-hover);
+            border-radius: 0.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+          }
+        }
+      }
+    }
+  }
+
+  .saved-dashboards {
+    .dashboards-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+
+      h3 {
+        margin: 0;
+        color: var(--text-color);
+        font-size: 1.125rem;
+      }
+
+      .create-new-btn {
+        background: var(--primary-blue);
+        color: white;
+        border: none;
+        padding: 0.75rem 1rem;
+        border-radius: 0.25rem;
+        cursor: pointer;
+        font-weight: 500;
+
+        &:hover {
+          background: var(--primary-blue-dark);
+        }
+      }
+    }
+
+    .dashboards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1rem;
+
+      .dashboard-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 0.5rem;
+        overflow: hidden;
+        transition: map.get($transitions, base);
+
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: var(--shadow-lg);
+        }
+
+        .dashboard-preview {
+          height: 150px;
+          background: var(--bg-hover);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--text-muted);
+          font-size: 0.875rem;
+        }
+
+        .dashboard-info {
+          padding: 1rem;
+
+          .dashboard-name {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-color);
+            margin: 0 0 0.5rem 0;
+          }
+
+          .dashboard-meta {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+          }
+
+          .dashboard-actions {
+            display: flex;
+            gap: 0.5rem;
+
+            .action-btn {
+              flex: 1;
+              padding: 0.5rem 0.75rem;
+              border: 1px solid var(--border-color);
+              border-radius: 0.25rem;
+              background: var(--bg-hover);
+              color: var(--text-color);
+              cursor: pointer;
+              font-size: 0.875rem;
+              transition: map.get($transitions, base);
+
+              &:hover {
+                background: var(--primary-blue);
+                color: white;
+                border-color: var(--primary-blue);
+              }
+
+              &.edit {
+                background: var(--warning-color);
+                color: white;
+                border-color: var(--warning-color);
+
+                &:hover {
+                  background: var(--warning-color-dark);
+                }
+              }
+
+              &.delete {
+                background: var(--error-color);
+                color: white;
+                border-color: var(--error-color);
+
+                &:hover {
+                  background: var(--error-color-dark);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Dark mode
+[data-theme="dark"] {
+  #custom-dashboards {
+    .dashboard-builder {
+      background: var(--dark-surface);
+      border-color: var(--dark-border);
+
+      .builder-header {
+        .builder-title {
+          h3 {
+            color: var(--dark-text);
+          }
+
+          p {
+            color: var(--dark-text-muted);
+          }
+        }
+
+        .builder-actions .action-btn {
+          background: var(--dark-surface);
+          border-color: var(--dark-border);
+          color: var(--dark-text);
+        }
+      }
+
+      .widget-palette {
+        .palette-header h4 {
+          color: var(--dark-text);
+        }
+
+        .widget-grid .widget-item {
+          background: var(--dark-bg);
+          border-color: var(--dark-border);
+
+          &:hover {
+            background: var(--dark-surface);
+          }
+
+          .widget-name {
+            color: var(--dark-text);
+          }
+
+          .widget-desc {
+            color: var(--dark-text-muted);
+          }
+        }
+      }
+
+      .dashboard-canvas {
+        background: var(--dark-bg);
+        border-color: var(--dark-border);
+
+        .canvas-placeholder {
+          color: var(--dark-text-muted);
+
+          h4 {
+            color: var(--dark-text);
+          }
+        }
+
+        .dashboard-widget {
+          background: var(--dark-surface);
+          border-color: var(--dark-border);
+
+          .widget-header {
+            .widget-title {
+              color: var(--dark-text);
+            }
+          }
+        }
+      }
+    }
+
+    .saved-dashboards {
+      .dashboards-header h3 {
+        color: var(--dark-text);
+      }
+
+      .dashboards-grid .dashboard-card {
+        background: var(--dark-surface);
+        border-color: var(--dark-border);
+
+        .dashboard-info {
+          .dashboard-name {
+            color: var(--dark-text);
+          }
+
+          .dashboard-meta {
+            color: var(--dark-text-muted);
+          }
+
+          .dashboard-actions .action-btn {
+            background: var(--dark-surface);
+            border-color: var(--dark-border);
+            color: var(--dark-text);
+          }
+        }
+      }
+    }
+  }
+}

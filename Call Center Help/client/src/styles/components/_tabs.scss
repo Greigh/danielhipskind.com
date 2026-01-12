@@ -1,0 +1,144 @@
+@use '../base/variables' as *;
+@use 'sass:map';
+
+// Tab Components
+.tab-container {
+  background: var(--white);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.tab-header {
+  display: flex;
+  align-items: flex-end; /* Align tabs to bottom line */
+  background: transparent;
+  border-bottom: 1px solid var(--gray-300);
+  gap: 0.25rem;
+  padding: 0 1rem; /* Indent tabs slightly */
+}
+
+.tab-button {
+  background: transparent;
+  border: 1px solid transparent;
+  border-bottom: none;
+  border-radius: 0.25rem 0.25rem 0 0;
+  padding: 0.75rem 1.25rem;
+  font-weight: 500;
+  color: var(--gray-600);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: -1px; /* Overlap border */
+  position: relative;
+
+  &:hover {
+    background: var(--gray-100);
+    color: var(--gray-800);
+  }
+
+  &.active {
+    background: var(--white);
+    color: var(--primary-blue);
+    border-color: var(--gray-300);
+    border-bottom-color: var(
+      --white
+    ); /* Hide bottom border to merge with content */
+    font-weight: 600;
+    z-index: 2; /* Sit above container border */
+  }
+
+  &:focus {
+    outline: none;
+    background: var(--gray-50);
+  }
+}
+
+.tab-content {
+  display: none;
+  padding: 1.5rem;
+
+  &.active {
+    display: block;
+  }
+}
+
+// Vertical tabs
+.tabs-vertical {
+  display: flex;
+
+  .tab-header {
+    flex-direction: column;
+    background: var(--gray-50);
+    border-right: 1px solid var(--gray-200);
+    border-bottom: none;
+    min-width: 200px;
+  }
+
+  .tab-button {
+    text-align: left;
+    border-bottom: none;
+    border-right: 3px solid transparent;
+
+    &.active {
+      border-right-color: var(--primary-blue);
+      border-bottom-color: transparent;
+    }
+  }
+
+  .tab-content {
+    flex: 1;
+  }
+}
+
+// Dark mode
+[data-theme='dark'] {
+  .tab-container {
+    background: var(--dark-surface);
+  }
+
+  .tab-header {
+    background: var(--dark-bg);
+    border-bottom-color: var(--dark-border);
+  }
+
+  .tab-button {
+    color: var(--dark-text-muted);
+
+    &:hover {
+      background: var(--dark-border);
+      color: var(--dark-text);
+    }
+
+    &.active {
+      background: var(--dark-surface);
+      color: #90caf9;
+      border-bottom-color: #90caf9;
+    }
+
+    &:focus {
+      box-shadow: inset 0 0 0 2px rgba(144, 202, 249, 0.3);
+    }
+  }
+
+  .tabs-vertical {
+    .tab-header {
+      background: var(--dark-bg);
+      border-right-color: var(--dark-border);
+    }
+
+    .tab-button.active {
+      border-right-color: #90caf9;
+    }
+  }
+}
+
+@media (max-width: map.get($breakpoints, sm)) {
+  .tab-button {
+    padding: 0.5rem;
+    font-size: 0.875rem;
+  }
+
+  .tab-content {
+    padding: 0.75rem;
+  }
+}
