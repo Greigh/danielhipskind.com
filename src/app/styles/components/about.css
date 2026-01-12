@@ -1,0 +1,118 @@
+/* About Section */
+.about-content {
+  position: relative;
+  background: var(--nav-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--nav-border);
+  border-radius: 1.5rem;
+  padding: 5rem 2rem 2rem 1.5rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* About Text Container */
+.about-text {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-height: 600px;
+  padding-bottom: 60px;
+  transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: var(--z-about);
+}
+
+.about-text.expanded {
+  max-height: 2000px;
+}
+
+/* Text Content */
+.about-text .about-intro {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.75;
+  margin-bottom: 2rem;
+  color: var(--accent-color); /* Matches live site #0066cc */
+  text-align: center;
+}
+
+.about-text p:not(.about-intro),
+.initial-content p,
+.expanded-content p {
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-relaxed);
+  color: var(--text-color);
+  opacity: 0.9;
+  margin: 0 auto 1.5rem;
+  max-width: 800px;
+}
+
+/* Content Sections */
+.initial-content,
+.expanded-content {
+  width: 100%;
+}
+
+.expanded-content {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.about-text.expanded .expanded-content {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Gradient Overlay */
+.about-gradient {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 250px;
+  background: linear-gradient(to bottom, transparent 0%, var(--nav-bg) 60%);
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: var(--z-gradient);
+}
+
+.about-text.expanded .about-gradient {
+  opacity: 0;
+}
+
+/* Read More Button */
+.read-more-btn {
+  position: absolute;
+  bottom: 15px;
+  left: 50%;
+  transform: translate(-50%, 0);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  min-width: 140px;
+  width: fit-content;
+  border: none;
+  border-radius: 25px;
+  background: var(--accent-color);
+  color: var(--bg-color);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.read-more-btn:hover {
+  transform: translate(-50%, -2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.read-more-btn svg {
+  width: 14px;
+  height: 14px;
+  transition: transform 0.3s ease;
+}

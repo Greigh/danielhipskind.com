@@ -1,0 +1,84 @@
+/* Base Container Styles */
+.container {
+  width: 100%;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 1rem;
+  box-sizing: border-box;
+}
+
+/* Section Containers */
+.section {
+  padding: 2rem 0 0;
+}
+
+/* Header & Navigation */
+.header-container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+
+.nav-container {
+  max-width: min(600px, 90%);
+  margin: 0 auto;
+  border-radius: 50px;
+  padding: 0.75rem;
+  z-index: var(--z-nav);
+}
+
+/* Hero Section */
+#hero {
+  min-height: 60vh;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 9rem 2rem 5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* About Section */
+.about-container {
+  position: relative;
+  max-width: 950px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+#about {
+  position: relative;
+  z-index: 3;
+  padding: 1.5rem 0.5rem;
+  margin-bottom: 2rem;
+  background: var(--bg-color);
+  transition: margin-bottom 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Projects Section */
+#projects {
+  position: relative;
+  z-index: var(--z-projects);
+  margin-top: auto;
+  background: var(--bg-color);
+  transition: margin-top 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Skills Section */
+.skills-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem 2rem;
+}
+
+.project-card,
+.skills-group {
+  will-change: transform;
+}

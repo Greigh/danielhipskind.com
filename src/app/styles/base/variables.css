@@ -1,0 +1,124 @@
+:root {
+  /* Theme Colors */
+  --bg-color: #ffffff;
+  --text-color: #333333;
+  --text-secondary: rgba(51, 51, 51, 0.7);
+  --link-hover: #025ab3;
+  --accent-color: #0066cc;
+
+  /* Navigation */
+  --nav-bg: rgba(255, 255, 255, 0.8);
+  --nav-border: rgba(255, 255, 255, 0.5);
+  --nav-border-hover: rgba(255, 255, 255, 0.2);
+  --nav-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  --nav-text: #333333;
+  --nav-hover: #0066cc;
+  --hover-bg: rgba(0, 0, 0, 0.1);
+
+  /* Typography */
+  --font-primary: -apple-system, 'system-ui', 'Segoe UI', Roboto, sans-serif;
+
+  /* Font Sizes */
+  --font-size-xxs: 0.6rem;
+  /* 9.6px */
+  --font-size-xs: 0.75rem;
+  /* 12px */
+  --font-size-sm: 0.875rem;
+  /* 14px */
+  --font-size-base: 1rem;
+  /* 16px */
+  --font-size-lg: 1.125rem;
+  /* 18px */
+  --font-size-xl: 1.25rem;
+  /* 20px */
+  --font-size-2xl: 1.375rem;
+  /* 22px */
+  --font-size-3xl: 1.5rem;
+  /* 24px */
+  --font-size-4xl: 1.875rem;
+  /* 30px */
+
+  /* Font Weights */
+  --font-weight-light: 300;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Line Heights */
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.6;
+  --line-height-relaxed: 1.75;
+
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  /* 4px */
+  --spacing-sm: 0.5rem;
+  /* 8px */
+  --spacing-md: 1rem;
+  /* 16px */
+  --spacing-lg: 1.5rem;
+  /* 24px */
+  --spacing-xl: 2rem;
+  /* 32px */
+
+  /* Layout */
+  --max-width: 1200px;
+  --border-radius: 1rem;
+  --card-padding: 2rem;
+
+  /* Z-index Stack */
+  --z-nav: 100;
+  /* Navigation always on top */
+  --z-button: 52;
+  /* Buttons above content */
+  --z-gradient: 51;
+  /* Gradients above base content */
+  --z-about: 50;
+  /* About section content */
+  --z-projects: 40;
+  /* Project cards */
+  --z-base: 1;
+  /* Base content level */
+
+  --transition-fast: 0.2s;
+  --transition-base: 0.3s;
+  --transition-slow: 0.5s;
+  --ease-base: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* GitHub button colors */
+  --github-button-bg: #24292e;
+  --github-button-text: #ffffff;
+  --github-button-hover: #2f363d;
+
+  /* Demo button colors */
+  --demo-button-bg: #0070f3;
+  --demo-button-text: #ffffff;
+  --demo-button-hover: #0051af;
+}
+
+/* Dark Theme */
+.dark {
+  --bg-color: #1a1a1a;
+  --text-color: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.7);
+  --accent-color: #66b3ff;
+
+  --nav-bg: rgba(26, 26, 26, 0.8);
+  --nav-border: rgba(255, 255, 255, 0.1);
+  --nav-border-hover: rgba(255, 255, 255, 0.15);
+  --nav-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  --nav-text: #ffffff;
+  --nav-hover: #66b3ff;
+  --hover-bg: rgba(255, 255, 255, 0.1);
+
+  /* GitHub button colors (dark theme) */
+  --github-button-bg: #2f363d;
+  --github-button-text: #ffffff;
+  --github-button-hover: #444d56;
+
+  /* Demo button colors (dark theme) */
+  --demo-button-bg: #0070f3;
+  --demo-button-text: #ffffff;
+  --demo-button-hover: #0051af;
+}

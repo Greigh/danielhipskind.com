@@ -1,5 +1,3 @@
-import { fetchGitHubData } from './utils/github.js';
-
 // About section content
 export const about = {
   intro:
@@ -24,28 +22,27 @@ export const about = {
   ],
 };
 
-// Projects will be populated from GitHub, plus our custom project
-let projects = [];
-
 // Manual project entry for Call Center Helper
-const callCenterHelperProject = {
-  title: 'Adamas - Call Center Helper',
-  repoName: 'callcenterhelper',
-  description:
-    'A powerful productivity toolkit designed for call center agents. Streamlines workflows with hold timers, call flow guides, pattern formatters, and quick notes. Features dark/light themes for reduced eye strain. Enhances customer interactions while improving efficiency and compliance. Finesse and Webex support coming soon!',
-  githubUrl: 'https://github.com/Greigh/Adamas',
-  languages: {
-    JavaScript: 48000, // 48%
-    SCSS: 42000, // 42%
-    HTML: 8000, // 7%
-    SH: 3000, // 3%
+export const manualProjects = [
+  {
+    title: 'Adamas - Call Center Helper',
+    repoName: 'callcenterhelper',
+    description:
+      'A powerful productivity toolkit designed for call center agents. Streamlines workflows with hold timers, call flow guides, pattern formatters, and quick notes. Features dark/light themes for reduced eye strain. Enhances customer interactions while improving efficiency and compliance. Finesse and Webex support coming soon!',
+    githubUrl: 'https://github.com/Greigh/Adamas',
+    languages: {
+      JavaScript: 48000, // 48%
+      SCSS: 42000, // 42%
+      HTML: 8000, // 7%
+      SH: 3000, // 3%
+    },
+    updatedAt: new Date().toLocaleDateString(),
+    order: 0, // Put it first in the list
+    demoUrl: '/Adamas/',
+    has_pages: false,
+    topics: ['utility', 'call-center', 'customer-service'],
   },
-  updatedAt: new Date().toLocaleDateString(),
-  order: 0, // Put it first in the list
-  demoUrl: '/Adamas/',
-  has_pages: false,
-  topics: ['utility', 'call-center', 'customer-service'],
-};
+];
 
 // Social links configuration
 export const socialLinks = [
@@ -82,8 +79,7 @@ export const socialLinks = [
   },
 ];
 
-// Add the skills definition that was also missing
-const skills = {
+export const skills = {
   technical: [
     { name: 'JavaScript', id: 'javascript', level: 95 },
     { name: 'Python', id: 'python', level: 85 },
@@ -106,55 +102,8 @@ const skills = {
   ],
 };
 
-// Initialize content
-export async function initialize() {
-  try {
-    const githubProjects = await fetchGitHubData();
-    // Add the manual project to the GitHub projects
-    projects = [callCenterHelperProject, ...githubProjects];
-
-    return {
-      about,
-      projects,
-      skills,
-      social: socialLinks,
-    };
-  } catch (error) {
-    console.error('Failed to initialize content:', error);
-    return {
-      about,
-      // Still include the manual project even if GitHub fetch fails
-      projects: [callCenterHelperProject],
-      skills,
-      social: socialLinks,
-    };
-  }
-}
-
-// Helper functions
-export function getProjectsByTech(tech) {
-  return projects.filter(
-    (project) => project.languages && project.languages[tech]
-  );
-}
-
-export function getSkillsByLevel(minLevel) {
-  return {
-    technical: skills.technical.filter((skill) => skill.level >= minLevel),
-    professional: skills.professional.filter(
-      (skill) => skill.level >= minLevel
-    ),
-  };
-}
-
 // Copyright generator
 export function generateCopyright() {
   const year = new Date().getFullYear();
   return `© ${year} Daniel Hipskind`;
 }
-
-export const content = {
-  about,
-  projects,
-  skills,
-};

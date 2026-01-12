@@ -1,0 +1,28 @@
+.error-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--spacing-xl);
+}
+
+.error-container h1 {
+  font-size: 6rem;
+  color: var(--accent-color);
+  margin-bottom: var(--spacing-lg);
+}
+
+.error-container a {
+  margin-top: var(--spacing-lg);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: 25px;
+  background: var(--accent-color);
+  color: var(--bg-color);
+  transition: transform var(--transition-base) var(--ease-base);
+}
+
+.error-container a:hover {
+  transform: translateY(-2px);
+}

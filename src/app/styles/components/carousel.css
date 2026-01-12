@@ -1,0 +1,112 @@
+.carousel-container {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  margin: 0 auto;
+  padding: 2.5rem 0;
+}
+
+.carousel-track {
+  display: flex;
+  transition: transform 0.5s ease-in-out;
+  width: 100%;
+}
+
+.carousel-slide {
+  min-width: 100%;
+  padding: 0 1rem;
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+/* Updated controls positioning and styling */
+.carousel-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 2rem auto 1rem;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+/* Make buttons more visible */
+.carousel-button {
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 3.5rem;
+  height: 3.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+.carousel-button svg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.carousel-button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.carousel-button:focus {
+  outline: 2px solid var(--accent-color);
+}
+
+.carousel-button:active {
+  transform: scale(0.95);
+}
+
+/* Enhanced pagination styling */
+.carousel-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1rem auto;
+  width: 100%;
+}
+
+.carousel-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background-color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.carousel-dot.active {
+  background-color: var(--accent-color);
+  transform: scale(1.4);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Make sure project cards inside carousel have proper sizing */
+.carousel-slide .project-card {
+  /* Let JS handle width/flex */
+  width: 100%;
+  margin: 0;
+  height: 100%; /* Ensure full height */
+}
+
+/* Controls container */
+.carousel-controls-container {
+  text-align: center;
+  margin: 1rem 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}

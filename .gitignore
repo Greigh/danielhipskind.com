@@ -1,148 +1,58 @@
-# Dependencies
-node_modules/
-yarn.lock
-pnpm-lock.yaml
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# Environment variables
-.env
-.env.*
-!.env.example
-!.env.deploy.example
-.env.deploy.example
-.env.example
-postbuild-rename.cjs
-postbuild-rename.js
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
 
-# Build outputs
-dist/
-build/
-out/
-.next/
-.nuxt/
-.output/
+# testing
+/coverage
 
-# IDE and editor files
-.idea/
-.vscode/
-*.sublime-project
-*.sublime-workspace
-.vs/
-*.swp
-*.swo
-*~
+# next.js
+/.next/
+/out/
 
-# Logs
-logs/
-*.log
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+.pnpm-debug.log*
 
-# Operating System
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
+# env files (can opt-in for committing if needed)
+.env*
 
-# Testing
-coverage/
-.nyc_output/
-.jest/
-__snapshots__/
+# vercel
+.vercel
 
-# Cache directories
-.cache/
-.parcel-cache/
-.npm/
-.eslintcache
-.stylelintcache
-.prettiercache
+# typescript
+*.tsbuildinfo
+next-env.d.ts
 
-# Temporary files
-*.tmp
-*.temp
+# backups
 *.bak
-*.swp
-*.orig
+_legacy_backup
 
-# Debug
-.debug/
-debug.log
-.chrome/
-
-# Misc
-.history/
-*.pid
-*.seed
-*.pid.lock
-.env.development.local
-.env.test.local
-.env.production.local
-.env.local
-
-# Optional: Production builds
-/public/assets/js/*.min.js
-/public/assets/css/*.min.css
-
-# Optional: Large media files
-*.mp4
-*.tiff
-*.avi
-*.flv
-*.mov
-*.wmv
-
-nodemon.json
-CNAME
-server.js
-ecosystem.config.cjs
-
-# Media and assets
-*.gif
-*.ico
-*.pdf
-*.psd
-*.ai
-*.sketch
-*.fig
-
-# Font files
-*.woff
-*.woff2
-*.eot
-*.ttf
-*.otf
-
-# Compressed files
-*.gz
-*.br
-*.zip
-*.tar
-*.7z
-
-# Source maps
-*.map
-
-# Cache directories
-.cache/
-public/assets/cache/
-
-nginx
-templates
-deploy.sh
-deploy-simple.sh
-
+# Call Center Helper
+CallCenterHelper
+CallCenterHelper/*
 Call Center Help
 
 .known_hosts
-deploy_*
-deploy_old.sh
-*.log
-deployments.log
-deploy
-
-scripts
-*.sh
+logs/
+.vscode/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
