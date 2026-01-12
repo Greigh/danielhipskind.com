@@ -96,7 +96,7 @@ build_call_center() {
     cd "$SCRIPT_DIR/Call Center Help/client" || return 1
 
     if [ -f "package.json" ]; then
-        npm install || return 1
+        npm install --include=dev || return 1
         npm run build || return 1
         # Restore local dependencies to keep dev server working
         echo "📦 Restoring local development dependencies..."
@@ -289,13 +289,21 @@ EOF
 verify_deployment() {
     echo "🔍 Verifying deployment..."
 
-    # Basic HTTP check
-    if curl -sf "https://danielhipskind.com" >/dev/null; then
-        echo "✅ Main site responding"
-    else
-        echo "❌ Main site not responding"
-        return 1
-    fi
+    # Basic HTTP check with retry
+    echo "Using retry logic for site verification..."
+    for i in {1..5}; do
+        if curl -sf "https://danielhipskind.com" >/dev/null; then
+            echo "✅ Main site responding"
+            break
+        fi
+        echo "⚠️  Site not yet responding, retrying in 2s ($i/5)..."
+        sleep 2
+
+        if [ $i -eq 5 ]; then
+            echo "❌ Main site not responding after 5 attempts"
+            return 1
+        fi
+    done
 
     # SSL certificate check
     if openssl s_client -connect danielhipskind.com:443 -servername danielhipskind.com < /dev/null 2>/dev/null | openssl x509 -noout -dates >/dev/null; then

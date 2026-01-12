@@ -44,10 +44,9 @@ next-env.d.ts
 *.bak
 _legacy_backup
 
-# Call Center Helper
-CallCenterHelper
-CallCenterHelper/*
-Call Center Help
+# Call Center Help
+Call Center Help/client/node_modules
+Call Center Help/client/dist
 
 .known_hosts
 logs/
@@ -56,3 +55,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+
+NGINX
+nginx/*
+deploy
