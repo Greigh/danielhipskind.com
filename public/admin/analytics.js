@@ -2,7 +2,8 @@ document.getElementById('save-token').addEventListener('click', () => {
   const token = document.getElementById('admin-token').value.trim();
   if (!token) return;
   sessionStorage.setItem('admin_token', token);
-  document.getElementById('token-status').textContent = 'Logged in (token saved in session)';
+  document.getElementById('token-status').textContent =
+    'Logged in (token saved in session)';
 });
 
 document.getElementById('logout').addEventListener('click', () => {
@@ -15,29 +16,37 @@ document.getElementById('logout').addEventListener('click', () => {
 
 document.getElementById('login-cookie').addEventListener('click', async () => {
   const secret = document.getElementById('admin-token').value.trim();
-  if (!secret) { document.getElementById('status').textContent = 'Enter admin secret first'; return; }
+  if (!secret) {
+    document.getElementById('status').textContent = 'Enter admin secret first';
+    return;
+  }
   try {
     const res = await fetch('/api/admin/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ secret }),
-      credentials: 'include'
+      credentials: 'include',
     });
     if (res.status === 204) {
-      document.getElementById('status').textContent = 'Logged in with cookie (HttpOnly)';
+      document.getElementById('status').textContent =
+        'Logged in with cookie (HttpOnly)';
       // set sessionStorage flag so UI knows it's logged in
       sessionStorage.setItem('admin_token', 'cookie');
-      document.getElementById('token-status').textContent = 'Logged in (cookie)';
+      document.getElementById('token-status').textContent =
+        'Logged in (cookie)';
     } else if (res.status === 401) {
       document.getElementById('status').textContent = 'Invalid admin secret';
     } else if (res.status === 403) {
-      document.getElementById('status').textContent = 'Admin login not enabled on server';
+      document.getElementById('status').textContent =
+        'Admin login not enabled on server';
     } else {
-      const j = await res.json().catch(()=>({}));
-      document.getElementById('status').textContent = 'Cookie login failed: ' + (j.error || res.statusText);
+      const j = await res.json().catch(() => ({}));
+      document.getElementById('status').textContent =
+        'Cookie login failed: ' + (j.error || res.statusText);
     }
   } catch (e) {
-    document.getElementById('status').textContent = 'Cookie login error: ' + e.message;
+    document.getElementById('status').textContent =
+      'Cookie login error: ' + e.message;
   }
 });
 
@@ -52,18 +61,22 @@ document.getElementById('load').addEventListener('click', async () => {
   try {
     const tokenIsCookie = token === 'cookie';
     if (!token) {
-      status.textContent = 'Please provide an admin token and click Save token or use Login (cookie)';
+      status.textContent =
+        'Please provide an admin token and click Save token or use Login (cookie)';
       return;
     }
-    const fetchOpts = tokenIsCookie ? { credentials: 'include' } : { headers: { Authorization: 'Bearer ' + token } };
+    const fetchOpts = tokenIsCookie
+      ? { credentials: 'include' }
+      : { headers: { Authorization: 'Bearer ' + token } };
     const res = await fetch(`/api/admin/analytics?limit=${limit}`, fetchOpts);
     if (!res.ok) {
       if (res.status === 401) {
-        status.textContent = 'Unauthorized - check your admin secret or re-login';
+        status.textContent =
+          'Unauthorized - check your admin secret or re-login';
       } else if (res.status === 403) {
         status.textContent = 'Admin analytics not enabled on server';
       } else {
-        const err = await res.json().catch(()=>({error:'unknown'}));
+        const err = await res.json().catch(() => ({ error: 'unknown' }));
         status.textContent = 'Error: ' + (err.error || res.statusText);
       }
       return;
@@ -81,7 +94,6 @@ document.getElementById('load').addEventListener('click', async () => {
     displayEvents(events);
 
     status.textContent = `Loaded ${json.count} events (source=${json.source})`;
-
   } catch (err) {
     status.textContent = 'Fetch error: ' + err.message;
   }
@@ -94,10 +106,14 @@ function updateStats(events) {
 
   // Calculate stats
   const totalEvents = events.length;
-  const uniqueIPs = new Set(events.map(e => e.ip)).size;
-  const eventTypes = new Set(events.map(e => e.event)).size;
-  const latestEvent = events.length > 0 ?
-    Math.floor((Date.now() - new Date(events[0].timestamp).getTime()) / 60000) : 0;
+  const uniqueIPs = new Set(events.map((e) => e.ip)).size;
+  const eventTypes = new Set(events.map((e) => e.event)).size;
+  const latestEvent =
+    events.length > 0
+      ? Math.floor(
+          (Date.now() - new Date(events[0].timestamp).getTime()) / 60000
+        )
+      : 0;
 
   // Update DOM
   document.getElementById('total-events').textContent = totalEvents;
@@ -108,15 +124,17 @@ function updateStats(events) {
 
 function displayEvents(events) {
   const eventFilter = document.getElementById('event-filter').value;
-  const filteredEvents = eventFilter ?
-    events.filter(event => event.event === eventFilter) :
-    events;
+  const filteredEvents = eventFilter
+    ? events.filter((event) => event.event === eventFilter)
+    : events;
 
   const tbody = document.querySelector('#events-table tbody');
   tbody.innerHTML = '';
 
   // Update count
-  document.getElementById('events-count').textContent = `${filteredEvents.length} events`;
+  document.getElementById(
+    'events-count'
+  ).textContent = `${filteredEvents.length} events`;
 
   for (const e of filteredEvents) {
     const tr = document.createElement('tr');
@@ -149,7 +167,8 @@ function displayEvents(events) {
     // User Agent (shortened)
     const ua = document.createElement('td');
     const uaText = e.ua || '-';
-    ua.textContent = uaText.length > 50 ? uaText.substring(0, 50) + '...' : uaText;
+    ua.textContent =
+      uaText.length > 50 ? uaText.substring(0, 50) + '...' : uaText;
     ua.title = e.ua || '';
     ua.style.maxWidth = '200px';
     ua.style.overflow = 'hidden';
@@ -160,7 +179,8 @@ function displayEvents(events) {
     const data = document.createElement('td');
     data.className = 'data-preview';
     const dataText = e.data ? JSON.stringify(e.data) : '-';
-    data.textContent = dataText.length > 50 ? dataText.substring(0, 50) + '...' : dataText;
+    data.textContent =
+      dataText.length > 50 ? dataText.substring(0, 50) + '...' : dataText;
     data.title = dataText;
     data.onclick = () => showDataModal(e);
 
@@ -196,12 +216,17 @@ document.getElementById('clear-cache').addEventListener('click', () => {
 // CSV export button
 document.getElementById('export-csv').addEventListener('click', async () => {
   const token = sessionStorage.getItem('admin_token') || '';
-  if (!token) { document.getElementById('status').textContent = 'No token saved'; return; }
+  if (!token) {
+    document.getElementById('status').textContent = 'No token saved';
+    return;
+  }
   const limit = Number(document.getElementById('limit').value) || 1000;
   const url = `/api/admin/analytics.csv?limit=${limit}`;
   try {
-  const tokenIsCookie = token === 'cookie';
-  const res = tokenIsCookie ? await fetch(url, { credentials: 'include' }) : await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
+    const tokenIsCookie = token === 'cookie';
+    const res = tokenIsCookie
+      ? await fetch(url, { credentials: 'include' })
+      : await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
     if (!res.ok) {
       document.getElementById('status').textContent = 'CSV export failed';
       return;
@@ -222,12 +247,17 @@ document.getElementById('export-csv').addEventListener('click', async () => {
 // RSS export button
 document.getElementById('export-rss').addEventListener('click', async () => {
   const token = sessionStorage.getItem('admin_token') || '';
-  if (!token) { document.getElementById('status').textContent = 'No token saved'; return; }
+  if (!token) {
+    document.getElementById('status').textContent = 'No token saved';
+    return;
+  }
   const limit = Number(document.getElementById('limit').value) || 100;
   const url = `/api/admin/analytics.rss?limit=${limit}`;
   try {
-  const tokenIsCookie = token === 'cookie';
-  const res = tokenIsCookie ? await fetch(url, { credentials: 'include' }) : await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
+    const tokenIsCookie = token === 'cookie';
+    const res = tokenIsCookie
+      ? await fetch(url, { credentials: 'include' })
+      : await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
     if (!res.ok) {
       document.getElementById('status').textContent = 'RSS export failed';
       return;
@@ -249,14 +279,22 @@ document.getElementById('export-rss').addEventListener('click', async () => {
 // Server-side streaming export
 document.getElementById('server-export').addEventListener('click', async () => {
   const token = sessionStorage.getItem('admin_token') || '';
-  if (!token) { document.getElementById('status').textContent = 'No token saved'; return; }
+  if (!token) {
+    document.getElementById('status').textContent = 'No token saved';
+    return;
+  }
   const tokenIsCookie = token === 'cookie';
   const limit = 50000; // large export
   const url = `/api/admin/analytics.csv?limit=${limit}`;
   document.getElementById('status').textContent = 'Starting server export...';
   try {
-    const res = tokenIsCookie ? await fetch(url, { credentials: 'include' }) : await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
-    if (!res.ok) { document.getElementById('status').textContent = 'Server export failed'; return; }
+    const res = tokenIsCookie
+      ? await fetch(url, { credentials: 'include' })
+      : await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
+    if (!res.ok) {
+      document.getElementById('status').textContent = 'Server export failed';
+      return;
+    }
     const blob = await res.blob();
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
@@ -273,34 +311,61 @@ document.getElementById('server-export').addEventListener('click', async () => {
 // JSON cursor export (NDJSON) - fetch pages until cursor is null or safety limit reached
 document.getElementById('json-export').addEventListener('click', async () => {
   const token = sessionStorage.getItem('admin_token') || '';
-  if (!token) { document.getElementById('status').textContent = 'No token saved'; return; }
+  if (!token) {
+    document.getElementById('status').textContent = 'No token saved';
+    return;
+  }
   const tokenIsCookie = token === 'cookie';
   const pageLimit = 2000; // server side limit per request
   let cursor = null;
   const outChunks = [];
   let total = 0;
   const safetyMax = 100000; // avoid browser OOM
-  document.getElementById('status').textContent = 'Starting JSON cursor export...';
+  document.getElementById('status').textContent =
+    'Starting JSON cursor export...';
   try {
     while (true) {
-      const url = `/api/admin/analytics/export?limit=${pageLimit}` + (cursor ? `&cursor=${encodeURIComponent(cursor)}` : '');
-      const res = tokenIsCookie ? await fetch(url, { credentials: 'include' }) : await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
-      if (!res.ok) { document.getElementById('status').textContent = 'Export request failed'; return; }
+      const url =
+        `/api/admin/analytics/export?limit=${pageLimit}` +
+        (cursor ? `&cursor=${encodeURIComponent(cursor)}` : '');
+      const res = tokenIsCookie
+        ? await fetch(url, { credentials: 'include' })
+        : await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
+      if (!res.ok) {
+        document.getElementById('status').textContent = 'Export request failed';
+        return;
+      }
       const json = await res.json();
       const items = json.events || [];
       for (const it of items) {
         outChunks.push(JSON.stringify(it));
       }
       total += items.length;
-      document.getElementById('status').textContent = `Exported ${total} events...`;
+      document.getElementById(
+        'status'
+      ).textContent = `Exported ${total} events...`;
       if (!json.cursor) break;
       cursor = json.cursor;
-      if (total >= safetyMax) { document.getElementById('status').textContent = `Reached safety limit ${safetyMax}`; break; }
+      if (total >= safetyMax) {
+        document.getElementById(
+          'status'
+        ).textContent = `Reached safety limit ${safetyMax}`;
+        break;
+      }
     }
     // download NDJSON
-    const blob = new Blob([outChunks.join('\n')], { type: 'application/x-ndjson' });
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'analytics.ndjson'; document.body.appendChild(a); a.click(); a.remove();
-    document.getElementById('status').textContent = `Export complete: ${total} events`;
+    const blob = new Blob([outChunks.join('\n')], {
+      type: 'application/x-ndjson',
+    });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'analytics.ndjson';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    document.getElementById(
+      'status'
+    ).textContent = `Export complete: ${total} events`;
   } catch (e) {
     document.getElementById('status').textContent = 'Export error';
   }
@@ -313,14 +378,17 @@ document.addEventListener('DOMContentLoaded', () => {
   // Check if user is authenticated
   if (!token) {
     // Redirect to login page if no token
-    document.getElementById('status').textContent = 'Not authenticated. Redirecting to login...';
+    document.getElementById('status').textContent =
+      'Not authenticated. Redirecting to login...';
     setTimeout(() => {
-      window.location.href = '/admin/login.html';
+      window.location.href = '/admin/';
     }, 2000);
     return;
   }
 
-  if (token) document.getElementById('token-status').textContent = 'Logged in (token saved in session)';
+  if (token)
+    document.getElementById('token-status').textContent =
+      'Logged in (token saved in session)';
   // Clear visible token input on load to avoid shoulder-surfing
   const input = document.getElementById('admin-token');
   if (input) input.value = '';

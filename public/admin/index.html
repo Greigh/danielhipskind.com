@@ -132,7 +132,7 @@
       </div>
 
       <div class="footer-links">
-        <a href="/admin/index.html">← Admin Dashboard</a>
+        <a href="/admin/analytics.html">← Admin Dashboard</a>
         <span
           style="
             margin: 0 var(--admin-space-sm);
@@ -224,7 +224,7 @@
             // Store token in sessionStorage for API calls
             sessionStorage.setItem('admin_token', 'cookie');
             setTimeout(() => {
-              window.location.href = '/admin/index.html';
+              window.location.href = '/admin/analytics.html';
             }, 1000);
           } else if (response.status === 401) {
             showAlert(
@@ -240,7 +240,7 @@
             // Store the token for direct API use
             sessionStorage.setItem('admin_token', secret);
             setTimeout(() => {
-              window.location.href = '/admin/index.html';
+              window.location.href = '/admin/analytics.html';
             }, 1000);
           } else {
             const errorData = await response.json().catch(() => ({}));
@@ -267,7 +267,7 @@
             'info'
           );
           setTimeout(() => {
-            window.location.href = '/admin/index.html';
+            window.location.href = '/admin/analytics.html';
           }, 1500);
         }
       });
