@@ -12,6 +12,15 @@ const cors = require('cors');
 const winston = require('winston');
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
+
+// Ensure logs directory exists
+const LOGS_DIR = path.join(__dirname, 'logs');
+try {
+  fs.mkdirSync(LOGS_DIR, { recursive: true });
+} catch (e) {
+  /* ignore */
+}
 const bodyParser = require('body-parser');
 const { body, validationResult } = require('express-validator');
 const { nanoid } = require('nanoid');
@@ -438,7 +447,243 @@ nextApp.prepare().then(() => {
     }
   );
 
-  // NOTE: Other specific API routes from original server.js should be added here...
+  // --- Admin Logic & Analytics (In-Memory Session Fallback) ---
+  const ADMIN_SESSION_NAME = 'admin_session';
+  const ADMIN_SESSION_TTL_MS = 30 * 60 * 1000; // 30 minutes
+  const adminSessions = new Map(); // In-memory session store (replaces Redis)
+
+  function generateSessionToken() {
+    return crypto.randomBytes(32).toString('hex');
+  }
+
+  function verifySessionToken(token) {
+    if (!token) return false;
+    const session = adminSessions.get(token);
+    if (!session) return false;
+    if (Date.now() > session.exp) {
+      adminSessions.delete(token);
+      return false;
+    }
+    return true;
+  }
+
+  function parseCookies(req) {
+    const header = req.headers.cookie || '';
+    return header
+      .split(';')
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .reduce((acc, kv) => {
+        const [k, ...v] = kv.split('=');
+        acc[k] = decodeURIComponent((v || []).join('='));
+        return acc;
+      }, {});
+  }
+
+  function getRealIP(req) {
+    const cf = req.get('CF-Connecting-IP');
+    if (cf && cf !== '127.0.0.1') return cf;
+    const forwarded = req.get('X-Forwarded-For');
+    if (forwarded) return forwarded.split(',')[0].trim();
+    return req.ip || req.connection?.remoteAddress || 'unknown';
+  }
+
+  // Login
+  app.post('/api/admin/login', async (req, res) => {
+    const secret = (req.body && req.body.secret) || req.get('x-admin-secret');
+    if (!process.env.ADMIN_SECRET)
+      return res.status(403).json({ error: 'Admin login not enabled' });
+    if (!secret || secret !== process.env.ADMIN_SECRET)
+      return res.status(401).json({ error: 'Unauthorized' });
+
+    const token = generateSessionToken();
+    adminSessions.set(token, {
+      ts: Date.now(),
+      exp: Date.now() + ADMIN_SESSION_TTL_MS,
+    });
+
+    const cookieParts = [
+      `${ADMIN_SESSION_NAME}=${token}`,
+      'HttpOnly',
+      'Path=/',
+      `Max-Age=${Math.floor(ADMIN_SESSION_TTL_MS / 1000)}`,
+      'SameSite=Strict',
+    ];
+    if (process.env.NODE_ENV === 'production') cookieParts.push('Secure');
+    res.setHeader('Set-Cookie', cookieParts.join('; '));
+    return res.status(204).end();
+  });
+
+  // Logout
+  app.post('/api/admin/logout', (req, res) => {
+    const cookies = parseCookies(req);
+    const token = cookies[ADMIN_SESSION_NAME];
+    if (token) adminSessions.delete(token);
+    res.setHeader(
+      'Set-Cookie',
+      `${ADMIN_SESSION_NAME}=; HttpOnly; Path=/; Max-Age=0; SameSite=Strict${
+        process.env.NODE_ENV === 'production' ? '; Secure' : ''
+      }`
+    );
+    return res.status(204).end();
+  });
+
+  // Analytics Ingest
+  app.post('/api/analytics', (req, res) => {
+    try {
+      const payload = req.body || {};
+      const record = {
+        timestamp: new Date().toISOString(),
+        ip: getRealIP(req),
+        ua: req.get('user-agent') || null,
+        path: req.get('referer') || payload.path || null,
+        event: payload.event || 'unknown',
+        data: payload.data || null,
+      };
+      const dateKey = new Date().toISOString().slice(0, 10);
+      const filename = path.join(LOGS_DIR, `analytics-${dateKey}.log`);
+      fs.appendFile(filename, JSON.stringify(record) + '\n', (err) => {
+        if (err) console.error('Analytics write error', err);
+      });
+      res.status(204).end();
+    } catch (err) {
+      console.error('Analytics ingest error', err);
+      res.status(500).json({ error: 'Failed' });
+    }
+  });
+
+  // Admin Analytics Read
+  app.get('/api/admin/analytics', async (req, res) => {
+    const cookies = parseCookies(req);
+    const token = cookies[ADMIN_SESSION_NAME];
+    const headerSecret = req.get('x-admin-secret');
+    const authHeader = req.get('authorization') || '';
+    const bearer = authHeader.replace(/^Bearer\s+/i, '');
+
+    const isAuth =
+      (token && verifySessionToken(token)) ||
+      headerSecret === process.env.ADMIN_SECRET ||
+      bearer === process.env.ADMIN_SECRET;
+
+    if (!process.env.ADMIN_SECRET)
+      return res.status(403).json({ error: 'Admin disabled' });
+    if (!isAuth) return res.status(401).json({ error: 'Unauthorized' });
+
+    const limit = Math.min(Number(req.query.limit) || 100, 1000);
+    try {
+      const files = fs
+        .readdirSync(LOGS_DIR)
+        .filter((f) => f.startsWith('analytics-'))
+        .sort()
+        .reverse();
+      if (files.length === 0)
+        return res.json({ source: 'file', count: 0, events: [] });
+
+      const latest = path.join(LOGS_DIR, files[0]);
+      const raw = fs
+        .readFileSync(latest, 'utf8')
+        .trim()
+        .split('\n')
+        .filter(Boolean);
+      // Read last N lines
+      const selected = raw
+        .slice(-limit)
+        .reverse()
+        .map((line) => {
+          try {
+            return JSON.parse(line);
+          } catch {
+            return { raw: line };
+          }
+        });
+      return res.json({
+        source: 'file',
+        file: files[0],
+        count: selected.length,
+        events: selected,
+      });
+    } catch (err) {
+      return res.status(500).json({ error: 'Read failed' });
+    }
+  });
+
+  // CSV Export
+  app.get('/api/admin/analytics.csv', async (req, res) => {
+    const cookies = parseCookies(req);
+    const token = cookies[ADMIN_SESSION_NAME];
+    const headerSecret = req.get('x-admin-secret');
+    const authHeader = req.get('authorization') || '';
+    const bearer = authHeader.replace(/^Bearer\s+/i, '');
+
+    const isAuth =
+      (token && verifySessionToken(token)) ||
+      headerSecret === process.env.ADMIN_SECRET ||
+      bearer === process.env.ADMIN_SECRET;
+
+    if (!process.env.ADMIN_SECRET)
+      return res.status(403).send('Admin disabled');
+    if (!isAuth) return res.status(401).send('Unauthorized');
+
+    const limit = Math.min(Number(req.query.limit) || 1000, 10000);
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader(
+      'Content-Disposition',
+      'attachment; filename="analytics.csv"'
+    );
+    res.write('timestamp,ip,ua,path,event,data\n');
+
+    try {
+      const files = fs
+        .readdirSync(LOGS_DIR)
+        .filter((f) => f.startsWith('analytics-'))
+        .sort()
+        .reverse();
+      if (files.length === 0) {
+        res.end();
+        return;
+      }
+
+      const latest = path.join(LOGS_DIR, files[0]);
+      const stream = fs.createReadStream(latest, { encoding: 'utf8' });
+      let leftover = '';
+      let count = 0;
+
+      stream.on('data', (chunk) => {
+        leftover += chunk;
+        const parts = leftover.split('\n');
+        leftover = parts.pop();
+        // Traverse backwards to get newest first? The legacy code did that in memory but for CSV stream it just dumped.
+        // Actually legacy code did: `for (let i = parts.length - 1; i >= 0; i--)`. Let's match that.
+        for (let i = parts.length - 1; i >= 0; i--) {
+          const line = parts[i].trim();
+          if (!line) continue;
+          try {
+            const e = JSON.parse(line);
+            const row = [
+              `"${e.timestamp || ''}"`,
+              `"${e.ip || ''}"`,
+              `"${(e.ua || '').replace(/"/g, '""')}"`,
+              `"${(e.path || '').replace(/"/g, '""')}"`,
+              `"${e.event || ''}"`,
+              `"${JSON.stringify(e.data || '').replace(/"/g, '""')}"`,
+            ];
+            res.write(row.join(',') + '\n');
+            count++;
+            if (count >= limit) {
+              stream.destroy();
+              res.end();
+              return;
+            }
+          } catch {}
+        }
+      });
+      stream.on('end', () => res.end());
+    } catch {
+      res.status(500).end();
+    }
+  });
+
+  // End Admin Logic
   // The user can add specific missing API endpoints if needed later.
   // BUT the user's specific request "new files aren't deploying" was about the MAIN SITE (Next.js).
 
