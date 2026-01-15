@@ -149,6 +149,13 @@ function displayEvents(events) {
     ip.className = 'ip-address';
     ip.textContent = e.ip || '-';
 
+    // Location
+    const loc = document.createElement('td');
+    const country = e.country || '';
+    const city = e.city || '';
+    loc.textContent =
+      country && city ? `${country} (${city})` : country || city || '-';
+
     // Event type with styling
     const ev = document.createElement('td');
     const eventSpan = document.createElement('span');
@@ -186,6 +193,7 @@ function displayEvents(events) {
 
     tr.appendChild(ts);
     tr.appendChild(ip);
+    tr.appendChild(loc);
     tr.appendChild(ev);
     tr.appendChild(path);
     tr.appendChild(ua);

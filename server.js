@@ -539,6 +539,8 @@ nextApp.prepare().then(() => {
         path: req.get('referer') || payload.path || null,
         event: payload.event || 'unknown',
         data: payload.data || null,
+        country: req.get('cf-ipcountry') || null,
+        city: req.get('cf-ipcity') || null,
       };
       const dateKey = new Date().toISOString().slice(0, 10);
       const filename = path.join(LOGS_DIR, `analytics-${dateKey}.log`);
@@ -630,7 +632,7 @@ nextApp.prepare().then(() => {
       'Content-Disposition',
       'attachment; filename="analytics.csv"'
     );
-    res.write('timestamp,ip,ua,path,event,data\n');
+    res.write('timestamp,ip,ua,path,event,data,country,city\n');
 
     try {
       const files = fs
@@ -666,6 +668,8 @@ nextApp.prepare().then(() => {
               `"${(e.path || '').replace(/"/g, '""')}"`,
               `"${e.event || ''}"`,
               `"${JSON.stringify(e.data || '').replace(/"/g, '""')}"`,
+              `"${e.country || ''}"`,
+              `"${e.city || ''}"`,
             ];
             res.write(row.join(',') + '\n');
             count++;
