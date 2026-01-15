@@ -21,7 +21,7 @@ body {
 
 /* Main container with max width and centering */
 .container {
-  max-width: var(--max-width, 1200px);
+  max-width: var(--max-width, 1400px); /* Increased for charts */
   margin: 0 auto;
   padding: 0 1rem;
 }
@@ -76,7 +76,9 @@ h1 {
 }
 
 /* Input and button styling */
-.controls input {
+.controls input,
+.controls select {
+  /* Added select */
   margin-left: 0.5rem;
   padding: 0.5rem 1rem;
   border: 1px solid var(--nav-border, rgba(255, 255, 255, 0.5));
@@ -87,7 +89,8 @@ h1 {
   transition: border-color 0.3s ease;
 }
 
-.controls input:focus {
+.controls input:focus,
+.controls select:focus {
   outline: none;
   border-color: var(--accent-color, #0066cc);
   box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.2);
@@ -132,8 +135,34 @@ h1 {
   text-align: center;
 }
 
+/* Charts Grid */
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.chart-container {
+  background: var(--nav-bg, rgba(255, 255, 255, 0.8));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--nav-border, rgba(255, 255, 255, 0.5));
+  border-radius: var(--border-radius, 1rem);
+  padding: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  min-height: 300px;
+}
+
+.chart-container h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  color: var(--text-color, #333);
+  text-align: center;
+}
+
 /* cURL examples section */
-section {
+section.curl-section {
   background: var(--nav-bg, rgba(255, 255, 255, 0.8));
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -224,6 +253,10 @@ section pre {
 
   .controls {
     padding: 1.5rem;
+  }
+
+  .charts-grid {
+    grid-template-columns: 1fr;
   }
 
   .controls input,

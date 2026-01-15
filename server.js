@@ -279,7 +279,49 @@ nextApp.prepare().then(() => {
             'https://cdn.jsdelivr.net',
             'https://cdn.socket.io',
             'https://static.cloudflareinsights.com',
+            'https://cdnjs.cloudflare.com',
+            'https://cdnjs.cloudflare.com', // Chart.js
           ],
+// ... (CSP continues)
+
+  // Analytics Ingest
+  app.post('/api/analytics', (req, res) => {
+    try {
+      const payload = req.body || {};
+      const record = {
+        timestamp: new Date().toISOString(),
+        ip: getRealIP(req),
+        ua: req.get('user-agent') || null,
+        path: req.get('referer') || payload.path || null,
+        referrer: payload.referrer || null, // Capture referrer
+        event: payload.event || 'unknown',
+        data: payload.data || null,
+        country: req.get('cf-ipcountry') || null,
+        city: req.get('cf-ipcity') || null,
+      };
+// ...
+
+  // CSV Export Header
+    res.write('timestamp,ip,ua,path,referrer,event,data,country,city\n');
+
+// ...
+
+  // CSV Export Row
+              `"${(e.path || '').replace(/"/g, '""')}"`,
+              `"${(e.referrer || '').replace(/"/g, '""')}"`, // Add referrer column
+              `"${e.event || ''}"`,
+
+// ...
+
+  // Explicitly serve admin index for /admin path
+  app.get(['/admin', '/admin/'], (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin', 'index.html'));
+  });
+
+  // Explicitly serve admin analytics for /admin/analytics
+  app.get(['/admin/analytics', '/admin/analytics/'], (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin', 'analytics.html'));
+  });
           styleSrc: ["'self'", "'unsafe-inline'"],
           imgSrc: ["'self'", 'data:', 'https:'],
           connectSrc: [
@@ -537,6 +579,7 @@ nextApp.prepare().then(() => {
         ip: getRealIP(req),
         ua: req.get('user-agent') || null,
         path: req.get('referer') || payload.path || null,
+        referrer: payload.referrer || null,
         event: payload.event || 'unknown',
         data: payload.data || null,
         country: req.get('cf-ipcountry') || null,
@@ -632,7 +675,7 @@ nextApp.prepare().then(() => {
       'Content-Disposition',
       'attachment; filename="analytics.csv"'
     );
-    res.write('timestamp,ip,ua,path,event,data,country,city\n');
+    res.write('timestamp,ip,ua,path,referrer,event,data,country,city\n');
 
     try {
       const files = fs
@@ -666,6 +709,7 @@ nextApp.prepare().then(() => {
               `"${e.ip || ''}"`,
               `"${(e.ua || '').replace(/"/g, '""')}"`,
               `"${(e.path || '').replace(/"/g, '""')}"`,
+              `"${(e.referrer || '').replace(/"/g, '""')}"`,
               `"${e.event || ''}"`,
               `"${JSON.stringify(e.data || '').replace(/"/g, '""')}"`,
               `"${e.country || ''}"`,
@@ -721,6 +765,11 @@ nextApp.prepare().then(() => {
   // Explicitly serve admin index for /admin path to avoid Next.js 404
   app.get(['/admin', '/admin/'], (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'admin', 'index.html'));
+  });
+
+  // Explicitly serve admin analytics for /admin/analytics
+  app.get(['/admin/analytics', '/admin/analytics/'], (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin', 'analytics.html'));
   });
 
   // Default Catch-All: Next.js

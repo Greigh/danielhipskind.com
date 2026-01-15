@@ -87,6 +87,9 @@ document.getElementById('load').addEventListener('click', async () => {
     // Store events globally for filtering
     window.currentEvents = events;
 
+    // Charts
+    updateCharts(events);
+
     // Update stats
     updateStats(events);
 
@@ -98,6 +101,107 @@ document.getElementById('load').addEventListener('click', async () => {
     status.textContent = 'Fetch error: ' + err.message;
   }
 });
+
+let charts = {};
+
+function updateCharts(events) {
+  document.getElementById('charts-section').style.display = 'block';
+
+  // Data Aggregation
+  const timestamps = events
+    .map(
+      (e) =>
+        new Date(e.timestamp).toLocaleDateString() +
+        ' ' +
+        new Date(e.timestamp).getHours() +
+        ':00'
+    )
+    .reverse();
+  const timeCounts = {};
+  timestamps.forEach((t) => (timeCounts[t] = (timeCounts[t] || 0) + 1));
+
+  const pages = events.map((e) => e.path || 'Unknown');
+  const pageCounts = {};
+  pages.forEach((p) => (pageCounts[p] = (pageCounts[p] || 0) + 1));
+  const topPages = Object.entries(pageCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10);
+
+  const locations = events.map((e) => e.country || 'Unknown');
+  const locCounts = {};
+  locations.forEach((l) => (locCounts[l] = (locCounts[l] || 0) + 1));
+  const topLocs = Object.entries(locCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5);
+
+  const browsers = events.map((e) => {
+    const ua = e.ua || '';
+    if (ua.includes('Chrome')) return 'Chrome';
+    if (ua.includes('Firefox')) return 'Firefox';
+    if (ua.includes('Safari')) return 'Safari';
+    if (ua.includes('Edge')) return 'Edge';
+    return 'Other';
+  });
+  const browserCounts = {};
+  browsers.forEach((b) => (browserCounts[b] = (browserCounts[b] || 0) + 1));
+
+  // Helper to destroy old chart
+  const updateChart = (id, type, labels, data, label) => {
+    if (charts[id]) charts[id].destroy();
+    const ctx = document.getElementById(id).getContext('2d');
+    charts[id] = new Chart(ctx, {
+      type: type,
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: label,
+            data: data,
+            backgroundColor: [
+              'rgba(54, 162, 235, 0.5)',
+              'rgba(255, 99, 132, 0.5)',
+              'rgba(255, 206, 86, 0.5)',
+              'rgba(75, 192, 192, 0.5)',
+              'rgba(153, 102, 255, 0.5)',
+            ],
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1,
+          },
+        ],
+      },
+      options: { responsive: true, maintainAspectRatio: false },
+    });
+  };
+
+  updateChart(
+    'pageViewsChart',
+    'line',
+    Object.keys(timeCounts),
+    Object.values(timeCounts),
+    'Events per Hour'
+  );
+  updateChart(
+    'topPagesChart',
+    'bar',
+    topPages.map((p) => p[0]),
+    topPages.map((p) => p[1]),
+    'Top Pages'
+  );
+  updateChart(
+    'locationsChart',
+    'bar',
+    topLocs.map((l) => l[0]),
+    topLocs.map((l) => l[1]),
+    'Visitors by Country'
+  );
+  updateChart(
+    'devicesChart',
+    'doughnut',
+    Object.keys(browserCounts),
+    Object.values(browserCounts),
+    'Browser Share'
+  );
+}
 
 // Enhanced display functions
 function updateStats(events) {
@@ -170,6 +274,16 @@ function displayEvents(events) {
     path.style.overflow = 'hidden';
     path.style.textOverflow = 'ellipsis';
     path.style.whiteSpace = 'nowrap';
+    path.title = e.path || '';
+
+    // Referrer
+    const ref = document.createElement('td');
+    ref.textContent = e.referrer || '-';
+    ref.style.maxWidth = '150px';
+    ref.style.overflow = 'hidden';
+    ref.style.textOverflow = 'ellipsis';
+    ref.style.whiteSpace = 'nowrap';
+    ref.title = e.referrer || '';
 
     // User Agent (shortened)
     const ua = document.createElement('td');
@@ -196,6 +310,7 @@ function displayEvents(events) {
     tr.appendChild(loc);
     tr.appendChild(ev);
     tr.appendChild(path);
+    tr.appendChild(ref);
     tr.appendChild(ua);
     tr.appendChild(data);
     tbody.appendChild(tr);

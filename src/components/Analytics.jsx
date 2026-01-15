@@ -35,6 +35,7 @@ export default function Analytics() {
       event,
       data: {
         path: window.location.pathname + window.location.search,
+        referrer: document.referrer || null,
         title: document.title,
         ...data,
       },

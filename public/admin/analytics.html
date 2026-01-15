@@ -44,6 +44,12 @@
         gap: var(--admin-space-xs);
       }
     </style>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"
+      integrity="sha512-ElRFoEQdI5Ht6kZvyzXhYG9NqjtkmlkfYk0wr6wHxU9JEHakS7UJZNeml5ALk+8IKlU6jDgMabC3vkumRokgJA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
   </head>
   <body class="admin-body">
     <main class="admin-container">
@@ -58,11 +64,25 @@
 
       <!-- Header -->
       <header class="analytics-header">
-        <h1 style="margin: 0 0 var(--admin-space-sm) 0; font-size: var(--admin-font-3xl);">📊 Analytics Dashboard</h1>
-        <p style="margin: 0; color: var(--admin-text-secondary);">
-          Comprehensive website analytics with real-time insights and advanced filtering
+        <h1
+          style="
+            margin: 0 0 var(--admin-space-sm) 0;
+            font-size: var(--admin-font-3xl);
+          "
+        >
+          📊 Analytics Dashboard
+        </h1>
+        <p style="margin: 0; color: var(--admin-text-secondary)">
+          Comprehensive website analytics with real-time insights and advanced
+          filtering
         </p>
-        <div class="admin-breadcrumbs" style="margin-top: var(--admin-space-md); padding: var(--admin-space-sm);">
+        <div
+          class="admin-breadcrumbs"
+          style="
+            margin-top: var(--admin-space-md);
+            padding: var(--admin-space-sm);
+          "
+        >
           <a href="/admin/index.html">🏠 Admin Dashboard</a>
           <span class="separator">|</span>
           <a href="/health-dashboard">🏥 Health Dashboard</a>
@@ -84,20 +104,31 @@
               type="password"
               class="admin-form-input"
               placeholder="Paste admin secret token"
-              style="width: 250px;"
+              style="width: 250px"
             />
           </div>
-          <button id="save-token" class="admin-btn admin-btn-sm">Save Token</button>
-          <button id="login-cookie" class="admin-btn admin-btn-sm admin-btn-secondary">Login (Cookie)</button>
-          <button id="logout" class="admin-btn admin-btn-sm admin-btn-warning">Logout</button>
-          <span id="token-status" class="admin-text-secondary">Not logged in</span>
+          <button id="save-token" class="admin-btn admin-btn-sm">
+            Save Token
+          </button>
+          <button
+            id="login-cookie"
+            class="admin-btn admin-btn-sm admin-btn-secondary"
+          >
+            Login (Cookie)
+          </button>
+          <button id="logout" class="admin-btn admin-btn-sm admin-btn-warning">
+            Logout
+          </button>
+          <span id="token-status" class="admin-text-secondary"
+            >Not logged in</span
+          >
         </div>
 
         <!-- Filter Controls -->
         <div class="control-row">
           <div class="control-group">
             <label class="admin-form-label" for="limit">Limit:</label>
-            <select id="limit" class="admin-form-input" style="width: auto;">
+            <select id="limit" class="admin-form-input" style="width: auto">
               <option value="10">10 events</option>
               <option value="25">25 events</option>
               <option value="50">50 events</option>
@@ -108,8 +139,14 @@
           </div>
 
           <div class="control-group">
-            <label class="admin-form-label" for="event-filter">Event Type:</label>
-            <select id="event-filter" class="admin-form-input" style="width: auto;">
+            <label class="admin-form-label" for="event-filter"
+              >Event Type:</label
+            >
+            <select
+              id="event-filter"
+              class="admin-form-input"
+              style="width: auto"
+            >
               <option value="">All Events</option>
               <option value="pageview">Pageviews</option>
               <option value="scroll">Scroll Events</option>
@@ -119,27 +156,61 @@
           </div>
 
           <button id="load" class="admin-btn">🔄 Load Analytics</button>
-          <button id="clear-cache" class="admin-btn admin-btn-secondary">Clear View</button>
+          <button id="clear-cache" class="admin-btn admin-btn-secondary">
+            Clear View
+          </button>
         </div>
 
         <!-- Export Controls -->
         <div class="control-row">
           <div class="export-buttons">
-            <button id="export-csv" class="admin-btn admin-btn-sm admin-btn-success">📊 Export CSV</button>
-            <button id="export-rss" class="admin-btn admin-btn-sm admin-btn-success">📡 Export RSS</button>
-            <button id="server-export" class="admin-btn admin-btn-sm admin-btn-success">⬇️ Server Export</button>
-            <button id="json-export" class="admin-btn admin-btn-sm admin-btn-success">📄 JSON Export</button>
+            <button
+              id="export-csv"
+              class="admin-btn admin-btn-sm admin-btn-success"
+            >
+              📊 Export CSV
+            </button>
+            <button
+              id="export-rss"
+              class="admin-btn admin-btn-sm admin-btn-success"
+            >
+              📡 Export RSS
+            </button>
+            <button
+              id="server-export"
+              class="admin-btn admin-btn-sm admin-btn-success"
+            >
+              ⬇️ Server Export
+            </button>
+            <button
+              id="json-export"
+              class="admin-btn admin-btn-sm admin-btn-success"
+            >
+              📄 JSON Export
+            </button>
           </div>
         </div>
       </section>
 
-      <div id="status" class="admin-card admin-p-md admin-mb-lg admin-text-center">Not loaded</div>
+      <div
+        id="status"
+        class="admin-card admin-p-md admin-mb-lg admin-text-center"
+      >
+        Not loaded
+      </div>
 
-      <!-- Stats Grid with Modern Design -->
+      <!-- Stats Grid -->
       <section class="admin-card admin-mb-lg">
         <div class="admin-p-lg">
-          <h3 style="margin: 0 0 var(--admin-space-md) 0; color: var(--admin-text);">📈 Analytics Overview</h3>
-          <div id="stats-grid" class="admin-status-grid" style="display: none;">
+          <h3
+            style="
+              margin: 0 0 var(--admin-space-md) 0;
+              color: var(--admin-text);
+            "
+          >
+            📈 Analytics Overview
+          </h3>
+          <div id="stats-grid" class="admin-status-grid" style="display: none">
             <div class="admin-status-card">
               <div class="admin-status-label">Total Events</div>
               <div class="admin-status-value" id="total-events">-</div>
@@ -161,23 +232,94 @@
         </div>
       </section>
 
+      <!-- Charts Grid -->
+      <section
+        class="admin-card admin-mb-lg"
+        id="charts-section"
+        style="display: none"
+      >
+        <div class="admin-p-lg">
+          <h3
+            style="
+              margin: 0 0 var(--admin-space-md) 0;
+              color: var(--admin-text);
+            "
+          >
+            📊 Visualizations
+          </h3>
+          <div class="charts-grid">
+            <div class="chart-container">
+              <h3>Activity Over Time</h3>
+              <canvas id="pageViewsChart"></canvas>
+            </div>
+            <div class="chart-container">
+              <h3>Top Pages</h3>
+              <canvas id="topPagesChart"></canvas>
+            </div>
+            <div class="chart-container">
+              <h3>Visitor Locations</h3>
+              <canvas id="locationsChart"></canvas>
+            </div>
+            <div class="chart-container">
+              <h3>Device Breakdown</h3>
+              <canvas id="devicesChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- cURL Examples -->
       <section class="admin-card admin-mb-lg">
         <div class="admin-p-lg">
-          <h4 style="margin: 0 0 var(--admin-space-md) 0; color: var(--admin-text);">🔧 API Examples</h4>
-          <pre id="curl-examples" style="background: var(--admin-primary-light); padding: var(--admin-space-md); border-radius: var(--admin-radius-md); font-family: monospace; font-size: var(--admin-font-sm); color: var(--admin-text);"># cURL examples will appear here</pre>
+          <h4
+            style="
+              margin: 0 0 var(--admin-space-md) 0;
+              color: var(--admin-text);
+            "
+          >
+            🔧 API Examples
+          </h4>
+          <pre
+            id="curl-examples"
+            style="
+              background: var(--admin-primary-light);
+              padding: var(--admin-space-md);
+              border-radius: var(--admin-radius-md);
+              font-family: monospace;
+              font-size: var(--admin-font-sm);
+              color: var(--admin-text);
+            "
+          >
+# cURL examples will appear here</pre
+          >
         </div>
       </section>
 
       <!-- Events Table -->
       <section class="admin-card">
         <div class="admin-p-lg">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--admin-space-md);">
-            <h3 style="margin: 0; color: var(--admin-text);">📋 Recent Events</h3>
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: var(--admin-space-md);
+            "
+          >
+            <h3 style="margin: 0; color: var(--admin-text)">
+              📋 Recent Events
+            </h3>
             <div class="admin-text-secondary" id="events-count">-</div>
           </div>
 
-          <div style="max-height: 600px; overflow-y: auto; border: 1px solid var(--admin-border); border-radius: var(--admin-radius-md);">
+          <div
+            style="
+              max-height: 600px;
+              overflow-y: auto;
+              border: 1px solid var(--admin-border);
+              border-radius: var(--admin-radius-md);
+            "
+          >
             <table id="events-table" class="admin-table">
               <thead>
                 <tr>
@@ -186,6 +328,7 @@
                   <th>Location</th>
                   <th>Event</th>
                   <th>Path</th>
+                  <th>Referrer</th>
                   <th>User Agent</th>
                   <th>Data</th>
                 </tr>
@@ -195,11 +338,6 @@
           </div>
         </div>
       </section>
-    </main>
-
-    <script src="/admin/analytics.js"></script>
-  </body>
-</html>
     </main>
 
     <script src="/admin/analytics.js"></script>
