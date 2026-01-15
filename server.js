@@ -714,6 +714,11 @@ nextApp.prepare().then(() => {
     }
   });
 
+  // Explicitly serve admin index for /admin path to avoid Next.js 404
+  app.get(['/admin', '/admin/'], (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin', 'index.html'));
+  });
+
   // Default Catch-All: Next.js
   app.all(/.*/, (req, res) => {
     return handle(req, res);
