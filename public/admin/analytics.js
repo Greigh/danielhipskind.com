@@ -87,8 +87,10 @@ document.getElementById('load').addEventListener('click', async () => {
     // Store events globally for filtering
     window.currentEvents = events;
 
-    // Charts
-    updateCharts(events);
+    // Charts - only update if visible
+    if (document.getElementById('charts-section').style.display !== 'none') {
+      updateCharts(events);
+    }
 
     // Update stats
     updateStats(events);
@@ -102,10 +104,27 @@ document.getElementById('load').addEventListener('click', async () => {
   }
 });
 
+// Toggle Charts
+document.getElementById('toggle-charts').addEventListener('click', () => {
+  const section = document.getElementById('charts-section');
+  const btn = document.getElementById('toggle-charts');
+
+  if (section.style.display === 'none') {
+    section.style.display = 'block';
+    btn.textContent = '📉 Hide Charts';
+    if (window.currentEvents) {
+      updateCharts(window.currentEvents);
+    }
+  } else {
+    section.style.display = 'none';
+    btn.textContent = '📈 Show Charts';
+  }
+});
+
 let charts = {};
 
 function updateCharts(events) {
-  document.getElementById('charts-section').style.display = 'block';
+  // document.getElementById('charts-section').style.display = 'block'; // Handled by toggle
 
   // Data Aggregation
   const timestamps = events

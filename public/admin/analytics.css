@@ -152,6 +152,12 @@ h1 {
   padding: 1.5rem;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   min-height: 300px;
+  height: 300px; /* Force height */
+  position: relative;
+}
+
+.chart-container canvas {
+  max-height: 250px;
 }
 
 .chart-container h3 {

@@ -146,11 +146,12 @@
       }
 
       .history-delete-btn {
-        background: var(--danger);
-        color: white;
+        background: var(--gray-200);
+        color: var(--gray-600);
 
         &:hover {
-          background: var(--danger-dark);
+          background: rgba(220, 38, 38, 0.1);
+          color: var(--danger);
         }
       }
     }
@@ -235,12 +236,17 @@
 }
 
 @keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.02); }
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
 }
 
 // Dark mode
-[data-theme="dark"] {
+[data-theme='dark'] {
   #pattern-formatter {
     .input-group label {
       color: var(--dark-text);
@@ -330,11 +336,12 @@
         }
 
         .history-delete-btn {
-          background: var(--danger);
-          color: white;
+          background: var(--dark-border);
+          color: var(--dark-text-muted);
 
           &:hover {
-            background: var(--danger-dark);
+            background: rgba(220, 38, 38, 0.2);
+            color: var(--danger);
           }
         }
 
@@ -351,5 +358,4 @@
       }
     }
   }
-
 }
