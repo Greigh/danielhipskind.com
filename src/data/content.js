@@ -22,8 +22,25 @@ export const about = {
   ],
 };
 
-// Manual project entry for Call Center Helper
+// Manual projects configuration
 export const manualProjects = [
+  {
+    title: 'Lgenia - Biotech Company Website',
+    repoName: 'lgenia',
+    description:
+      'The official website for Lgenia, a biotech company dedicated to discovering affordable medications for debilitating diseases like Tuberculosis, Malaria, and Alzheimer’s. Built with Next.js and Tailwind CSS, the site features a modern, responsive design with smooth Framer Motion animations, showcasing Lgenia’s research, partnerships, and mission to transform global health.',
+    githubUrl: null, // Private repository
+    languages: {
+      JavaScript: 65000,
+      React: 20000,
+      TailwindCSS: 15000,
+    },
+    updatedAt: new Date().toLocaleDateString(),
+    order: 0,
+    demoUrl: 'https://lgenia.com/',
+    has_pages: false,
+    topics: ['pharmaceutical', 'research', 'nextjs', 'tailwind-css'],
+  },
   {
     title: 'Adamas - Call Center Helper',
     repoName: 'callcenterhelper',
@@ -37,7 +54,7 @@ export const manualProjects = [
       SH: 3000, // 3%
     },
     updatedAt: new Date().toLocaleDateString(),
-    order: 0, // Put it first in the list
+    order: 1, // Changed from 0 to 1
     demoUrl: 'https://danielhipskind.com/adamas/',
     has_pages: false,
     topics: ['utility', 'call-center', 'customer-service'],

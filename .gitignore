@@ -50,6 +50,7 @@ Call Center Help/client/dist
 
 .known_hosts
 logs/
+*.log
 .vscode/
 npm-debug.log*
 yarn-debug.log*
