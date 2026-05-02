@@ -39,6 +39,9 @@ export const metadata = {
   icons: {
     icon: '/assets/images/DanielPortfolio.jpeg',
   },
+  verification: {
+    google: 'IR7KiemqEjVXXfQkZcL8aVXVNrxjMtpAU88D_P33Qjk',
+  },
 };
 
 export default function RootLayout({ children }) {
