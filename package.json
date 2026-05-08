@@ -25,12 +25,17 @@
     "next": "^16.2.6",
     "next-themes": "^0.4.6",
     "nodemailer": "^8.0.7",
+    "react": "19.2.6",
     "react-dom": "19.2.6",
     "socket.io": "^4.8.3",
     "winston": "^3.19.0"
   },
   "devDependencies": {
+    "@emnapi/runtime": "^1.10.0",
     "eslint": "^10.3.0",
     "eslint-config-next": "16.2.6"
+  },
+  "overrides": {
+    "eslint": "$eslint"
   }
 }
