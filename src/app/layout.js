@@ -42,6 +42,10 @@ export const metadata = {
   verification: {
     google: 'IR7KiemqEjVXXfQkZcL8aVXVNrxjMtpAU88D_P33Qjk',
   },
+  metadataBase: new URL('https://danielhipskind.com'),
+  alternates: {
+    canonical: 'https://danielhipskind.com/',
+  },
 };
 
 export default function RootLayout({ children }) {
