@@ -2,36 +2,18 @@ export default function sitemap() {
   const baseUrl = 'https://danielhipskind.com';
   const now = new Date();
 
-  return [
-    {
-      url: `${baseUrl}/`,
-      lastModified: now,
-      changeFrequency: 'monthly',
-      priority: 1,
-    },
-    {
-      url: `${baseUrl}/adamas/`,
-      lastModified: now,
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/adamas/privacy`,
-      lastModified: now,
-      changeFrequency: 'yearly',
-      priority: 0.3,
-    },
-    {
-      url: `${baseUrl}/adamas/terms`,
-      lastModified: now,
-      changeFrequency: 'yearly',
-      priority: 0.3,
-    },
-    {
-      url: `${baseUrl}/adamas/contact`,
-      lastModified: now,
-      changeFrequency: 'yearly',
-      priority: 0.5,
-    },
+  const pages = [
+    { path: '/', priority: 1, changeFrequency: 'monthly' },
+    { path: '/adamas/', priority: 0.8, changeFrequency: 'monthly' },
+    { path: '/adamas/privacy', priority: 0.3, changeFrequency: 'yearly' },
+    { path: '/adamas/terms', priority: 0.3, changeFrequency: 'yearly' },
+    { path: '/adamas/contact', priority: 0.5, changeFrequency: 'yearly' },
   ];
+
+  return pages.map(({ path, priority, changeFrequency }) => ({
+    url: `${baseUrl}${path}`,
+    lastModified: now,
+    changeFrequency,
+    priority,
+  }));
 }

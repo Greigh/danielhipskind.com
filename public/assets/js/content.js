@@ -42,7 +42,7 @@ const callCenterHelperProject = {
   },
   updatedAt: new Date().toLocaleDateString(),
   order: 0, // Put it first in the list
-  demoUrl: '/Adamas/',
+  demoUrl: 'https://danielhipskind.com/adamas/',
   has_pages: false,
   topics: ['utility', 'call-center', 'customer-service'],
 };

@@ -25,6 +25,10 @@ const bodyParser = require('body-parser');
 const { body, validationResult } = require('express-validator');
 const { nanoid } = require('nanoid');
 const next = require('next');
+const {
+  seoRedirectMiddleware,
+  CANONICAL_ORIGIN,
+} = require('./lib/seo-redirects.cjs');
 
 // Setup Next.js
 const dev = process.env.NODE_ENV !== 'production';
@@ -299,6 +303,13 @@ nextApp.prepare().then(() => {
     })
   );
   app.use(cors());
+
+  // Canonical URLs, legacy paths, and Search Console cleanup (before static)
+  app.use(seoRedirectMiddleware);
+
+  // Forward to Next before body parsers consume the raw body
+  app.post('/api/analytics', (req, res) => handle(req, res));
+
   app.use(bodyParser.json({ limit: '10mb' }));
   app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -351,13 +362,18 @@ nextApp.prepare().then(() => {
   fs.mkdirSync(popupsDir, { recursive: true });
   fs.mkdirSync(uploadsDir, { recursive: true });
 
+  // Canonical Adamas URLs (before static; absolute URLs for Express 5 redirect)
+  app.get('/adamas', (req, res) =>
+    res.redirect(301, `${CANONICAL_ORIGIN}/adamas/`)
+  );
+  ['contact', 'privacy', 'terms', 'settings'].forEach((page) => {
+    app.get(`/adamas/${page}.html`, (req, res) => {
+      res.redirect(301, `${CANONICAL_ORIGIN}/adamas/${page}`);
+    });
+  });
+
   // Serve Adamas static files
   app.use('/adamas', express.static(adamasPath));
-
-  // Redirect /callcenterhelper to /adamas
-  app.use('/callcenterhelper', (req, res) => {
-    res.redirect(301, '/adamas' + req.path);
-  });
 
   app.use('/uploads', express.static(uploadsDir));
   app.use(
@@ -531,32 +547,7 @@ nextApp.prepare().then(() => {
     return res.status(204).end();
   });
 
-  // Analytics Ingest
-  app.post('/api/analytics', (req, res) => {
-    try {
-      const payload = req.body || {};
-      const record = {
-        timestamp: new Date().toISOString(),
-        ip: getRealIP(req),
-        ua: req.get('user-agent') || null,
-        path: req.get('referer') || payload.path || null,
-        referrer: payload.referrer || null,
-        event: payload.event || 'unknown',
-        data: payload.data || null,
-        country: req.get('cf-ipcountry') || null,
-        city: req.get('cf-ipcity') || null,
-      };
-      const dateKey = new Date().toISOString().slice(0, 10);
-      const filename = path.join(LOGS_DIR, `analytics-${dateKey}.log`);
-      fs.appendFile(filename, JSON.stringify(record) + '\n', (err) => {
-        if (err) console.error('Analytics write error', err);
-      });
-      res.status(204).end();
-    } catch (err) {
-      console.error('Analytics ingest error', err);
-      res.status(500).json({ error: 'Failed' });
-    }
-  });
+  // Analytics ingest: handled by Next.js route at src/app/api/analytics/route.js
 
   // Admin Analytics Read
   app.get('/api/admin/analytics', async (req, res) => {

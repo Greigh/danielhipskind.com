@@ -37,14 +37,23 @@ export const metadata = {
     creator: '@danielhipskind_',
   },
   icons: {
-    icon: '/assets/images/DanielPortfolio.jpeg',
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/assets/images/216.png', sizes: '216x216', type: 'image/png' },
+    ],
+    apple: '/assets/images/512.png',
   },
+  manifest: '/assets/manifest.json',
   verification: {
     google: 'IR7KiemqEjVXXfQkZcL8aVXVNrxjMtpAU88D_P33Qjk',
   },
   metadataBase: new URL('https://danielhipskind.com'),
   alternates: {
     canonical: 'https://danielhipskind.com/',
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 

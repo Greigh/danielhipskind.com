@@ -7,7 +7,7 @@ const Hero = () => {
         <div className="hero-image-container">
           {/* Using Next.js Image for optimization, but keeping structure similar */}
           <Image
-            src="/assets/images/DanielPortfolio.jpeg"
+            src="/assets/images/DanielPortfolio.webp"
             alt="Daniel Hipskind"
             className="hero-img"
             width={150}

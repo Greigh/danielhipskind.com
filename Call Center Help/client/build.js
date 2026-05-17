@@ -182,6 +182,23 @@ try {
     fs.writeFileSync(buildDateFile, estDate + '\n');
   }
 
+  // 6. Reject uncompiled webpack template literals in HTML (SEO / 4xx cleanup)
+  const htmlFiles = fs
+    .readdirSync(distPath)
+    .filter((f) => f.endsWith('.html'));
+  const templateLeak = /<%[\s\S]*?%>/;
+  htmlFiles.forEach((file) => {
+    const contents = fs.readFileSync(path.join(distPath, file), 'utf8');
+    if (templateLeak.test(contents)) {
+      throw new Error(
+        `${file} contains uncompiled template syntax (e.g. htmlWebpackPlugin). Check webpack HtmlWebpackPlugin output.`
+      );
+    }
+  });
+  if (htmlFiles.length > 0) {
+    console.log('✅ Verified HTML has no uncompiled webpack templates');
+  }
+
   console.log('\n🎉 Production build finished successfully!');
 } catch (error) {
   console.error('\n❌ Build failed.');

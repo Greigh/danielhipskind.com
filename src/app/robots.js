@@ -3,8 +3,17 @@ export default function robots() {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: '/admin/',
+      disallow: [
+        '/admin/',
+        '/api/',
+        '/_next/',
+        '/cdn-cgi/',
+        '/callcenterhelper/',
+        '/Adamas/',
+        '/uploads/',
+      ],
     },
     sitemap: 'https://danielhipskind.com/sitemap.xml',
+    host: 'https://danielhipskind.com',
   };
 }

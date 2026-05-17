@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
+import { postAnalyticsEvent } from '@/lib/analytics-beacon';
 
 export default function Analytics() {
   const [consent, setConsent] = useState('loading'); // loading, granted, denied, unknown
@@ -42,15 +43,7 @@ export default function Analytics() {
       timestamp: new Date().toISOString(),
     };
 
-    try {
-      navigator.sendBeacon('/api/analytics', JSON.stringify(payload));
-    } catch (e) {
-      fetch('/api/analytics', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      }).catch(() => {});
-    }
+    postAnalyticsEvent(payload);
   }, []);
 
   // Track Pageview on route change (and initial load if consented)

@@ -32,16 +32,18 @@
       timestamp: new Date().toISOString()
     };
 
+    var body = JSON.stringify(payload);
     try {
-      navigator.sendBeacon('/api/analytics', JSON.stringify(payload));
+      var blob = new Blob([body], { type: 'application/json' });
+      if (navigator.sendBeacon('/api/analytics', blob)) return;
     } catch (e) {
-      // Fallback to fetch
-      fetch('/api/analytics', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      }).catch(()=>{});
+      /* fall through to fetch */
     }
+    fetch('/api/analytics', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: body
+    }).catch(function () {});
   }
 
   // Track initial pageview

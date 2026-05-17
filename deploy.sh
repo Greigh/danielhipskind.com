@@ -96,6 +96,9 @@ build_call_center() {
     cd "$SCRIPT_DIR/Call Center Help/client" || return 1
 
     if [ -f "package.json" ]; then
+
+        rm -f package-lock.json
+        rm -rf node_modules
         npm install --include=dev || return 1
         npm run build || return 1
         # Restore local dependencies to keep dev server working
@@ -112,6 +115,12 @@ build_call_center() {
 
 # Build Next.js application
 build_nextjs() {
+
+    echo "🗑️  Cleaning up NPM and Next.js build files..."
+    rm -f package-lock.json
+    rm -rf node_modules
+    rm -rf .next
+
     echo "🏗️  Building Next.js application..."
     npm install || return 1
     npm run build || return 1
@@ -189,13 +198,13 @@ restart_application() {
     # For password auth, use a simpler approach - execute commands one by one
     if [ -n "$SSH_PASSWORD" ]; then
         echo "📦 Installing main dependencies..."
-        if ! sshpass -p "$SSH_PASSWORD" ssh "$VPS_USER@$VPS_HOST" "cd /var/www/danielhipskind.com && npm install --omit=dev --silent"; then
+        if ! sshpass -p "$SSH_PASSWORD" ssh "$VPS_USER@$VPS_HOST" "cd /var/www/danielhipskind.com && rm -rf node_modules package-lock.json && npm install --omit=dev --silent"; then
             echo "❌ Failed to install main dependencies"
             return 1
         fi
 
         echo "📦 Installing Call Center Helper dependencies..."
-        sshpass -p "$SSH_PASSWORD" ssh "$VPS_USER@$VPS_HOST" "cd /var/www/danielhipskind.com && [ -d 'adamas/client' ] && cd 'adamas/client' && npm install --omit=dev --silent" || true
+        sshpass -p "$SSH_PASSWORD" ssh "$VPS_USER@$VPS_HOST" "cd /var/www/danielhipskind.com && [ -d 'adamas/client' ] && cd 'adamas/client' && rm -rf node_modules package-lock.json && npm install --omit=dev --silent" || true
 
         echo "🔄 Restarting application with PM2..."
         if sshpass -p "$SSH_PASSWORD" ssh "$VPS_USER@$VPS_HOST" "cd /var/www/danielhipskind.com && pm2 restart danielhipskind --update-env || pm2 start ecosystem.config.cjs && pm2 save" >/dev/null 2>&1; then
@@ -211,12 +220,14 @@ restart_application() {
 #!/bin/bash
 cd /var/www/danielhipskind.com
 
-# Install main dependencies
+# Clean and install main dependencies
+rm -rf node_modules package-lock.json
 npm install --omit=dev --silent
 
-# Install Call Center Helper dependencies
+# Clean and install Call Center Helper dependencies
 if [ -d "adamas/client" ]; then
     cd "adamas/client"
+    rm -rf node_modules package-lock.json
     npm install --omit=dev --silent
     cd /var/www/danielhipskind.com
 fi
