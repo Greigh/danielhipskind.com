@@ -273,33 +273,12 @@ async function logAudit(userId, action, resource, details, req) {
 nextApp.prepare().then(() => {
   app.use(
     helmet({
-      contentSecurityPolicy: {
-        directives: {
-          defaultSrc: ["'self'"],
-          scriptSrc: [
-            "'self'",
-            "'unsafe-inline'",
-            "'unsafe-eval'",
-            'https://cdn.jsdelivr.net',
-            'https://cdn.socket.io',
-            'https://static.cloudflareinsights.com',
-            'https://cdnjs.cloudflare.com',
-            'https://cdnjs.cloudflare.com', // Chart.js
-          ],
-
-          styleSrc: ["'self'", "'unsafe-inline'"],
-          imgSrc: ["'self'", 'data:', 'https:'],
-          connectSrc: [
-            "'self'",
-            'https://cdn.socket.io',
-            'https://cloudflareinsights.com',
-          ],
-          fontSrc: ["'self'"],
-          objectSrc: ["'none'"],
-          mediaSrc: ["'self'"],
-          frameSrc: ["'none'"],
-        },
-      },
+      // CSP is owned by nginx (single source of truth for every app it fronts:
+      // Next.js, /adamas, lgenia, webexpressstudio). Defining it here too sent
+      // two Content-Security-Policy headers, so the browser enforced the
+      // stricter intersection — e.g. blocking the data: fonts and Google /
+      // reCAPTCHA frames the nginx policy intentionally allows.
+      contentSecurityPolicy: false,
     })
   );
   app.use(cors());
@@ -315,7 +294,23 @@ nextApp.prepare().then(() => {
 
   const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 100,
+    max: 300,
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    // Behind nginx+Cloudflare every request reaches Node from 127.0.0.1, so
+    // req.ip would bucket the entire internet together. Key on the real
+    // client IP that Cloudflare forwards instead.
+    keyGenerator: (req) => req.get('CF-Connecting-IP') || req.ip,
+    // We key on CF-Connecting-IP (not the spoofable XFF), so suppress
+    // express-rate-limit's trust-proxy validation warning.
+    validate: { trustProxy: false },
+    // Never throttle static assets: a single page load pulls ~15+ of them,
+    // and they're immutable + meant to be edge-cached.
+    skip: (req) =>
+      req.method === 'GET' &&
+      (req.path.startsWith('/_next/') ||
+        req.path.startsWith('/assets/') ||
+        req.path === '/favicon.ico'),
   });
   app.use(limiter);
 

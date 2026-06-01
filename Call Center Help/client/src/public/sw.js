@@ -3,31 +3,20 @@ const CACHE_NAME = 'adamas-v1.0.0';
 const STATIC_CACHE = 'adamas-static-v1.0.0';
 const DYNAMIC_CACHE = 'adamas-dynamic-v1.0.0';
 
+const APP_SCOPE = self.registration.scope;
+const assetUrl = (path) => new URL(path, APP_SCOPE).href;
+
 // Files to cache immediately
 const STATIC_FILES = [
-  '/',
-  '/index.html',
-  '/src/index.html',
-  '/src/js/main.js',
-  '/src/js/modules/storage.js',
-  '/src/js/modules/settings.js',
-  '/src/js/modules/notes.js',
-  '/src/js/modules/patterns.js',
-  '/src/js/modules/timer.js',
-  '/src/js/modules/themes.js',
-  '/src/js/modules/floating.js',
-  '/src/js/modules/draggable.js',
-  '/src/js/modules/callflow.js',
-  '/src/js/utils/app-globals.js',
-  '/src/js/utils/app-state.js',
-  '/src/js/utils/audio.js',
-  '/src/js/utils/form-fixer.js',
-  '/src/js/utils/helpers.js',
-  '/src/js/utils/keyboard-shortcuts.js',
-  '/src/styles/main.css',
-  '/src/styles/main.scss',
-  '/src/public/download-alert-sounds.sh',
-  '/src/public/audio/',
+  assetUrl(''),
+  assetUrl('index.html'),
+  assetUrl('settings.html'),
+  assetUrl('privacy.html'),
+  assetUrl('terms.html'),
+  assetUrl('contact.html'),
+  assetUrl('js/main.js'),
+  assetUrl('styles/main.css'),
+  assetUrl('download-alert-sounds.sh'),
   // Add manifest and icons when available
 ];
 
@@ -129,7 +118,7 @@ self.addEventListener('fetch', (event) => {
           })
           .catch(() => {
             // Return offline fallback
-            return caches.match('/src/index.html');
+            return caches.match(assetUrl('index.html'));
           });
       }
 

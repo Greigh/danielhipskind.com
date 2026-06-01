@@ -1,55 +1,56 @@
-import { Suspense } from 'react';
-import { Geist, Geist_Mono } from 'next/font/google';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import Analytics from '@/components/Analytics';
-import { Providers } from '@/components/Providers';
-import './styles/main.css';
+import { Suspense } from "react";
+import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import Analytics from "@/components/Analytics";
+import { Providers } from "@/components/Providers";
+import "./styles/main.css";
 
 const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
 });
 
 const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
 });
 
 export const metadata = {
-  title: 'Daniel Hipskind | Software Engineer',
+  title: "Daniel Hipskind | Software Engineer",
   description:
-    'Software Engineer Portfolio - React, Next.js, Full Stack Development. View my projects, skills, and experience.',
+    "Software Engineer Portfolio - React, Next.js, Full Stack Development. View my projects, skills, and experience.",
   openGraph: {
-    title: 'Daniel Hipskind | Software Engineer',
+    title: "Daniel Hipskind | Software Engineer",
     description:
-      'Software Engineer Portfolio - React, Next.js, Full Stack Development. View my projects, skills, and experience.',
-    url: 'https://danielhipskind.com',
-    siteName: 'Daniel Hipskind',
-    locale: 'en_US',
-    type: 'website',
+      "Software Engineer Portfolio - React, Next.js, Full Stack Development. View my projects, skills, and experience.",
+    url: "https://danielhipskind.com",
+    siteName: "Daniel Hipskind",
+    locale: "en_US",
+    type: "website",
   },
   twitter: {
-    card: 'summary_large_image',
-    title: 'Daniel Hipskind | Software Engineer',
+    card: "summary_large_image",
+    title: "Daniel Hipskind | Software Engineer",
     description:
-      'Software Engineer Portfolio - React, Next.js, Full Stack Development.',
-    creator: '@danielhipskind_',
+      "Software Engineer Portfolio - React, Next.js, Full Stack Development.",
+    creator: "@danielhipskind_",
   },
   icons: {
     icon: [
-      { url: '/favicon.ico', sizes: 'any' },
-      { url: '/assets/images/216.png', sizes: '216x216', type: 'image/png' },
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/assets/images/216.png", sizes: "216x216", type: "image/png" },
     ],
-    apple: '/assets/images/512.png',
+    apple: "/assets/images/512.png",
   },
-  manifest: '/assets/manifest.json',
+  manifest: "/assets/manifest.json",
   verification: {
-    google: 'IR7KiemqEjVXXfQkZcL8aVXVNrxjMtpAU88D_P33Qjk',
+    google: "IR7KiemqEjVXXfQkZcL8aVXVNrxjMtpAU88D_P33Qjk",
   },
-  metadataBase: new URL('https://danielhipskind.com'),
+  metadataBase: new URL("https://danielhipskind.com"),
   alternates: {
-    canonical: 'https://danielhipskind.com/',
+    canonical: "https://danielhipskind.com/",
   },
   robots: {
     index: true,
@@ -66,6 +67,12 @@ export default function RootLayout({ children }) {
     >
       <body suppressHydrationWarning>
         <Providers>
+          <Script
+            src="https://static.cloudflareinsights.com/beacon.min.js"
+            data-cf-beacon='{"token":"201fc8a690104fd298a4e92d4de0cf0a"}'
+            strategy="afterInteractive"
+          />
+
           {/* Analytics Opt-in Banner */}
           <Suspense fallback={null}>
             <Analytics />

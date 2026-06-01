@@ -172,6 +172,7 @@ upload_call_center() {
 deploy_nginx() {
     echo "🌐 Deploying nginx configurations..."
     rsync -az -e "$RSYNC_SSH" \
+        --exclude '.DS_Store' --exclude '*.backup' \
         "$SCRIPT_DIR/nginx/" \
         "$VPS_USER@$VPS_HOST:/etc/nginx/sites-available/" || return 1
 
