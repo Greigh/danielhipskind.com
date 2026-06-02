@@ -874,17 +874,6 @@ document.addEventListener('DOMContentLoaded', function () {
     // Set up global error handling first
     setupGlobalErrorHandling();
 
-    // Request persistent storage to prevent browser from clearing data
-    import('./modules/storage.js')
-      .then((storage) => {
-        if (storage.requestPersistentStorage) {
-          storage.requestPersistentStorage();
-        }
-      })
-      .catch((err) => {
-        console.warn('Could not request persistent storage:', err);
-      });
-
     initializeSettings();
     window.appSettings = appSettings;
     initializeTheme();

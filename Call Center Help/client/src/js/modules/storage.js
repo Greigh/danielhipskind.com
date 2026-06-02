@@ -1,30 +1,13 @@
 // LocalStorage persistence functions
 
-// Request persistent storage to prevent browser from clearing data
+// Request persistent storage to prevent browser from clearing data.
+// The browser persistence APIs are deprecated here, so this is now a no-op.
 export function requestPersistentStorage() {
-  if ('storage' in navigator && 'persist' in navigator.storage) {
-    navigator.storage
-      .persist()
-      .then(function (persistent) {
-        if (!persistent) {
-          console.log(
-            'Storage persistence denied - data may be cleared by browser'
-          );
-        }
-      })
-      .catch(function (error) {
-        console.warn('Error requesting persistent storage:', error);
-      });
-  } else {
-    console.log('Persistent storage API not available');
-  }
+  return Promise.resolve(false);
 }
 
 // Check if storage is persistent
 export function isStoragePersistent() {
-  if ('storage' in navigator && 'persisted' in navigator.storage) {
-    return navigator.storage.persisted();
-  }
   return Promise.resolve(false);
 }
 
