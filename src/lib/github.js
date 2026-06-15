@@ -16,22 +16,12 @@ export const FEATURED_REPOS = [
   {
     repo: 'danielhipskind.com',
     displayName: 'Portfolio Website',
-    order: 5,
+    order: 4,
   },
   {
     repo: 'WebExpressStudioTemplate',
     displayName: 'Web Express Studio Template',
-    order: 6,
-  },
-  {
-    repo: 'notebookitem-fivem',
-    displayName: 'Notebook Item for FiveM',
-    order: 7,
-  },
-  {
-    repo: 'FiveM-phone',
-    displayName: 'Phone App for FiveM',
-    order: 4,
+    order: 5,
   },
 ];
 
