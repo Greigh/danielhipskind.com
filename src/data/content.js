@@ -36,7 +36,7 @@ export const manualProjects = [
       TailwindCSS: 15000,
     },
     updatedAt: new Date().toLocaleDateString(),
-    order: 0,
+    order: 1,
     demoUrl: 'https://lgenia.com/',
     has_pages: false,
     topics: ['pharmaceutical', 'research', 'nextjs', 'tailwind-css'],
@@ -54,7 +54,7 @@ export const manualProjects = [
       SH: 3000, // 3%
     },
     updatedAt: new Date().toLocaleDateString(),
-    order: 1, // Changed from 0 to 1
+    order: 2,
     demoUrl: 'https://danielhipskind.com/adamas/',
     has_pages: false,
     topics: ['utility', 'call-center', 'customer-service'],

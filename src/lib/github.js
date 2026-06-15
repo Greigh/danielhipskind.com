@@ -4,36 +4,41 @@ const USERNAME = 'greigh';
 // Define your featured projects with custom display names
 export const FEATURED_REPOS = [
   {
+    repo: 'fihaven',
+    displayName: 'FiHaven',
+    order: 0,
+  },
+  {
     repo: 'blockingmachine',
     displayName: 'Blocking Machine',
-    order: 1,
+    order: 3,
   },
   {
     repo: 'danielhipskind.com',
     displayName: 'Portfolio Website',
-    order: 3,
+    order: 5,
   },
   {
     repo: 'WebExpressStudioTemplate',
     displayName: 'Web Express Studio Template',
-    order: 4,
+    order: 6,
   },
   {
     repo: 'notebookitem-fivem',
     displayName: 'Notebook Item for FiveM',
-    order: 5,
+    order: 7,
   },
   {
     repo: 'FiveM-phone',
     displayName: 'Phone App for FiveM',
-    order: 2,
+    order: 4,
   },
 ];
 
 export async function fetchGitHubData() {
   try {
     const repoPromises = FEATURED_REPOS.map(
-      async ({ repo, displayName, order }) => {
+      async ({ repo, displayName, order, demoUrl: demoUrlOverride }) => {
         try {
           // Fetch repo data with next.js caching (1 hour)
           const repoResponse = await fetch(
@@ -85,7 +90,7 @@ export async function fetchGitHubData() {
             languages: languages || {},
             updatedAt: new Date(repoData.updated_at).toLocaleDateString(),
             order: order,
-            demoUrl: getDemoUrl(repoData),
+            demoUrl: demoUrlOverride || getDemoUrl(repoData),
             has_pages: repoData.has_pages,
             topics: repoData.topics || [],
           };

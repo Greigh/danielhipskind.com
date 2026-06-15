@@ -4,7 +4,9 @@ import ProjectCarousel from './ProjectCarousel';
 
 const Projects = async () => {
   const githubProjects = await fetchGitHubData();
-  const allProjects = [...manualProjects, ...githubProjects];
+  const allProjects = [...manualProjects, ...githubProjects].sort(
+    (a, b) => (a.order ?? 999) - (b.order ?? 999)
+  );
 
   return (
     <section id="projects">
