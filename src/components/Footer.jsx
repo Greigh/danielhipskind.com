@@ -1,5 +1,5 @@
-import { socialLinks, generateCopyright } from '@/data/content';
-import Icon from './Icon';
+import { socialLinks, generateCopyright } from "@/data/content";
+import Icon from "./Icon";
 
 const Footer = () => {
   return (
@@ -11,7 +11,7 @@ const Footer = () => {
               key={link.name}
               href={link.url}
               target="_blank"
-              rel={link.rel || 'noopener noreferrer'}
+              rel={link.rel || "noopener noreferrer"}
               aria-label={link.name}
               className="social-link"
             >
@@ -31,14 +31,14 @@ const Footer = () => {
         <div className="footer-copyright">
           <p>{generateCopyright()}</p>
           <p className="license">
-            All rights reserved. Read{' '}
+            All rights reserved. Read{" "}
             <a
-              href="https://github.com/danielhipskind/portfolio/blob/main/LICENSE"
+              href="https://github.com/greigh/danielhipskind.com/blob/main/LICENSE"
               target="_blank"
               rel="noopener noreferrer"
             >
               LICENSE
-            </a>{' '}
+            </a>{" "}
             for more info.
           </p>
         </div>
