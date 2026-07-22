@@ -35,7 +35,6 @@ export const metadata = {
     title: "Daniel Hipskind | Software Engineer",
     description:
       "Software Engineer Portfolio - React, Next.js, Full Stack Development.",
-    creator: "@danielhipskind_",
   },
   icons: {
     icon: [

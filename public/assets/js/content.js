@@ -32,7 +32,7 @@ const callCenterHelperProject = {
   title: 'Adamas - Call Center Helper',
   repoName: 'callcenterhelper',
   description:
-    'A powerful productivity toolkit designed for call center agents. Streamlines workflows with hold timers, call flow guides, pattern formatters, and quick notes. Features dark/light themes for reduced eye strain. Enhances customer interactions while improving efficiency and compliance. Finesse and Webex support coming soon!',
+    'A powerful productivity toolkit designed for call center agents. Streamlines workflows with hold timers, call flow guides, pattern formatters, and quick notes. Features dark/light themes for reduced eye strain. Enhances customer interactions while improving efficiency and compliance.',
   githubUrl: 'https://github.com/Greigh/Adamas',
   languages: {
     JavaScript: 48000, // 48%
@@ -60,22 +60,6 @@ export const socialLinks = [
     icon: 'linkedin',
   },
   {
-    name: 'Twitter',
-    url: 'https://twitter.com/danielhipskind_',
-    icon: 'twitter',
-  },
-  {
-    name: 'Mastodon',
-    url: 'https://mastodon.social/@danielhipskind',
-    icon: 'mastodon',
-    rel: 'me',
-  },
-  {
-    name: 'Bluesky',
-    url: 'https://bsky.app/profile/danielhipskind.com',
-    icon: 'bluesky',
-  },
-  {
     name: 'Email',
     url: 'mailto:me@danielhipskind.com',
     icon: 'email',
@@ -86,23 +70,26 @@ export const socialLinks = [
 const skills = {
   technical: [
     { name: 'JavaScript', id: 'javascript', level: 95 },
-    { name: 'Python', id: 'python', level: 85 },
-    { name: 'React', id: 'react', level: 87 },
+    { name: 'TypeScript', id: 'typescript', level: 88 },
+    { name: 'React', id: 'react', level: 90 },
+    { name: 'Next.js', id: 'nextjs', level: 86 },
     { name: 'Node.js', id: 'nodejs', level: 88 },
-    { name: 'HTML/CSS', id: 'html', level: 92 },
-    { name: 'Git', id: 'git', level: 85 },
-    { name: 'php', id: 'php', level: 80 },
-    { name: 'Java', id: 'java', level: 90 },
+    { name: 'Tailwind CSS', id: 'tailwindcss', level: 90 },
+    { name: 'Swift', id: 'swift', level: 82 },
+    { name: 'Kotlin', id: 'kotlin', level: 80 },
+    { name: 'Python', id: 'python', level: 85 },
+    { name: 'Java', id: 'java', level: 87 },
+    { name: 'Git', id: 'git', level: 88 },
   ],
   professional: [
-    { name: 'Problem Solving', level: 95 },
-    { name: 'Team Collaboration', level: 93 },
-    { name: 'Adaptability', level: 98 },
-    { name: 'Time Management', level: 90 },
-    { name: 'Critical Thinking', level: 92 },
-    { name: 'Project Management', level: 87 },
-    { name: 'Leadership', level: 95 },
-    { name: 'Attention to Detail', level: 97 },
+    { name: 'Problem Solving', level: 90 },
+    { name: 'Critical Thinking', level: 88 },
+    { name: 'Adaptability', level: 92 },
+    { name: 'Attention to Detail', level: 90 },
+    { name: 'Team Collaboration', level: 85 },
+    { name: 'Time Management', level: 78 },
+    { name: 'Leadership', level: 75 },
+    { name: 'Project Management', level: 72 },
   ],
 };
 
