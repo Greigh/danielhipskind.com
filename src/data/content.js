@@ -82,17 +82,14 @@ export const socialLinks = [
 
 export const skills = {
   technical: [
-    { name: 'JavaScript', id: 'javascript', level: 95 },
+    { name: 'JavaScript', id: 'javascript', level: 94 },
     { name: 'TypeScript', id: 'typescript', level: 88 },
-    { name: 'React', id: 'react', level: 90 },
-    { name: 'Next.js', id: 'nextjs', level: 86 },
-    { name: 'Node.js', id: 'nodejs', level: 88 },
-    { name: 'Tailwind CSS', id: 'tailwindcss', level: 90 },
-    { name: 'Swift', id: 'swift', level: 82 },
-    { name: 'Kotlin', id: 'kotlin', level: 80 },
-    { name: 'Python', id: 'python', level: 85 },
-    { name: 'Java', id: 'java', level: 87 },
-    { name: 'Git', id: 'git', level: 88 },
+    { name: 'React', id: 'react', level: 91 },
+    { name: 'Next.js', id: 'nextjs', level: 85 },
+    { name: 'Node.js', id: 'nodejs', level: 83 },
+    { name: 'Tailwind CSS', id: 'tailwindcss', level: 89 },
+    { name: 'Swift', id: 'swift', level: 72 },
+    { name: 'Kotlin', id: 'kotlin', level: 68 },
   ],
   professional: [
     { name: 'Problem Solving', level: 90 },
