@@ -79,6 +79,10 @@ This project is designed for self-hosting with **PM2** and **NGINX**:
 3. **Configure NGINX**
    Use NGINX as a reverse proxy to forward traffic to `localhost:3000`.
 
+4. **Self-hosted email**
+   Cutover from Porkbun MX to the VPS mail stack is documented in
+   [`deploy/mail.md`](deploy/mail.md).
+
 ## 📁 Project Structure
 
 ```bash

@@ -59,4 +59,13 @@ yarn-error.log*
 
 NGINX
 nginx/*
-deploy
+
+# deploy/: track maintainer markdown; ignore everything else (e.g. logrotate)
+deploy/*
+!deploy/*.md
+
+# Local mail credentials (copy from deploy/mail-server-logins.example.md)
+mail-server-logins.md
+
+templates/*
+templates-old/*
