@@ -91,9 +91,17 @@ not enough.
 
 ---
 
-## Porkbun DNS cutover
+## DNS cutover (Cloudflare)
 
-Zone: `danielhipskind.com` at Porkbun. Apply after preflight succeeds.
+`danielhipskind.com` is registered at **Porkbun**, but authoritative
+nameservers are **Cloudflare** (`peyton` / `clarissa`). Edit live MX/SPF/DKIM
+in the Cloudflare zone (API credentials in `.env.deploy`). Porkbun’s own DNS
+panel is not what the public internet queries.
+
+Porkbun API keys (for registrar / unused Porkbun DNS) live in the gitignored
+`mail-server-logins.md`.
+
+Apply after preflight succeeds.
 
 ### Remove
 
@@ -176,8 +184,9 @@ Then:
 
 If inbound fails after MX change:
 
-1. At Porkbun, restore MX to `10 fwd1.porkbun.com` and `20 fwd2.porkbun.com`
-   (or whatever Porkbun shows for email forwarding).
+1. In **Cloudflare**, restore MX to `10 fwd1.porkbun.com` and
+   `20 fwd2.porkbun.com` (or re-enable Porkbun email forwarding at the
+   registrar and point MX back at Porkbun).
 2. Re-enable Porkbun forwarding if you disabled it.
 3. Leave `mail` A/AAAA and VPS mailbox config in place; they do not hurt
    rollback.
