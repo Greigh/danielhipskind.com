@@ -195,6 +195,56 @@ DNS propagation can take minutes to hours depending on TTL/cache.
 
 ---
 
+## Authentication-Results for same-box mail (added 2026-08-07)
+
+Mail from an app on this box to a mailbox on this box (e.g. FiHaven's
+`no-reply@fihaven.app` → `me@danielhipskind.com`) used to arrive with **no
+`Authentication-Results` header at all**, so mail clients showed TLS but a
+dash for DKIM/SPF/DMARC. Nothing was misconfigured — the message simply never
+took an inbound SMTP pass. The Node app talks to `localhost:25`, and on that
+single pass OpenDKIM **signs** (`Mode sv`, client is in `InternalHosts`); a
+milter cannot sign and verify the same message, and the recipient domain is
+local, so Postfix went straight to Dovecot LMTP.
+
+The fix gives such mail a genuine second pass:
+
+| Piece | Purpose |
+|---|---|
+| `/etc/postfix/reinject_clients` (cidr) | `127.0.0.0/8` + `::1` → restriction class `reinject_local`. The re-injected copy arrives from `82.25.91.225`, which does **not** match — that is the loop guard. |
+| `/etc/postfix/reinject_domains` (hash) | local domains → `FILTER smtp:[82.25.91.225]:10026`. Outbound mail to real users never matches, so it never gains an `Authentication-Results` header. |
+| `main.cf` | `smtpd_restriction_classes = reinject_local`; `reinject_local = check_recipient_access hash:/etc/postfix/reinject_domains`; `smtpd_recipient_restrictions = check_client_access cidr:/etc/postfix/reinject_clients` |
+| `master.cf` `82.25.91.225:10026` | re-injection listener; `smtpd_client_restrictions` limits it to this host's own IP |
+| `/etc/opendkim/TrustedHosts` | `*.danielhipskind.com` / `*.greighstudios.com` **removed** — the public IP's PTR matched them, so OpenDKIM would have signed again instead of verifying. `127.0.0.1`/`localhost`/`::1` stay, so local submission is still signed. |
+
+Two details that are easy to get wrong:
+
+- **Re-inject via the public IP, not loopback.** Connecting to `82.25.91.225`
+  routes over `lo` with `src 82.25.91.225` (`ip route get 82.25.91.225`), so
+  SPF evaluates the real MX address and `v=spf1 mx -all` passes. Re-injecting
+  from `127.0.0.1` would make SPF fail.
+- **Port 10026, not 25.** Postfix bounces `mail for 82.25.91.225 loops back to
+  myself` if an `smtp` client targets its own interface on port 25.
+- Keep `smtpd_tls_security_level=may` on the listener. With `none` the last
+  hop is plaintext, which flips the client's TLS indicator off and earns
+  rspamd's `RCVD_NO_TLS_LAST`.
+
+Expected result on a delivered message:
+
+```text
+Authentication-Results: mail.danielhipskind.com;
+    dkim=pass header.d=fihaven.app header.s=default;
+    spf=pass (... designates 82.25.91.225 as permitted sender) smtp.mailfrom=no-reply@fihaven.app;
+    dmarc=pass (policy=reject) header.from=fihaven.app
+```
+
+Verify with `journalctl -t opendkim` — pass 1 logs `DKIM-Signature field
+added`, pass 2 logs `not internal` then `DKIM verification successful`.
+
+Rollback: restore `/root/mail-authres-backup-*/` (`main.cf`, `master.cf`,
+`TrustedHosts`), then `postfix reload && systemctl restart opendkim`.
+
+---
+
 ## Gotchas
 
 - **Hostinger cloud firewall** is allowlist-mode; mail ports must be opened
