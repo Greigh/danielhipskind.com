@@ -1,0 +1,13 @@
+{
+  "name": "call-center-help-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Call Center Help (Adamas) workspace root",
+  "scripts": {
+    "build": "npm --prefix client run build",
+    "deploy": "node deploy.js",
+    "upload": "node deploy.js",
+    "start": "npm --prefix client run start",
+    "dev": "npm --prefix client run dev"
+  }
+}

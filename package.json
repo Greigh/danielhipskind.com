@@ -8,13 +8,14 @@
     "build": "next build",
     "start": "node server.js",
     "lint": "eslint",
-    "deploy": "bash deploy.sh"
+    "deploy": "bash deploy.sh",
+    "cf:cache": "node deploy/sync-cloudflare-cache.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "body-parser": "^2.3.0",
     "cors": "^2.8.6",
-    "dotenv": "^17.4.2",
+    "dotenv": "^18.0.0",
     "express": "^5.2.1",
     "express-rate-limit": "^8.6.1",
     "express-validator": "^7.3.2",
@@ -25,7 +26,7 @@
     "nanoid": "^6.0.1",
     "next": "^16.3.0",
     "next-themes": "^0.4.6",
-    "nodemailer": "^9.0.3",
+    "nodemailer": "^10.0.10",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "socket.io": "^4.8.3",
@@ -33,11 +34,13 @@
   },
   "devDependencies": {
     "@emnapi/runtime": "^1.11.3",
-    "eslint": "^10.8.0",
-    "eslint-config-next": "^16.3.0"
+    "eslint": "^10.10.0",
+    "eslint-config-next": "^16.3.5"
   },
   "allowScripts": {
     "sharp@0.34.5": true,
-    "unrs-resolver@1.12.2": true
+    "unrs-resolver@1.12.2": true,
+    "@parcel/watcher@2.6.0": true,
+    "fsevents@2.3.3": true
   }
 }

@@ -1,0 +1,4 @@
+#!/bin/bash
+# Wrapper to deploy/upload Adamas from Call Center Help directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+node "$SCRIPT_DIR/deploy.js" "$@"

@@ -60,9 +60,10 @@ yarn-error.log*
 NGINX
 nginx/*
 
-# deploy/: track maintainer markdown; ignore everything else (e.g. logrotate)
+# deploy/: track maintainer markdown and scripts; ignore everything else (e.g. logrotate)
 deploy/*
 !deploy/*.md
+!deploy/sync-cloudflare-cache.js
 
 # Local mail credentials (copy from deploy/mail-server-logins.example.md)
 mail-server-logins.md

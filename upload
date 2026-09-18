@@ -1,0 +1,8 @@
+#!/bin/bash
+# Wrapper to deploy/upload Adamas or full portfolio
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/Call Center Help/deploy.js" ]; then
+  node "$SCRIPT_DIR/Call Center Help/deploy.js" "$@"
+elif [ -f "$SCRIPT_DIR/deploy.sh" ]; then
+  bash "$SCRIPT_DIR/deploy.sh" "$@"
+fi
