@@ -17,27 +17,19 @@ const cookie = require('cookie');
 const bodyParser = require('body-parser');
 const { body, validationResult } = require('express-validator');
 const { nanoid } = require('nanoid');
-
-const SESSION_COOKIE = 'adamas_session';
-const SESSION_MAX_AGE_MS = 12 * 60 * 60 * 1000;
-
-function sessionCookieOptions() {
-  // COOKIE_SECURE=true|false overrides; otherwise Secure in production (HTTPS).
-  // Local smoke against http:// should set COOKIE_SECURE=false.
-  const secure =
-    process.env.COOKIE_SECURE === 'true'
-      ? true
-      : process.env.COOKIE_SECURE === 'false'
-        ? false
-        : process.env.NODE_ENV === 'production';
-  return {
-    httpOnly: true,
-    secure,
-    sameSite: 'lax',
-    path: '/',
-    maxAge: SESSION_MAX_AGE_MS,
-  };
-}
+const {
+  SESSION_COOKIE,
+  sessionCookieOptions,
+  isAllowedFinesseUrl,
+  escapeXml,
+  escapeHtml,
+  escapeRegExp,
+  maskSsnServer,
+  sanitizeCallLogPayload,
+  isPublicRegistrationAllowed,
+  assertEmailRecipientAllowed,
+  isFinesseActionAllowed,
+} = require('./lib/security');
 
 function readSessionToken(req) {
   const header = req.header('Authorization');
@@ -82,63 +74,6 @@ function clearSessionCookie(res) {
   });
 }
 
-/** Reject private/link-local literal hosts; require strict Finesse hostnames. */
-function isAllowedFinesseUrl(rawUrl) {
-  let urlObj;
-  try {
-    urlObj = new URL(rawUrl);
-  } catch {
-    return false;
-  }
-  // HTTPS only — never follow cleartext to internal networks
-  if (urlObj.protocol !== 'https:') return false;
-  if (urlObj.username || urlObj.password) return false;
-  const host = String(urlObj.hostname || '').toLowerCase();
-  if (!host || host === 'localhost' || host.endsWith('.local')) return false;
-  if (
-    /^(10\.|127\.|0\.|169\.254\.|192\.168\.|172\.(1[6-9]|2\d|3[0-1])\.)/.test(
-      host
-    )
-  ) {
-    return false;
-  }
-  if (/^\d{1,3}(\.\d{1,3}){3}$/.test(host)) return false;
-  if (host.includes(':')) return false; // raw IPv6
-  // Exact allowlist only — never match arbitrary "finesse.*" attacker hosts
-  const allowedExactEnv = (process.env.FINESSE_ALLOWED_HOSTS || '')
-    .split(',')
-    .map((s) => s.trim().toLowerCase())
-    .filter(Boolean);
-  if (allowedExactEnv.length > 0) {
-    return allowedExactEnv.some(
-      (h) => host === h || host.endsWith('.' + h)
-    );
-  }
-  // Default safe suffixes when env unset (no open "finesse." prefix)
-  const patterns = [/(^|\.)cisco\.com$/i, /(^|\.)lminfosys\.net$/i];
-  return patterns.some((p) => p.test(host));
-}
-
-function escapeXml(value) {
-  return String(value ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;');
-}
-
-const FINESSE_ALLOWED_ACTIONS = new Set([
-  'MAKE_CALL',
-  'ANSWER',
-  'DROP',
-  'HOLD',
-  'RETRIEVE',
-  'TRANSFER_SST',
-  'CONSULT_CALL',
-  'CONFERENCE',
-]);
-
 /** Fetch Finesse without following redirects (SSRF hardening). */
 async function fetchFinesse(url, options = {}) {
   const response = await fetch(url, { ...options, redirect: 'manual' });
@@ -148,33 +83,6 @@ async function fetchFinesse(url, options = {}) {
     throw err;
   }
   return response;
-}
-
-function maskSsnServer(value) {
-  const digits = String(value || '').replace(/\D/g, '');
-  if (!digits) return { ssn: '', ssnLast4: '' };
-  return {
-    ssn: `***${digits.slice(-4)}`,
-    ssnLast4: digits.slice(-4),
-  };
-}
-
-function sanitizeCallLogPayload(body, userId) {
-  const src = body && typeof body === 'object' ? body : {};
-  const {
-    userId: _u,
-    _id: _id,
-    password: _p,
-    twilio: _t,
-    __v: _v,
-    ...rest
-  } = src;
-  const ssnFields = maskSsnServer(rest.ssn || rest.ssnLast4 || '');
-  return {
-    ...rest,
-    ...ssnFields,
-    userId,
-  };
 }
 
 async function deleteUserAccount(userId, res) {
@@ -612,19 +520,6 @@ const auth = async (req, res, next) => {
   }
 };
 
-function escapeHtml(text) {
-  return String(text ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
-function escapeRegExp(string) {
-  return String(string).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
 // File upload — images only, size-capped, randomized name
 const ALLOWED_UPLOAD_EXTS = new Set([
   '.png',
@@ -853,11 +748,7 @@ app.post(
   ],
   async (req, res) => {
     // Default closed in production — set ALLOW_PUBLIC_REGISTER=true to enable
-    const allow =
-      process.env.ALLOW_PUBLIC_REGISTER === 'true' ||
-      (process.env.NODE_ENV !== 'production' &&
-        process.env.ALLOW_PUBLIC_REGISTER !== 'false');
-    if (!allow) {
+    if (!isPublicRegistrationAllowed()) {
       return res.status(403).json({ error: 'Public registration is disabled' });
     }
 
@@ -1168,28 +1059,13 @@ const transporter = nodemailer.createTransport({
 // Email — constrain open-relay risk
 app.post('/api/email/send', auth, (req, res) => {
   const { to, subject, text } = req.body || {};
-  const toAddr = String(to || '').trim();
   const subj = String(subject || '').slice(0, 200);
   const body = String(text || '').slice(0, 10000);
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(toAddr)) {
-    return res.status(400).json({ error: 'Invalid recipient email' });
+  const allowed = assertEmailRecipientAllowed(to);
+  if (!allowed.ok) {
+    return res.status(allowed.status).json({ error: allowed.error });
   }
-  const domainAllow = (process.env.EMAIL_ALLOW_DOMAINS || '')
-    .split(',')
-    .map((s) => s.trim().toLowerCase())
-    .filter(Boolean);
-  // Production: require an explicit allowlist (fail closed — no open relay)
-  if (process.env.NODE_ENV === 'production' && domainAllow.length === 0) {
-    return res.status(503).json({
-      error: 'Email sending is not configured (EMAIL_ALLOW_DOMAINS required)',
-    });
-  }
-  if (domainAllow.length) {
-    const domain = toAddr.split('@')[1].toLowerCase();
-    if (!domainAllow.includes(domain)) {
-      return res.status(403).json({ error: 'Recipient domain not allowed' });
-    }
-  }
+  const toAddr = allowed.address;
   transporter.sendMail(
     { from: process.env.EMAIL_USER, to: toAddr, subject: subj, text: body },
     async (err) => {
@@ -1437,7 +1313,7 @@ app.put('/adamas/api/finesse/Dialog/:dialogId', auth, async (req, res) => {
 
     if (req.body.action) {
       const action = String(req.body.action).toUpperCase().trim();
-      if (!FINESSE_ALLOWED_ACTIONS.has(action) || action === 'MAKE_CALL') {
+      if (!isFinesseActionAllowed(action) || action === 'MAKE_CALL') {
         return res.status(400).json({ error: 'Invalid dialog action' });
       }
       requestBody = `<Dialog>

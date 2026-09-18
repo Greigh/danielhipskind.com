@@ -167,21 +167,33 @@ This software and its documentation are the exclusive property of Daniel Hipskin
 
 ## Production deploy
 
-Adamas is **not** deployed from this repo alone. Live `/adamas/` is built and
-uploaded by [`danielhipskind.com/deploy.sh`](https://github.com/Greigh/danielhipskind.com/blob/main/deploy.sh):
+Live `/adamas/` is always deployed **together** with the portfolio site via
+`danielhipskind.com/deploy.sh`. Adamas source is **required** — deploy will not
+silently ship a stale nested copy.
 
-1. Syncs this checkout into `danielhipskind.com/Call Center Help/client` when
-   `ADAMS_SRC` is set or a sibling `../Adamas` directory exists
-2. Runs `npm run build` there
-3. Rsyncs `dist/` → `/var/www/danielhipskind.com/adamas/`
-4. Restarts the parent PM2 app (`danielhipskind`), which serves `/adamas` as static files
+Recommended (from this repo):
 
 ```bash
-# From your Mac (portfolio monorepo):
-cd /path/to/danielhipskind.com
-export ADAMS_SRC=/path/to/Greigh/Adamas   # optional if ../Adamas exists
-./deploy.sh
+# Keep danielhipskind.com as a sibling (or set SITE_ROOT)
+cd /path/to/Adamas
+npm run deploy
 ```
 
-Or from this repo when nested: `npm run deploy` → `../../deploy.sh`.
+That script:
 
+1. Resolves `danielhipskind.com` (`SITE_ROOT` or sibling folder)
+2. `git pull`s both repos (skip with `DEPLOY_SKIP_PULL=1`)
+3. Runs `npm test` (skip with `DEPLOY_SKIP_TESTS=1`)
+4. Invokes site `deploy.sh` with `ADAMS_SRC` pointing at this checkout
+
+From the site repo:
+
+```bash
+cd /path/to/danielhipskind.com
+# Adamas must exist at ../Adamas or ADAMS_SRC must be set
+./deploy.sh
+# or: npm run deploy
+```
+
+Deploy always: pulls both trees → syncs Adamas → `Call Center Help/client` →
+build → rsync `/adamas/` → PM2 restart.

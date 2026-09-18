@@ -32,7 +32,10 @@
     "tsc": "tsc",
     "server:dev": "PORT=8080 nodemon server.js",
     "dev:local": "concurrently \"npm run server:dev\" \"npm run dev\"",
-    "deploy": "../../deploy.sh"
+    "deploy": "bash scripts/deploy-with-site.sh",
+    "deploy:skip-tests": "DEPLOY_SKIP_TESTS=1 bash scripts/deploy-with-site.sh",
+    "test:security": "jest --runInBand test/security.helpers.test.js test/security.client.test.js test/http.security.smoke.test.js",
+    "test:audit": "jest --runInBand test/security.helpers.test.js test/security.client.test.js test/memory.bounds.test.js test/legal.and.features.test.js test/http.security.smoke.test.js"
   },
   "author": "Daniel Hipskind aka Greigh",
   "license": "CC BY-NC-ND",

@@ -90,11 +90,11 @@ setup_ssh_auth() {
     fi
 }
 
-# Optionally sync standalone Greigh/Adamas into the nested client before build.
+# Always sync standalone Greigh/Adamas into the nested client before build.
 # Deploy ALWAYS builds from: "$SCRIPT_DIR/Call Center Help/client"
-# Set ADAMS_SRC to your Adamas checkout (default: sibling ../Adamas if present).
-sync_adamas_into_client() {
-    local CLIENT_DIR="$SCRIPT_DIR/Call Center Help/client"
+# Adamas source is REQUIRED (fail closed) — set ADAMS_SRC or keep a sibling ../Adamas.
+# Set REQUIRE_ADAMAS_SRC=0 only for emergency nested-only deploys (discouraged).
+resolve_adamas_src() {
     local SRC="${ADAMS_SRC:-}"
     if [ -z "$SRC" ] && [ -d "$SCRIPT_DIR/../Adamas" ]; then
         SRC="$SCRIPT_DIR/../Adamas"
@@ -102,35 +102,94 @@ sync_adamas_into_client() {
     if [ -z "$SRC" ] && [ -d "$SCRIPT_DIR/../adamas" ]; then
         SRC="$SCRIPT_DIR/../adamas"
     fi
-    if [ -z "$SRC" ] || [ ! -f "$SRC/package.json" ]; then
-        echo "ℹ️  No ADAMS_SRC / sibling Adamas checkout found — building nested client as-is"
-        echo "   Tip: export ADAMS_SRC=/path/to/Greigh/Adamas before deploy to sync Facet first"
-        return 0
+    # Nested client that is itself a full Adamas tree (has package.json + server.js)
+    if [ -z "$SRC" ] && [ -f "$SCRIPT_DIR/Call Center Help/client/package.json" ] \
+        && [ -f "$SCRIPT_DIR/Call Center Help/client/server.js" ] \
+        && [ -f "$SCRIPT_DIR/Call Center Help/client/src/styles/base/_variables.scss" ]; then
+        # Prefer external Adamas; nested-only only if explicitly allowed
+        if [ "${REQUIRE_ADAMAS_SRC:-1}" = "0" ]; then
+            SRC="$SCRIPT_DIR/Call Center Help/client"
+        fi
     fi
-    echo "🔄 Syncing Adamas from $SRC → Call Center Help/client ..."
-    mkdir -p "$CLIENT_DIR"
-    # Prefer rsync; fall back to tar if rsync is unavailable
-    if command -v rsync >/dev/null 2>&1; then
-        rsync -a --delete \
-            --exclude='.git' \
-            --exclude='node_modules' \
-            --exclude='dist' \
-            --exclude='uploads' \
-            --exclude='logs' \
-            --exclude='*.log' \
-            --exclude='.DS_Store' \
-            "$SRC/" "$CLIENT_DIR/" || return 1
-    else
-        tar -C "$SRC" \
-            --exclude='.git' --exclude='node_modules' --exclude='dist' \
-            --exclude='uploads' --exclude='logs' --exclude='.DS_Store' \
-            -cf - . | tar -C "$CLIENT_DIR" -xf - || return 1
-    fi
-    if ! grep -q '0e7490' "$CLIENT_DIR/src/styles/base/_variables.scss" 2>/dev/null; then
-        echo "❌ Synced client is missing Facet token #0e7490 — aborting"
+    if [ -z "$SRC" ] || [ ! -f "$SRC/package.json" ] || [ ! -f "$SRC/server.js" ]; then
+        echo "❌ Adamas source required for deploy."
+        echo "   Clone Greigh/Adamas next to this repo, or:"
+        echo "   export ADAMS_SRC=/path/to/Adamas"
+        echo "   (npm run deploy from Adamas sets ADAMS_SRC automatically)"
         return 1
     fi
-    echo "✅ Nested client synced from Adamas"
+    echo "$SRC"
+}
+
+pull_adamas_and_site() {
+    if [ "${DEPLOY_SKIP_PULL:-0}" = "1" ]; then
+        echo "⏭️  Skipping git pull (DEPLOY_SKIP_PULL=1)"
+        return 0
+    fi
+    echo "⬇️  Pulling latest danielhipskind.com + Adamas..."
+    if [ -d "$SCRIPT_DIR/.git" ]; then
+        git -C "$SCRIPT_DIR" pull --ff-only || \
+            echo "⚠️  Site pull failed — continuing with local tree"
+    fi
+    local SRC="$1"
+    if [ -d "$SRC/.git" ] && [ "$SRC" != "$SCRIPT_DIR/Call Center Help/client" ]; then
+        git -C "$SRC" pull --ff-only || \
+            echo "⚠️  Adamas pull failed — continuing with local tree"
+    fi
+}
+
+sync_adamas_into_client() {
+    local CLIENT_DIR="$SCRIPT_DIR/Call Center Help/client"
+    local SRC
+    SRC="$(resolve_adamas_src)" || return 1
+
+    pull_adamas_and_site "$SRC" || true
+
+    # If source IS the nested client, nothing to sync
+    if [ "$(cd "$SRC" && pwd)" = "$(cd "$CLIENT_DIR" 2>/dev/null && pwd)" ]; then
+        echo "ℹ️  Using nested client as Adamas source (no external sync)"
+    else
+        echo "🔄 Syncing Adamas from $SRC → Call Center Help/client ..."
+        mkdir -p "$CLIENT_DIR"
+        if command -v rsync >/dev/null 2>&1; then
+            rsync -a --delete \
+                --exclude='.git' \
+                --exclude='node_modules' \
+                --exclude='dist' \
+                --exclude='uploads' \
+                --exclude='logs' \
+                --exclude='*.log' \
+                --exclude='.DS_Store' \
+                "$SRC/" "$CLIENT_DIR/" || return 1
+        else
+            # Clear stale files then extract (tar has no --delete)
+            find "$CLIENT_DIR" -mindepth 1 -maxdepth 1 \
+                ! -name 'node_modules' ! -name 'dist' ! -name '.git' \
+                -exec rm -rf {} + 2>/dev/null || true
+            tar -C "$SRC" \
+                --exclude='.git' --exclude='node_modules' --exclude='dist' \
+                --exclude='uploads' --exclude='logs' --exclude='.DS_Store' \
+                -cf - . | tar -C "$CLIENT_DIR" -xf - || return 1
+        fi
+        echo "✅ Nested client synced from Adamas"
+    fi
+
+    if ! grep -q '0e7490' "$CLIENT_DIR/src/styles/base/_variables.scss" 2>/dev/null; then
+        echo "❌ Client is missing Facet token #0e7490 — aborting"
+        return 1
+    fi
+    if [ ! -f "$CLIENT_DIR/src/public/sw.facet.js" ] && [ ! -f "$CLIENT_DIR/src/public/sw.js" ]; then
+        echo "❌ Client missing service worker — aborting"
+        return 1
+    fi
+
+    if [ "${DEPLOY_SKIP_TESTS:-0}" != "1" ] && [ -f "$CLIENT_DIR/package.json" ]; then
+        echo "🧪 Running Adamas tests inside nested client..."
+        (cd "$CLIENT_DIR" && npm install --include=dev --silent && npm test) || {
+            echo "❌ Adamas tests failed — refusing to deploy"
+            return 1
+        }
+    fi
 }
 
 # Build Call Center Helper client
