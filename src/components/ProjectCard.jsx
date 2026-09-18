@@ -2,16 +2,19 @@ import Icon from './Icon';
 
 const ProjectCard = ({ project }) => {
   // Calculate language percentages
-  const totalBytes = Object.values(project.languages).reduce(
+  const totalBytes = Object.values(project.languages || {}).reduce(
     (a, b) => a + b,
     0
   );
-  const languages = Object.entries(project.languages)
-    .sort(([, a], [, b]) => b - a) // Sort by size descending
-    .map(([name, bytes]) => ({
-      name,
-      percentage: ((bytes / totalBytes) * 100).toFixed(1),
-    }));
+  const languages =
+    totalBytes > 0
+      ? Object.entries(project.languages)
+          .sort(([, a], [, b]) => b - a) // Sort by size descending
+          .map(([name, bytes]) => ({
+            name,
+            percentage: ((bytes / totalBytes) * 100).toFixed(1),
+          }))
+      : [];
 
   return (
     <div className="project-card glass-effect">

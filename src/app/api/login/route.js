@@ -2,9 +2,7 @@ import { NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/db';
 import CallCenterUser from '@/models/CallCenterUser';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'secret';
+import { signAuthToken } from '@/lib/auth';
 
 export async function POST(req) {
   try {
@@ -27,7 +25,7 @@ export async function POST(req) {
       );
     }
 
-    const token = jwt.sign({ _id: user._id, role: user.role }, JWT_SECRET);
+    const token = signAuthToken({ _id: user._id, role: user.role });
     return NextResponse.json({ token });
   } catch (err) {
     console.error('Login error:', err);

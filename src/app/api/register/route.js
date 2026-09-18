@@ -25,9 +25,10 @@ export async function POST(req) {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = new CallCenterUser({
-      username,
-      email,
+      username: String(username).trim().slice(0, 64),
+      email: String(email).trim().toLowerCase().slice(0, 254),
       password: hashedPassword,
+      role: 'agent', // never accept client-supplied role
     });
 
     try {

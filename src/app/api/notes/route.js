@@ -32,7 +32,14 @@ export async function POST(req) {
     const body = await req.json();
     await connectToDatabase();
 
-    const note = new Note({ ...body, userId: user._id });
+    // Only persist allowlisted fields — prevent mass assignment
+    const content =
+      typeof body.content === 'string' ? body.content.slice(0, 10000) : '';
+    if (!content.trim()) {
+      return NextResponse.json({ error: 'Content required' }, { status: 400 });
+    }
+
+    const note = new Note({ content, userId: user._id });
     await note.save();
     return NextResponse.json(note, { status: 201 });
   } catch (err) {

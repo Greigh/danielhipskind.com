@@ -7,6 +7,7 @@ const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const nodemailer = require('nodemailer');
 const rateLimit = require('express-rate-limit');
+const { ipKeyGenerator } = require('express-rate-limit');
 const helmet = require('helmet');
 const cors = require('cors');
 const winston = require('winston');
@@ -34,6 +35,15 @@ const {
 const dev = process.env.NODE_ENV !== 'production';
 const nextApp = next({ dev });
 const handle = nextApp.getRequestHandler();
+
+function getJwtSecret() {
+  const secret = process.env.JWT_SECRET;
+  if (secret && secret !== 'secret') return secret;
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('JWT_SECRET must be set to a strong value in production');
+  }
+  return 'dev-only-insecure-jwt-secret';
+}
 
 const logger = winston.createLogger({
   level: 'info',
@@ -271,6 +281,14 @@ async function logAudit(userId, action, resource, details, req) {
 
 // prepare Next.js
 nextApp.prepare().then(() => {
+  // Fail closed in production if JWT signing secret is missing/weak
+  try {
+    getJwtSecret();
+  } catch (err) {
+    logger.error(err.message);
+    process.exit(1);
+  }
+
   app.use(
     helmet({
       // CSP is owned by nginx (single source of truth for every app it fronts:
@@ -281,13 +299,25 @@ nextApp.prepare().then(() => {
       contentSecurityPolicy: false,
     })
   );
-  app.use(cors());
+  app.use(
+    cors({
+      origin: process.env.CORS_ORIGIN || 'https://danielhipskind.com',
+      credentials: true,
+    })
+  );
 
   // Canonical URLs, legacy paths, and Search Console cleanup (before static)
   app.use(seoRedirectMiddleware);
 
-  // Forward to Next before body parsers consume the raw body
-  app.post('/api/analytics', (req, res) => handle(req, res));
+  // Forward Next-owned API routes BEFORE body parsers consume the raw body.
+  // Express body-parser + Next Request body = "Response body object should not
+  // be disturbed or locked".
+  const nextApiForward = (req, res) => handle(req, res);
+  app.all('/api/analytics', nextApiForward);
+  app.all('/api/health', nextApiForward);
+  app.all('/api/notes', nextApiForward);
+  app.all('/api/upload', nextApiForward);
+  app.all(/^\/callcenterhelper\/api(?:\/|$)/, nextApiForward);
 
   app.use(bodyParser.json({ limit: '10mb' }));
   app.use(bodyParser.urlencoded({ extended: true }));
@@ -300,7 +330,12 @@ nextApp.prepare().then(() => {
     // Behind nginx+Cloudflare every request reaches Node from 127.0.0.1, so
     // req.ip would bucket the entire internet together. Key on the real
     // client IP that Cloudflare forwards instead.
-    keyGenerator: (req) => req.get('CF-Connecting-IP') || req.ip,
+    keyGenerator: (req) => {
+      const cf = req.get('CF-Connecting-IP');
+      if (cf) return cf;
+      // Use helper so IPv6 addresses are normalized (express-rate-limit v8+)
+      return ipKeyGenerator(req.ip);
+    },
     // We key on CF-Connecting-IP (not the spoofable XFF), so suppress
     // express-rate-limit's trust-proxy validation warning.
     validate: { trustProxy: false },
@@ -333,7 +368,7 @@ nextApp.prepare().then(() => {
     const token = req.header('Authorization')?.replace('Bearer ', '');
     if (!token) return res.status(401).json({ error: 'Access denied' });
     try {
-      const verified = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+      const verified = jwt.verify(token, getJwtSecret());
       req.user = verified;
       next();
     } catch {
@@ -440,13 +475,14 @@ nextApp.prepare().then(() => {
       if (!errors.isEmpty())
         return res.status(400).json({ errors: errors.array() });
 
-      const { username, email, password, role = 'agent' } = req.body;
+      // Never accept client-supplied role — privilege escalation vector
+      const { username, email, password } = req.body;
       const hashedPassword = await bcrypt.hash(password, 10);
       const user = new Models.User({
         username,
         email,
         password: hashedPassword,
-        role,
+        role: 'agent',
       });
       try {
         await user.save();
@@ -472,7 +508,8 @@ nextApp.prepare().then(() => {
       }
       const token = jwt.sign(
         { _id: user._id, role: user.role },
-        process.env.JWT_SECRET || 'secret'
+        getJwtSecret(),
+        { expiresIn: '7d' }
       );
       res.json({
         token,
@@ -490,6 +527,14 @@ nextApp.prepare().then(() => {
   const ADMIN_SESSION_NAME = 'admin_session';
   const ADMIN_SESSION_TTL_MS = 30 * 60 * 1000; // 30 minutes
   const adminSessions = new Map(); // In-memory session store (replaces Redis)
+
+  // Periodically prune expired admin sessions (memory leak prevention)
+  setInterval(() => {
+    const now = Date.now();
+    for (const [token, session] of adminSessions) {
+      if (now > session.exp) adminSessions.delete(token);
+    }
+  }, 5 * 60 * 1000).unref?.();
 
   function generateSessionToken() {
     return crypto.randomBytes(32).toString('hex');

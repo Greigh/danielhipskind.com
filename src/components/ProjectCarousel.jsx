@@ -31,17 +31,25 @@ const ProjectCarousel = ({ projects = [] }) => {
     };
 
     window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
+    return () => {
+      clearTimeout(resizeTimer);
+      window.removeEventListener('resize', onResize);
+    };
   }, []);
 
-  const totalSlides = Math.ceil(projects.length / itemsPerSlide);
+  const totalSlides = Math.max(
+    0,
+    Math.ceil((projects.length || 0) / itemsPerSlide)
+  );
 
   // Navigation handlers
   const nextSlide = useCallback(() => {
+    if (totalSlides <= 1) return;
     setCurrentSlide((prev) => (prev + 1) % totalSlides);
   }, [totalSlides]);
 
   const prevSlide = useCallback(() => {
+    if (totalSlides <= 1) return;
     setCurrentSlide((prev) => (prev - 1 + totalSlides) % totalSlides);
   }, [totalSlides]);
 
@@ -49,16 +57,29 @@ const ProjectCarousel = ({ projects = [] }) => {
     setCurrentSlide(index);
   };
 
+  // Keep currentSlide in range when itemsPerSlide / project count changes
+  useEffect(() => {
+    if (totalSlides === 0) {
+      setCurrentSlide(0);
+      return;
+    }
+    setCurrentSlide((prev) => Math.min(prev, totalSlides - 1));
+  }, [totalSlides]);
+
   // Autoplay logic
   useEffect(() => {
-    if (isPaused) return;
+    if (isPaused || totalSlides <= 1) return;
 
     autoplayRef.current = setInterval(() => {
       nextSlide();
     }, 15000); // 15s interval
 
     return () => clearInterval(autoplayRef.current);
-  }, [isPaused, nextSlide]);
+  }, [isPaused, nextSlide, totalSlides]);
+
+  if (!projects.length) {
+    return <p className="carousel-empty">No projects to display right now.</p>;
+  }
 
   return (
     <div

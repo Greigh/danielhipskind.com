@@ -29,11 +29,11 @@ module.exports = {
         GITHUB_TOKEN: process.env.GITHUB_TOKEN || '',
         GITHUB_USERNAME: process.env.GITHUB_USERNAME || '',
 
-        // Admin secret for protected routes (set on server)
-        ADMIN_SECRET: 'twf7fwd*ZFX!geg7npw',
-        // Optional nginx/basic auth credentials for admin UI (if used)
-        ADMIN_BASIC_USER: 'daniel_admin',
-        ADMIN_BASIC_PASS: 'DZJ*ykg!anv_jyz4xec',
+        // Admin secrets — set via environment / .env on the server; never commit values
+        ADMIN_SECRET: process.env.ADMIN_SECRET || '',
+        ADMIN_BASIC_USER: process.env.ADMIN_BASIC_USER || '',
+        ADMIN_BASIC_PASS: process.env.ADMIN_BASIC_PASS || '',
+        JWT_SECRET: process.env.JWT_SECRET || '',
 
         // Redis configuration for session storage
         REDIS_HOST: '127.0.0.1',

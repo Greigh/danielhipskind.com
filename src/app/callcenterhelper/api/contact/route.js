@@ -15,6 +15,15 @@ const parsePort = (val, fallback = 587) => {
   return Number.isFinite(n) && n > 0 ? n : fallback;
 };
 
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 // Configure transporter
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
@@ -46,11 +55,24 @@ export async function POST(req) {
     }
 
     const secret =
-      process.env.RECAPTCHA_SECRET ||
-      '6LdQ0hssAAAAAI24KyvGabtWcaf1CgI0h8Jkk6jn';
-    const verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${secret}&response=${captchaToken}`;
+      process.env.RECAPTCHA_SECRET || process.env.CAPTCHA_SECRET;
+    if (!secret) {
+      console.error('Contact API: RECAPTCHA_SECRET / CAPTCHA_SECRET not set');
+      return NextResponse.json(
+        { error: 'CAPTCHA is not configured.' },
+        { status: 503 }
+      );
+    }
 
-    const verifyRes = await fetch(verifyUrl, { method: 'POST' });
+    const verifyUrl = 'https://www.google.com/recaptcha/api/siteverify';
+    const verifyRes = await fetch(verifyUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        secret,
+        response: captchaToken,
+      }),
+    });
     const verifyData = await verifyRes.json();
 
     if (!verifyData.success) {
@@ -60,17 +82,18 @@ export async function POST(req) {
       );
     }
 
+    const safeName = escapeHtml(name);
+    const safeEmail = escapeHtml(email);
+    const safeMessage = escapeHtml(message).replace(/\n/g, '<br>');
+
     // Send Email
     await transporter.sendMail({
       from: process.env.SMTP_USER,
       to: process.env.CONTACT_TO_EMAIL || process.env.SMTP_USER,
-      subject: `Contact Form Submission from ${name}`,
+      subject: `Contact Form Submission from ${String(name).slice(0, 100)}`,
       replyTo: email,
       text: `Name: ${name}\nEmail: ${email}\nMessage:\n${message}`,
-      html: `<p><strong>Name:</strong> ${name}</p><p><strong>Email:</strong> ${email}</p><p><strong>Message:</strong><br>${message.replace(
-        /\n/g,
-        '<br>'
-      )}</p>`,
+      html: `<p><strong>Name:</strong> ${safeName}</p><p><strong>Email:</strong> ${safeEmail}</p><p><strong>Message:</strong><br>${safeMessage}</p>`,
     });
 
     return NextResponse.json({

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { postAnalyticsEvent } from '@/lib/analytics-beacon';
 
@@ -8,7 +8,6 @@ export default function Analytics() {
   const [consent, setConsent] = useState('loading'); // loading, granted, denied, unknown
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const hasTrackedInitial = useRef(false);
 
   // Load consent state
   useEffect(() => {
@@ -87,6 +86,7 @@ export default function Analytics() {
 
     // Clean up
     return () => {
+      clearTimeout(scrollTimer);
       document.removeEventListener('visibilitychange', handleVisibility);
       window.removeEventListener('scroll', handleScroll);
     };
@@ -96,11 +96,8 @@ export default function Analytics() {
   const accept = () => {
     localStorage.setItem('analytics_enabled', 'true');
     setConsent('granted');
-    // Track consent (manually since send checks localStorage immediately)
-    // We need to wait for state update or just call API directly?
-    // send() checks localStorage, which we just set. So calling send works.
-    // Use setTimeout to ensure state propagation if needed, but localStorage is sync.
-    setTimeout(() => send('consent_accepted'), 0);
+    // localStorage is sync; send() will see the new value
+    send('consent_accepted');
   };
 
   const dismiss = () => {

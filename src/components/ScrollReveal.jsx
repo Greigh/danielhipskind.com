@@ -27,9 +27,7 @@ const ScrollReveal = ({ children, threshold = 0.1, className = '' }) => {
     }
 
     return () => {
-      if (element) {
-        observer.unobserve(element);
-      }
+      observer.disconnect();
     };
   }, [threshold]);
 
