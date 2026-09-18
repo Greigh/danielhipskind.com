@@ -1,12 +1,12 @@
 module.exports = {
   apps: [
     {
-      name: 'danielhipskind',
-      script: 'npm',
-      args: 'start',
-      type: 'module',
+      name: "danielhipskind",
+      script: "npm",
+      args: "start",
+      type: "module",
       instances: 1,
-      exec_mode: 'fork',
+      exec_mode: "fork",
       autorestart: true,
       watch: false,
 
@@ -16,62 +16,62 @@ module.exports = {
         alwaysStat: true,
         interval: 1000,
       },
-      ignore_watch: ['node_modules', 'logs', '*.log'],
-      max_memory_restart: '1G',
+      ignore_watch: ["node_modules", "logs", "*.log"],
+      max_memory_restart: "1G",
       env_production: {
         // Basic runtime
-        NODE_ENV: 'production',
+        NODE_ENV: "production",
         PORT: process.env.PORT || 3001,
-        HOST: process.env.HOST || '0.0.0.0',
-        TZ: process.env.TZ || 'America/New_York',
+        HOST: process.env.HOST || "0.0.0.0",
+        TZ: process.env.TZ || "America/New_York",
 
         // GitHub proxy token (set this in the environment on the server; do NOT commit secrets)
-        GITHUB_TOKEN: process.env.GITHUB_TOKEN || '',
-        GITHUB_USERNAME: process.env.GITHUB_USERNAME || '',
+        GITHUB_TOKEN: process.env.GITHUB_TOKEN || "",
+        GITHUB_USERNAME: process.env.GITHUB_USERNAME || "",
 
         // Admin secrets — set via environment / .env on the server; never commit values
-        ADMIN_SECRET: process.env.ADMIN_SECRET || '',
-        ADMIN_BASIC_USER: process.env.ADMIN_BASIC_USER || '',
-        ADMIN_BASIC_PASS: process.env.ADMIN_BASIC_PASS || '',
-        JWT_SECRET: process.env.JWT_SECRET || '',
+        ADMIN_SECRET: process.env.ADMIN_SECRET || "",
+        ADMIN_BASIC_USER: process.env.ADMIN_BASIC_USER || "",
+        ADMIN_BASIC_PASS: process.env.ADMIN_BASIC_PASS || "",
+        JWT_SECRET: process.env.JWT_SECRET || "",
 
         // Redis configuration for session storage
-        REDIS_HOST: '127.0.0.1',
-        REDIS_PORT: '6379',
+        REDIS_HOST: "127.0.0.1",
+        REDIS_PORT: "6379",
 
         // Cloudflare Turnstile CAPTCHA
-        CLOUDFLARE_TURNSTILE_SECRET: process.env.CAPTCHA_SECRET || '',
+        CLOUDFLARE_TURNSTILE_SECRET: process.env.CAPTCHA_SECRET || "",
 
         // hCaptcha secret key for contact form verification
-        HCAPTCHA_SECRET: process.env.HCAPTCHA_SECRET || '',
+        HCAPTCHA_SECRET: process.env.HCAPTCHA_SECRET || "",
 
         // CORS / site config
-        CORS_ORIGIN: process.env.CORS_ORIGIN || 'https://danielhipskind.com',
+        CORS_ORIGIN: process.env.CORS_ORIGIN || "https://danielhipskind.com",
       },
       env_development: {
-        NODE_ENV: 'development',
+        NODE_ENV: "development",
         PORT: 3001,
-        HOST: 'localhost',
+        HOST: "localhost",
       },
-      error_file: './logs/err.log',
-      out_file: './logs/out.log',
-      log_file: './logs/combined.log',
+      error_file: "./logs/err.log",
+      out_file: "./logs/out.log",
+      log_file: "./logs/combined.log",
       time: true,
       kill_timeout: 5000,
       wait_ready: true,
       listen_timeout: 10000,
       max_restarts: 5,
-      min_uptime: '30s',
+      min_uptime: "30s",
       restart_delay: 5000,
       source_map_support: true,
       node_args: [
-        '--unhandled-rejections=strict',
-        '--trace-deprecation',
-        '--max-old-space-size=512',
-        '--trace-warnings',
+        "--unhandled-rejections=strict",
+        "--trace-deprecation",
+        "--max-old-space-size=512",
+        "--trace-warnings",
       ],
       merge_logs: true,
-      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+      log_date_format: "YYYY-MM-DD HH:mm:ss Z",
     },
   ],
 };

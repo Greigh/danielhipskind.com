@@ -1,3 +1,12 @@
+const path = require('path');
+const fs = require('fs');
+
+// Load production secrets from .env.production when present (PM2 may not inject them).
+require('dotenv').config({
+  path: path.join(__dirname, '.env.production'),
+});
+require('dotenv').config(); // also allow .env for local overrides
+
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
@@ -11,8 +20,6 @@ const { ipKeyGenerator } = require('express-rate-limit');
 const helmet = require('helmet');
 const cors = require('cors');
 const winston = require('winston');
-const path = require('path');
-const fs = require('fs');
 const crypto = require('crypto');
 
 // Ensure logs directory exists
