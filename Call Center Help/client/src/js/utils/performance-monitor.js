@@ -16,6 +16,9 @@ class PerformanceMonitor {
 
     this.observers = new Map();
     this.isMonitoring = false;
+    this.memoryInterval = null;
+    this.maxNetworkRequests = 100;
+    this.maxErrors = 50;
   }
 
   // Start monitoring
@@ -37,6 +40,10 @@ class PerformanceMonitor {
 
     this.isMonitoring = false;
     this.disconnectObservers();
+    if (this.memoryInterval) {
+      clearInterval(this.memoryInterval);
+      this.memoryInterval = null;
+    }
 
     console.log('[Performance Monitor] Stopped monitoring');
   }
@@ -151,6 +158,12 @@ class PerformanceMonitor {
               type: entry.initiatorType,
               timestamp: entry.fetchStart,
             });
+            if (
+              this.metrics.networkRequests.length > this.maxNetworkRequests
+            ) {
+              this.metrics.networkRequests =
+                this.metrics.networkRequests.slice(-this.maxNetworkRequests);
+            }
           });
         });
         resourceObserver.observe({ entryTypes: ['resource'] });
@@ -196,7 +209,9 @@ class PerformanceMonitor {
   // Track memory usage
   trackMemoryUsage() {
     if ('memory' in window.performance) {
-      setInterval(() => {
+      if (this.memoryInterval) clearInterval(this.memoryInterval);
+      this.memoryInterval = setInterval(() => {
+        if (!this.isMonitoring) return;
         const memory = window.performance.memory;
         this.metrics.memoryUsage = {
           used: memory.usedJSHeapSize,
@@ -204,14 +219,21 @@ class PerformanceMonitor {
           limit: memory.jsHeapSizeLimit,
           timestamp: Date.now(),
         };
-      }, 5000); // Update every 5 seconds
+      }, 15000);
+    }
+  }
+
+  _pushError(entry) {
+    this.metrics.errors.push(entry);
+    if (this.metrics.errors.length > this.maxErrors) {
+      this.metrics.errors = this.metrics.errors.slice(-this.maxErrors);
     }
   }
 
   // Track JavaScript errors
   trackErrors() {
     window.addEventListener('error', (event) => {
-      this.metrics.errors.push({
+      this._pushError({
         message: event.message,
         filename: event.filename,
         lineno: event.lineno,
@@ -222,7 +244,7 @@ class PerformanceMonitor {
     });
 
     window.addEventListener('unhandledrejection', (event) => {
-      this.metrics.errors.push({
+      this._pushError({
         message: event.reason?.message || event.reason,
         timestamp: Date.now(),
         type: 'promise',

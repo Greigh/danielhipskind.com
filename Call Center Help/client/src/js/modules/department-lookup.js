@@ -3,6 +3,7 @@
 
 import { showToast } from '../utils/toast.js';
 import { showConfirmModal } from '../utils/modal.js';
+import { escapeHtml } from '../utils/helpers.js';
 
 export function initializeDepartmentLookup() {
   createLookupInterface();
@@ -415,7 +416,7 @@ function displayResults(results, searchTerm) {
   if (results.length === 0) {
     resultsContainer.innerHTML = `
       <div class="no-results">
-        <p>No departments or locations found for "${searchTerm}"</p>
+        <p>No departments or locations found for "${escapeHtml(searchTerm || '')}"</p>
         <p class="text-muted">Try adjusting your search terms or filters</p>
       </div>
     `;
@@ -463,20 +464,20 @@ function createResultItem(item, searchTerm) {
   const highlightedDesc = highlightMatch(item.description, searchTerm);
 
   return `
-    <div class="lookup-result-item" data-id="${item.id}">
+    <div class="lookup-result-item" data-id="${escapeHtml(String(item.id))}">
       <div class="result-header">
         <div class="result-name">${highlightedName}</div>
-        <div class="result-number">${item.number}</div>
+        <div class="result-number">${escapeHtml(item.number || '')}</div>
       </div>
       <div class="result-details">
-        <div class="result-category">${item.category}</div>
+        <div class="result-category">${escapeHtml(item.category || '')}</div>
         <div class="result-description">${highlightedDesc}</div>
       </div>
       <div class="result-actions">
-        <button class="btn btn-sm btn-outline call-btn" data-number="${item.number}" title="Call this number">
+        <button class="btn btn-sm btn-outline call-btn" data-number="${escapeHtml(item.number || '')}" title="Call this number">
           📞 Call
         </button>
-        <button class="btn btn-sm btn-outline copy-btn" data-number="${item.number}" title="Copy number">
+        <button class="btn btn-sm btn-outline copy-btn" data-number="${escapeHtml(item.number || '')}" title="Copy number">
           📋 Copy
         </button>
       </div>
@@ -485,9 +486,12 @@ function createResultItem(item, searchTerm) {
 }
 
 function highlightMatch(text, searchTerm) {
-  if (!searchTerm) return text;
-  const regex = new RegExp(`(${searchTerm})`, 'gi');
-  return text.replace(regex, '<mark>$1</mark>');
+  const safe = escapeHtml(text || '');
+  if (!searchTerm) return safe;
+  const escapedTerm = String(searchTerm).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(`(${escapedTerm})`, 'gi');
+  // Re-escape after split so mark wrapping stays safe
+  return safe.replace(regex, '<mark>$1</mark>');
 }
 
 function showPlaceholder() {
@@ -753,17 +757,17 @@ function populateManagementList() {
     itemElement.className = 'department-item';
     itemElement.innerHTML = `
       <div class="department-info">
-        <div class="department-name">${item.name}</div>
+        <div class="department-name">${escapeHtml(item.name || '')}</div>
         <div class="department-details">
-          <span class="department-number">${item.number}</span>
-          <span class="department-type type-${item.type}">${item.type}</span>
-          <span class="department-category">${item.category}</span>
+          <span class="department-number">${escapeHtml(item.number || '')}</span>
+          <span class="department-type type-${escapeHtml(item.type || '')}">${escapeHtml(item.type || '')}</span>
+          <span class="department-category">${escapeHtml(item.category || '')}</span>
         </div>
-        <div class="department-description">${item.description}</div>
+        <div class="department-description">${escapeHtml(item.description || '')}</div>
       </div>
       <div class="department-actions">
-        <button class="btn btn-sm btn-outline edit-btn" data-id="${item.id}">Edit</button>
-        <button class="btn btn-sm btn-danger delete-btn" data-id="${item.id}">Delete</button>
+        <button class="btn btn-sm btn-outline edit-btn" data-id="${escapeHtml(String(item.id))}">Edit</button>
+        <button class="btn btn-sm btn-danger delete-btn" data-id="${escapeHtml(String(item.id))}">Delete</button>
       </div>
     `;
 
@@ -806,8 +810,8 @@ function populateFilterList() {
     filterElement.className = 'filter-item';
     filterElement.innerHTML = `
       <div class="filter-info">
-        <div class="filter-name">${filter.label}</div>
-        <div class="filter-type">${filter.type}</div>
+        <div class="filter-name">${escapeHtml(filter.label || '')}</div>
+        <div class="filter-type">${escapeHtml(filter.type || '')}</div>
       </div>
       <div class="filter-actions">
         <button class="btn btn-sm btn-outline edit-filter-btn" data-index="${index}">Edit</button>

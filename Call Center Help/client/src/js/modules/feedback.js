@@ -2,6 +2,7 @@
 // Handles post-call surveys, feedback collection, and analytics
 
 import { moduleState as crmState, logCallToCRM } from './crm.js';
+import { escapeHtml } from '../utils/helpers.js';
 
 export const feedbackState = {
   surveys: [],
@@ -166,17 +167,34 @@ function renderTemplatesList(doc) {
       (template) => `
     <div class="template-item">
       <div class="template-info">
-        <h5>${template.name}</h5>
-        <span class="template-questions">${template.questions.length} questions</span>
+        <h5>${escapeHtml(template.name || '')}</h5>
+        <span class="template-questions">${escapeHtml(String(template.questions.length))} questions</span>
       </div>
       <div class="template-actions">
-        <button class="btn-sm" onclick="editFeedbackTemplate('${template.id}')">Edit</button>
-        <button class="btn-sm btn-secondary" onclick="duplicateFeedbackTemplate('${template.id}')">Duplicate</button>
+        <button type="button" class="btn-sm feedback-edit-template" data-id="${escapeHtml(template.id)}">Edit</button>
+        <button type="button" class="btn-sm btn-secondary feedback-dup-template" data-id="${escapeHtml(template.id)}">Duplicate</button>
       </div>
     </div>
   `
     )
     .join('');
+
+  container.querySelectorAll('.feedback-edit-template').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const id = btn.getAttribute('data-id');
+      if (id && typeof window.editFeedbackTemplate === 'function') {
+        window.editFeedbackTemplate(id);
+      }
+    });
+  });
+  container.querySelectorAll('.feedback-dup-template').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const id = btn.getAttribute('data-id');
+      if (id && typeof window.duplicateFeedbackTemplate === 'function') {
+        window.duplicateFeedbackTemplate(id);
+      }
+    });
+  });
 }
 
 function renderResponsesList(doc) {
@@ -190,11 +208,11 @@ function renderResponsesList(doc) {
       (response) => `
     <div class="response-item">
       <div class="response-header">
-        <span class="response-date">${new Date(response.timestamp).toLocaleString()}</span>
-        <span class="response-rating">${getResponseRating(response)}</span>
+        <span class="response-date">${escapeHtml(new Date(response.timestamp).toLocaleString())}</span>
+        <span class="response-rating">${escapeHtml(String(getResponseRating(response)))}</span>
       </div>
       <div class="response-summary">
-        ${response.surveyName} - ${response.customerName || 'Anonymous'}
+        ${escapeHtml(response.surveyName || '')} - ${escapeHtml(response.customerName || 'Anonymous')}
       </div>
     </div>
   `

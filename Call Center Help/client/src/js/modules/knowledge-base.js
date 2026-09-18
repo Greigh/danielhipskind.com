@@ -1,6 +1,8 @@
 // Knowledge Base Integration Module
 // Provides quick access to procedures, FAQs, and documentation
 
+import { escapeHtml } from '../utils/helpers.js';
+
 export const kbState = {
   articles: [],
   categories: [],
@@ -265,31 +267,52 @@ function renderArticlesList(doc, filteredArticles = null) {
   container.innerHTML = articles
     .map(
       (article) => `
-    <div class="kb-article-card" onclick="openKBArticle('${article.id}')">
+    <div class="kb-article-card" data-article-id="${escapeHtml(article.id)}">
       <div class="kb-article-header">
-        <h4>${article.title}</h4>
+        <h4>${escapeHtml(article.title || '')}</h4>
         <div class="kb-article-meta">
-          <span class="kb-category" style="background: ${getCategoryColor(article.category)}">${article.category}</span>
-          <span class="kb-author">${article.author}</span>
-          <span class="kb-date">${new Date(article.lastModified).toLocaleDateString()}</span>
+          <span class="kb-category" style="background: ${escapeHtml(getCategoryColor(article.category))}">${escapeHtml(article.category || '')}</span>
+          <span class="kb-author">${escapeHtml(article.author || '')}</span>
+          <span class="kb-date">${escapeHtml(new Date(article.lastModified).toLocaleDateString())}</span>
         </div>
       </div>
       <div class="kb-article-preview">
-        ${getArticlePreview(article.content)}
+        ${escapeHtml(getArticlePreview(article.content))}
       </div>
       <div class="kb-article-tags">
-        ${article.tags.map((tag) => `<span class="kb-tag">${tag}</span>`).join('')}
+        ${(article.tags || []).map((tag) => `<span class="kb-tag">${escapeHtml(tag)}</span>`).join('')}
       </div>
       <div class="kb-article-actions">
-        <button class="btn-icon" onclick="event.stopPropagation(); toggleKBBookmark('${article.id}')" title="Bookmark">
+        <button type="button" class="btn-icon kb-bookmark-btn" data-article-id="${escapeHtml(article.id)}" title="Bookmark">
           ${kbState.bookmarks.includes(article.id) ? '⭐' : '☆'}
         </button>
-        <button class="btn-icon" onclick="event.stopPropagation(); editKBArticle('${article.id}')" title="Edit">✏️</button>
+        <button type="button" class="btn-icon kb-edit-btn" data-article-id="${escapeHtml(article.id)}" title="Edit">✏️</button>
       </div>
     </div>
   `
     )
     .join('');
+
+  container.querySelectorAll('.kb-article-card').forEach((card) => {
+    card.addEventListener('click', () => {
+      const id = card.getAttribute('data-article-id');
+      if (id && typeof window.openKBArticle === 'function') window.openKBArticle(id);
+    });
+  });
+  container.querySelectorAll('.kb-bookmark-btn').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = btn.getAttribute('data-article-id');
+      if (id && typeof window.toggleKBBookmark === 'function') window.toggleKBBookmark(id);
+    });
+  });
+  container.querySelectorAll('.kb-edit-btn').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = btn.getAttribute('data-article-id');
+      if (id && typeof window.editKBArticle === 'function') window.editKBArticle(id);
+    });
+  });
 }
 
 function getCategoryColor(categoryName) {

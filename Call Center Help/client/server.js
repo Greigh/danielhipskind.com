@@ -104,15 +104,7 @@ function isAllowedFinesseUrl(rawUrl) {
   }
   if (/^\d{1,3}(\.\d{1,3}){3}$/.test(host)) return false;
   if (host.includes(':')) return false; // raw IPv6
-  // Exact suffix / label allowlist — no loose "finesse" substring hosts
-  const patterns = [
-    /(^|\.)cisco\.com$/i,
-    /(^|\.)lminfosys\.net$/i,
-    /^finesse(\.|-)/i,
-    /\.finesse\./i,
-  ];
-  // Require hostname to look like a real Finesse server (finesse.X or X.finesse.Y)
-  // Reject attacker domains such as finesse.evil.com unless under known parents
+  // Exact allowlist only — never match arbitrary "finesse.*" attacker hosts
   const allowedExactEnv = (process.env.FINESSE_ALLOWED_HOSTS || '')
     .split(',')
     .map((s) => s.trim().toLowerCase())
@@ -122,8 +114,30 @@ function isAllowedFinesseUrl(rawUrl) {
       (h) => host === h || host.endsWith('.' + h)
     );
   }
+  // Default safe suffixes when env unset (no open "finesse." prefix)
+  const patterns = [/(^|\.)cisco\.com$/i, /(^|\.)lminfosys\.net$/i];
   return patterns.some((p) => p.test(host));
 }
+
+function escapeXml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
+const FINESSE_ALLOWED_ACTIONS = new Set([
+  'MAKE_CALL',
+  'ANSWER',
+  'DROP',
+  'HOLD',
+  'RETRIEVE',
+  'TRANSFER_SST',
+  'CONSULT_CALL',
+  'CONFERENCE',
+]);
 
 /** Fetch Finesse without following redirects (SSRF hardening). */
 async function fetchFinesse(url, options = {}) {
@@ -206,9 +220,27 @@ if (process.env.NODE_ENV !== 'production') {
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
-  // Cookies on the Socket.IO handshake (same-origin)
   cors: {
-    origin: true,
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      const allowed = (
+        process.env.CORS_ORIGINS ||
+        process.env.FRONTEND_ORIGIN ||
+        ''
+      )
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .filter((o) => o !== '*');
+      if (allowed.length === 0) {
+        if (process.env.NODE_ENV === 'production') {
+          return callback(new Error('CORS origin not allowed'));
+        }
+        return callback(null, true);
+      }
+      if (allowed.includes(origin)) return callback(null, true);
+      return callback(new Error('CORS origin not allowed'));
+    },
     credentials: true,
   },
 });
@@ -326,6 +358,7 @@ function initializeModels() {
       email: { type: String, required: true, unique: true },
       password: { type: String, required: true },
       role: { type: String, default: 'agent' },
+      tokenVersion: { type: Number, default: 0 },
       createdAt: { type: Date, default: Date.now },
       settings: { type: mongoose.Schema.Types.Mixed, default: {} },
       twilio: {
@@ -391,7 +424,7 @@ function initializeModels() {
   }
 }
 
-// Connect to MongoDB
+// Connect to MongoDB — production fails closed (no silent mock auth store)
 mongoose
   .connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/callcenter', {
     serverSelectionTimeoutMS: 5000,
@@ -402,8 +435,15 @@ mongoose
     initializeModels();
   })
   .catch((err) => {
+    if (process.env.NODE_ENV === 'production') {
+      logger.error(
+        'MongoDB connection failed in production — refusing to start with mock DB',
+        err.message
+      );
+      process.exit(1);
+    }
     logger.error(
-      'MongoDB connection error - Falling back to Mock DB',
+      'MongoDB connection error - Falling back to Mock DB (non-production only)',
       err.message
     );
     isDbConnected = false;
@@ -510,7 +550,7 @@ app.use(
         }
         return callback(null, true);
       }
-      if (allowed.includes(origin) || allowed.includes('*')) {
+      if (allowed.includes(origin)) {
         return callback(null, true);
       }
       return callback(new Error('CORS origin not allowed'));
@@ -556,6 +596,11 @@ const auth = async (req, res, next) => {
     if (!user) {
       clearSessionCookie(res);
       return res.status(401).json({ error: 'Invalid token' });
+    }
+    const currentVersion = user.tokenVersion || 0;
+    if ((verified.tv || 0) !== currentVersion) {
+      clearSessionCookie(res);
+      return res.status(401).json({ error: 'Session expired' });
     }
     req.user = {
       _id: user._id,
@@ -685,8 +730,42 @@ app.get('/adamas/privacy', (req, res) => {
 });
 
 // Contact Form Handling
+async function verifyRecaptcha(token, remoteip) {
+  const secret = process.env.RECAPTCHA_SECRET_KEY;
+  if (!secret) {
+    if (process.env.NODE_ENV === 'production') {
+      return { ok: false, error: 'CAPTCHA is not configured' };
+    }
+    // Dev: allow without secret so local contact form still works
+    return { ok: true };
+  }
+  if (!token || typeof token !== 'string') {
+    return { ok: false, error: 'Please complete the CAPTCHA verification.' };
+  }
+  try {
+    const params = new URLSearchParams({
+      secret,
+      response: token.slice(0, 4096),
+    });
+    if (remoteip) params.set('remoteip', String(remoteip));
+    const resp = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params.toString(),
+    });
+    const data = await resp.json();
+    if (!data.success) {
+      return { ok: false, error: 'CAPTCHA verification failed.' };
+    }
+    return { ok: true };
+  } catch (err) {
+    logger.error('reCAPTCHA verify error:', err.message);
+    return { ok: false, error: 'CAPTCHA verification unavailable.' };
+  }
+}
+
 async function handleContactForm(req, res) {
-  const { name, email, message } = req.body;
+  const { name, email, message, captchaToken } = req.body || {};
 
   if (!name || !email || !message) {
     return res
@@ -694,17 +773,30 @@ async function handleContactForm(req, res) {
       .json({ error: 'Please provide name, email, and message.' });
   }
 
+  const nameStr = String(name).slice(0, 200);
+  const emailStr = String(email).slice(0, 254);
+  const messageStr = String(message).slice(0, 5000);
+
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailStr)) {
+    return res.status(400).json({ error: 'Invalid email address.' });
+  }
+
+  const captcha = await verifyRecaptcha(captchaToken, req.ip);
+  if (!captcha.ok) {
+    return res.status(400).json({ error: captcha.error });
+  }
+
   try {
     // Send email notification (HTML-escaped to prevent mail client injection)
-    const safeName = escapeHtml(name);
-    const safeEmail = escapeHtml(email);
-    const safeMessage = escapeHtml(message).replace(/\n/g, '<br>');
+    const safeName = escapeHtml(nameStr);
+    const safeEmail = escapeHtml(emailStr);
+    const safeMessage = escapeHtml(messageStr).replace(/\n/g, '<br>');
     await transporter.sendMail({
-      from: `"${String(name).replace(/["\r\n]/g, '')}" <${process.env.EMAIL_USER}>`,
-      replyTo: email,
+      from: `"${nameStr.replace(/["\r\n]/g, '')}" <${process.env.EMAIL_USER}>`,
+      replyTo: emailStr,
       to: process.env.EMAIL_USER,
-      subject: `Adamas Contact: Message from ${String(name).replace(/[\r\n]/g, '')}`,
-      text: `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`,
+      subject: `Adamas Contact: Message from ${nameStr.replace(/[\r\n]/g, '')}`,
+      text: `Name: ${nameStr}\nEmail: ${emailStr}\n\nMessage:\n${messageStr}`,
       html: `
         <h3>New Contact Message</h3>
         <p><strong>Name:</strong> ${safeName}</p>
@@ -757,9 +849,18 @@ app.post(
   [
     body('username').isLength({ min: 3 }).trim().escape(),
     body('email').isEmail().normalizeEmail(),
-    body('password').isLength({ min: 6 }),
+    body('password').isLength({ min: 8 }),
   ],
   async (req, res) => {
+    // Default closed in production — set ALLOW_PUBLIC_REGISTER=true to enable
+    const allow =
+      process.env.ALLOW_PUBLIC_REGISTER === 'true' ||
+      (process.env.NODE_ENV !== 'production' &&
+        process.env.ALLOW_PUBLIC_REGISTER !== 'false');
+    if (!allow) {
+      return res.status(403).json({ error: 'Public registration is disabled' });
+    }
+
     const errors = validationResult(req);
     if (!errors.isEmpty())
       return res.status(400).json({ errors: errors.array() });
@@ -797,7 +898,7 @@ app.post(
       return res.status(400).json({ error: 'Invalid credentials' });
     }
     const token = jwt.sign(
-      { _id: user._id, role: user.role },
+      { _id: user._id, role: user.role, tv: user.tokenVersion || 0 },
       EFFECTIVE_JWT_SECRET,
       { expiresIn: '12h' }
     );
@@ -822,6 +923,10 @@ app.get('/api/me', async (req, res) => {
     const verified = jwt.verify(token, EFFECTIVE_JWT_SECRET);
     const user = await Models.User.findById(verified._id);
     if (!user) return res.status(401).json({ error: 'Not authenticated' });
+    if ((verified.tv || 0) !== (user.tokenVersion || 0)) {
+      clearSessionCookie(res);
+      return res.status(401).json({ error: 'Session expired' });
+    }
     res.json({
       user: {
         _id: user._id,
@@ -886,7 +991,7 @@ app.put(
 app.put(
   '/api/user/password',
   auth,
-  [body('currentPassword').exists(), body('newPassword').isLength({ min: 6 })],
+  [body('currentPassword').exists(), body('newPassword').isLength({ min: 8 })],
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty())
@@ -902,9 +1007,10 @@ app.put(
       return res.status(400).json({ error: 'Incorrect current password' });
 
     user.password = await bcrypt.hash(newPassword, 10);
+    user.tokenVersion = (user.tokenVersion || 0) + 1;
     await user.save();
 
-    // Invalidate current session — client must re-login
+    // Invalidate all sessions minted before this password change
     clearSessionCookie(res);
     res.json({ message: 'Password updated successfully' });
   }
@@ -1072,6 +1178,12 @@ app.post('/api/email/send', auth, (req, res) => {
     .split(',')
     .map((s) => s.trim().toLowerCase())
     .filter(Boolean);
+  // Production: require an explicit allowlist (fail closed — no open relay)
+  if (process.env.NODE_ENV === 'production' && domainAllow.length === 0) {
+    return res.status(503).json({
+      error: 'Email sending is not configured (EMAIL_ALLOW_DOMAINS required)',
+    });
+  }
   if (domainAllow.length) {
     const domain = toAddr.split('@')[1].toLowerCase();
     if (!domainAllow.includes(domain)) {
@@ -1258,17 +1370,21 @@ app.post('/adamas/api/finesse/User/:username/Dialogs', auth, async (req, res) =>
     // However, body-parser might have parsed it.
     // If client sends { destination: '...' }, we create XML.
     if (req.body.destination) {
+      const destination = String(req.body.destination).slice(0, 64);
+      if (!/^[0-9+*#\-()\sA-Za-z.]+$/.test(destination)) {
+        return res.status(400).json({ error: 'Invalid destination' });
+      }
       requestBody = `<Dialog>
         <requestedAction>MAKE_CALL</requestedAction>
-        <toAddress>${req.body.destination}</toAddress>
-        <fromAddress>${username}</fromAddress>
+        <toAddress>${escapeXml(destination)}</toAddress>
+        <fromAddress>${escapeXml(username)}</fromAddress>
       </Dialog>`;
     } else if (typeof req.body === 'string') {
-      // Already string (perhaps text/plain middleware?)
-      // Already string (perhaps text/plain middleware?)
-      requestBody = req.body;
+      return res.status(400).json({ error: 'Raw XML body not accepted' });
     } else if (req.body.rawXml) {
-      requestBody = req.body.rawXml;
+      return res.status(400).json({ error: 'rawXml is not accepted' });
+    } else {
+      return res.status(400).json({ error: 'Missing destination' });
     }
 
     const response = await fetchFinesse(finesseUrl, {
@@ -1320,13 +1436,19 @@ app.put('/adamas/api/finesse/Dialog/:dialogId', auth, async (req, res) => {
     let requestBody = req.body;
 
     if (req.body.action) {
+      const action = String(req.body.action).toUpperCase().trim();
+      if (!FINESSE_ALLOWED_ACTIONS.has(action) || action === 'MAKE_CALL') {
+        return res.status(400).json({ error: 'Invalid dialog action' });
+      }
       requestBody = `<Dialog>
-          <requestedAction>${req.body.action}</requestedAction>
+          <requestedAction>${escapeXml(action)}</requestedAction>
        </Dialog>`;
     } else if (typeof req.body === 'string') {
-      requestBody = req.body;
+      return res.status(400).json({ error: 'Raw XML body not accepted' });
     } else if (req.body.rawXml) {
-      requestBody = req.body.rawXml;
+      return res.status(400).json({ error: 'rawXml is not accepted' });
+    } else {
+      return res.status(400).json({ error: 'Missing action' });
     }
 
     const response = await fetchFinesse(finesseUrl, {
@@ -1490,7 +1612,7 @@ app.get('/api/user/twilio', auth, async (req, res) => {
 });
 
 // Socket.io — require valid session JWT on handshake
-io.use((socket, next) => {
+io.use(async (socket, next) => {
   try {
     let token = socket.handshake.auth && socket.handshake.auth.token;
     if (!token && socket.handshake.headers && socket.handshake.headers.cookie) {
@@ -1500,7 +1622,12 @@ io.use((socket, next) => {
     if (!token) {
       return next(new Error('Unauthorized'));
     }
-    socket.user = jwt.verify(token, EFFECTIVE_JWT_SECRET);
+    const verified = jwt.verify(token, EFFECTIVE_JWT_SECRET);
+    const user = await Models.User.findById(verified._id);
+    if (!user || (verified.tv || 0) !== (user.tokenVersion || 0)) {
+      return next(new Error('Unauthorized'));
+    }
+    socket.user = { _id: user._id, role: user.role };
     return next();
   } catch {
     return next(new Error('Unauthorized'));

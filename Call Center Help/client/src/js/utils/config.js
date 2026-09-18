@@ -1,61 +1,14 @@
-// Configuration module for environment variables and API settings
+// Client-safe configuration only — never bundle server secrets into the browser.
 
 export const config = {
-  // Twilio Configuration
-  twilio: {
-    accountSid: process.env.TWILIO_ACCOUNT_SID || '',
-    authToken: process.env.TWILIO_AUTH_TOKEN || '',
-    phoneNumber: process.env.TWILIO_PHONE_NUMBER || '',
-  },
-
-  // Email Configuration
-  email: {
-    host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-    port: parseInt(process.env.EMAIL_PORT) || 587,
-    user: process.env.EMAIL_USER || '',
-    pass: process.env.EMAIL_PASS || '',
-  },
-
-  // Telephony Configuration
+  // Public / non-secret telephony hints (user may override in UI; secrets stay server-side)
   telephony: {
-    provider: process.env.TELEPHONY_PROVIDER || 'twilio',
-    asterisk: {
-      host: process.env.ASTERISK_HOST || '',
-      port: parseInt(process.env.ASTERISK_PORT) || 5038,
-      user: process.env.ASTERISK_USER || '',
-      pass: process.env.ASTERISK_PASS || '',
-    },
-    finesse: {
-      host: process.env.FINESSE_HOST || '',
-      port: parseInt(process.env.FINESSE_PORT) || 8443,
-      agentId: process.env.FINESSE_AGENT_ID || '',
-      password: process.env.FINESSE_AGENT_PASSWORD || '',
-      extension: process.env.FINESSE_AGENT_EXTENSION || '',
-      ssl: process.env.FINESSE_SSL === 'true',
-    },
+    provider: 'twilio',
   },
 
-  // CRM API Keys
-  crm: {
-    salesforce: {
-      clientId: process.env.SALESFORCE_CLIENT_ID || '',
-      clientSecret: process.env.SALESFORCE_CLIENT_SECRET || '',
-    },
-    hubspot: {
-      apiKey: process.env.HUBSPOT_API_KEY || '',
-    },
-    zendesk: {
-      apiKey: process.env.ZENDESK_API_KEY || '',
-    },
-    freshdesk: {
-      apiKey: process.env.FRESHDESK_API_KEY || '',
-    },
-  },
-
-  // Push Notifications
+  // Push — public key only (private key must never ship to the client)
   push: {
     vapidPublicKey: process.env.VAPID_PUBLIC_KEY || '',
-    vapidPrivateKey: process.env.VAPID_PRIVATE_KEY || '',
   },
 
   // Feature Flags
@@ -66,51 +19,66 @@ export const config = {
     email: true,
     training: true,
     auditLogging: true,
-    dataEncryption: false, // Disabled by default for compatibility
+    dataEncryption: false,
     gdprCompliance: true,
   },
 };
 
-// Load configuration from localStorage (user overrides)
+const SECRET_KEYS = new Set([
+  'authToken',
+  'pass',
+  'password',
+  'apiKey',
+  'clientSecret',
+  'vapidPrivateKey',
+  'accountSid', // treat SID+token pair carefully; never persist token
+]);
+
+function stripSecrets(value) {
+  if (!value || typeof value !== 'object') return value;
+  if (Array.isArray(value)) return value.map(stripSecrets);
+  const out = {};
+  for (const [k, v] of Object.entries(value)) {
+    if (SECRET_KEYS.has(k)) continue;
+    if (/token|secret|password|passwd|api[_-]?key/i.test(k)) continue;
+    out[k] = typeof v === 'object' && v !== null ? stripSecrets(v) : v;
+  }
+  return out;
+}
+
+// Load non-secret user overrides from localStorage
 export function loadUserConfig() {
   try {
     const userConfig = JSON.parse(localStorage.getItem('user-config') || '{}');
-
-    // Merge user config with defaults
-    if (userConfig.twilio) {
-      config.twilio = { ...config.twilio, ...userConfig.twilio };
+    const safe = stripSecrets(userConfig);
+    if (safe.telephony) {
+      config.telephony = { ...config.telephony, ...safe.telephony };
     }
-    if (userConfig.email) {
-      config.email = { ...config.email, ...userConfig.email };
+    if (safe.features) {
+      config.features = { ...config.features, ...safe.features };
     }
-    if (userConfig.telephony) {
-      config.telephony = { ...config.telephony, ...userConfig.telephony };
-    }
-    if (userConfig.features) {
-      config.features = { ...config.features, ...userConfig.features };
+    if (safe.push && safe.push.vapidPublicKey) {
+      config.push.vapidPublicKey = safe.push.vapidPublicKey;
     }
   } catch (error) {
     console.warn('Error loading user configuration:', error);
   }
 }
 
-// Save user configuration to localStorage
+// Persist only non-secret preferences
 export function saveUserConfig() {
   try {
-    const userConfig = {
-      twilio: config.twilio,
-      email: config.email,
-      telephony: config.telephony,
+    const userConfig = stripSecrets({
+      telephony: { provider: config.telephony.provider },
       features: config.features,
-    };
+      push: { vapidPublicKey: config.push.vapidPublicKey },
+    });
     localStorage.setItem('user-config', JSON.stringify(userConfig));
   } catch (error) {
     console.error('Error saving user configuration:', error);
   }
 }
 
-// Initialize configuration
 export function initializeConfig() {
   loadUserConfig();
-  console.log('Configuration initialized');
 }

@@ -1,6 +1,8 @@
 // Camera Integration Module
 // Allows photo capture during calls
 
+const MAX_PHOTOS = 20;
+
 export const cameraState = {
   stream: null,
   canvas: null,
@@ -45,8 +47,11 @@ export function capturePhoto() {
   canvas.width = video.videoWidth;
   canvas.height = video.videoHeight;
   ctx.drawImage(video, 0, 0);
-  const photo = canvas.toDataURL('image/png');
+  const photo = canvas.toDataURL('image/jpeg', 0.85);
   cameraState.photos.push(photo);
+  if (cameraState.photos.length > MAX_PHOTOS) {
+    cameraState.photos = cameraState.photos.slice(-MAX_PHOTOS);
+  }
   return photo;
 }
 

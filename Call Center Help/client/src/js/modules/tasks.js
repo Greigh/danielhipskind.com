@@ -277,11 +277,11 @@ export function initializeTasks() {
           <form class="task-edit-form">
             <div class="form-group">
               <label for="edit-title">Title</label>
-              <input type="text" id="edit-title" value="${task.title}" required>
+              <input type="text" id="edit-title" value="${escapeHtml(task.title || '')}" required>
             </div>
             <div class="form-group">
               <label for="edit-description">Description</label>
-              <textarea id="edit-description" rows="3">${task.description || ''}</textarea>
+              <textarea id="edit-description" rows="3">${escapeHtml(task.description || '')}</textarea>
             </div>
             <div class="form-row">
               <div class="form-group">
@@ -301,7 +301,7 @@ export function initializeTasks() {
               <label for="edit-assignee">Assignee</label>
               <select id="edit-assignee">
                 <option value="">Unassigned</option>
-                ${defaultAssignees.map((a) => `<option value="${a.id}" ${task.assignee === a.id ? 'selected' : ''}>${a.name}</option>`).join('')}
+                ${defaultAssignees.map((a) => `<option value="${escapeHtml(String(a.id))}" ${task.assignee === a.id ? 'selected' : ''}>${escapeHtml(a.name)}</option>`).join('')}
               </select>
             </div>
           </form>

@@ -1048,9 +1048,18 @@ export function initFloating() {
 
   setupAllFloating();
 
-  // Periodically check for new floating buttons
+  // Periodically check for new floating buttons, then settle
   if (floatingSetupInterval) clearInterval(floatingSetupInterval);
-  floatingSetupInterval = setInterval(setupAllFloating, 2000);
+  let setupPasses = 0;
+  floatingSetupInterval = setInterval(() => {
+    setupAllFloating();
+    setupPasses += 1;
+    // Stop polling after ~30s once the DOM has stabilized
+    if (setupPasses >= 15) {
+      clearInterval(floatingSetupInterval);
+      floatingSetupInterval = null;
+    }
+  }, 2000);
 }
 
 // Export the instance getter for external use
