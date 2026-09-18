@@ -262,6 +262,7 @@ export function initializeSettings() {
               overlay.setAttribute('aria-hidden', 'true');
               overlay.inert = true;
             }
+            document.body.classList.remove('welcome-open');
           }
           window.dispatchEvent(
             new CustomEvent('appSettingsChanged', { detail: appSettings })
@@ -2429,8 +2430,8 @@ function checkWelcomeStatus() {
       overlay.classList.remove('active');
       overlay.setAttribute('aria-hidden', 'true');
       overlay.inert = true;
-      document.body.classList.remove('welcome-open');
     }
+    document.body.classList.remove('welcome-open');
     return;
   }
 
@@ -2449,10 +2450,17 @@ function checkWelcomeStatus() {
 
   if (!(overlay && nextBtn)) return;
 
+  // Keep overlay a direct child of <body> so it is never trapped inside a
+  // hidden .app-view (e.g. #settings-view { display:none }).
+  if (overlay.parentElement !== document.body) {
+    document.body.appendChild(overlay);
+  }
+
   // Already bound: just ensure visible if still needed
   if (welcomeWizardBound) {
     overlay.classList.add('active');
     overlay.setAttribute('aria-hidden', 'false');
+    overlay.inert = false;
     document.body.classList.add('welcome-open');
     return;
   }

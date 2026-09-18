@@ -164,3 +164,24 @@ Common variables (see `server.js` / `.env`):
 **License:** [CC BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/)
 
 This software and its documentation are the exclusive property of Daniel Hipskind (Greigh). Unauthorized reproduction or distribution of this work is prohibited.
+
+## Production deploy
+
+Adamas is **not** deployed from this repo alone. Live `/adamas/` is built and
+uploaded by [`danielhipskind.com/deploy.sh`](https://github.com/Greigh/danielhipskind.com/blob/main/deploy.sh):
+
+1. Syncs this checkout into `danielhipskind.com/Call Center Help/client` when
+   `ADAMS_SRC` is set or a sibling `../Adamas` directory exists
+2. Runs `npm run build` there
+3. Rsyncs `dist/` → `/var/www/danielhipskind.com/adamas/`
+4. Restarts the parent PM2 app (`danielhipskind`), which serves `/adamas` as static files
+
+```bash
+# From your Mac (portfolio monorepo):
+cd /path/to/danielhipskind.com
+export ADAMS_SRC=/path/to/Greigh/Adamas   # optional if ../Adamas exists
+./deploy.sh
+```
+
+Or from this repo when nested: `npm run deploy` → `../../deploy.sh`.
+
