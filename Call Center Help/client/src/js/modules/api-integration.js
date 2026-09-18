@@ -1,5 +1,6 @@
 // Import toast for notifications
 import { showToast } from '../utils/toast.js';
+import { icon, iconLabel, initialsAvatar, priorityDot } from '../utils/icons.js';
 
 // External API Integration Module
 // Provides REST/WebSocket APIs for third-party integrations
@@ -195,7 +196,7 @@ function renderEndpointsList(doc) {
           <input type="checkbox" ${endpoint.enabled ? 'checked' : ''} onchange="toggleEndpoint('${endpoint.id}', this.checked)">
           <span class="toggle-slider"></span>
         </label>
-        <button class="btn-icon" onclick="testEndpoint('${endpoint.id}')" title="Test">🔍</button>
+        <button class="btn-icon" onclick="testEndpoint('${endpoint.id}')" title="Test">${icon('search')}</button>
       </div>
     </div>
   `
@@ -223,8 +224,8 @@ function renderAPIKeysList(doc) {
         <div class="key-created">Created: ${new Date(key.createdAt).toLocaleDateString()}</div>
       </div>
       <div class="key-controls">
-        <button class="btn-icon" onclick="copyAPIKey('${key.value}')" title="Copy">📋</button>
-        <button class="btn-icon danger" onclick="revokeAPIKey('${key.id}')" title="Revoke">🗑️</button>
+        <button class="btn-icon" onclick="copyAPIKey('${key.value}')" title="Copy">${icon('clipboard')}</button>
+        <button class="btn-icon danger" onclick="revokeAPIKey('${key.id}')" title="Revoke">${icon('trash')}</button>
       </div>
     </div>
   `
@@ -252,8 +253,8 @@ function renderWebhooksList(doc) {
         <div class="webhook-events">${webhook.events.join(', ')}</div>
       </div>
       <div class="webhook-controls">
-        <button class="btn-icon" onclick="testWebhook('${webhook.id}')" title="Test">🔍</button>
-        <button class="btn-icon danger" onclick="deleteWebhook('${webhook.id}')" title="Delete">🗑️</button>
+        <button class="btn-icon" onclick="testWebhook('${webhook.id}')" title="Test">${icon('search')}</button>
+        <button class="btn-icon danger" onclick="deleteWebhook('${webhook.id}')" title="Delete">${icon('trash')}</button>
       </div>
     </div>
   `

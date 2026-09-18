@@ -253,7 +253,7 @@ function getNumericRating(response) {
 
 function getResponseRating(response) {
   const rating = getNumericRating(response);
-  return rating ? `${rating}/5 ⭐` : 'N/A';
+  return rating ? `${rating}/5 ${icon('star')}` : 'N/A';
 }
 
 export function triggerFeedbackSurvey(
@@ -507,3 +507,4 @@ window.closeFeedbackModal = closeFeedbackModal;
 
 // Import toast for notifications
 import { showToast } from '../utils/toast.js';
+import { icon, iconLabel, initialsAvatar, priorityDot } from '../utils/icons.js';

@@ -1,5 +1,6 @@
 // Automated Workflows Module
 import { saveData, loadData } from './storage.js';
+import { icon, iconLabel, initialsAvatar, priorityDot } from '../utils/icons.js';
 
 export function initializeWorkflows() {
   const workflowSteps = document.getElementById('workflow-steps');
@@ -80,7 +81,7 @@ export function initializeWorkflows() {
     const forms = {
       call: `
         <div class="modal-header">
-          <h3>📞 Configure Call Step</h3>
+          <h3>${icon('phone')} Configure Call Step</h3>
           <button class="close-btn" onclick="hideStepConfigForm()">×</button>
         </div>
         <form onsubmit="return false;">
@@ -104,7 +105,7 @@ export function initializeWorkflows() {
       `,
       email: `
         <div class="modal-header">
-          <h3>📧 Configure Email Step</h3>
+          <h3>${icon('mail')} Configure Email Step</h3>
           <button class="close-btn" onclick="hideStepConfigForm()">×</button>
         </div>
         <form onsubmit="return false;">
@@ -136,7 +137,7 @@ export function initializeWorkflows() {
       `,
       task: `
         <div class="modal-header">
-          <h3>📋 Configure Task Step</h3>
+          <h3>${icon('clipboard')} Configure Task Step</h3>
           <button class="close-btn" onclick="hideStepConfigForm()">×</button>
         </div>
         <form onsubmit="return false;">
@@ -173,7 +174,7 @@ export function initializeWorkflows() {
       `,
       wait: `
         <div class="modal-header">
-          <h3>⏱️ Configure Wait Step</h3>
+          <h3>${icon('clock')} Configure Wait Step</h3>
           <button class="close-btn" onclick="hideStepConfigForm()">×</button>
         </div>
         <form onsubmit="return false;">
@@ -200,7 +201,7 @@ export function initializeWorkflows() {
       `,
       condition: `
         <div class="modal-header">
-          <h3>🔀 Configure Condition Step</h3>
+          <h3>${icon('gitBranch')} Configure Condition Step</h3>
           <button class="close-btn" onclick="hideStepConfigForm()">×</button>
         </div>
         <form onsubmit="return false;">
@@ -245,7 +246,7 @@ export function initializeWorkflows() {
       `,
       notification: `
         <div class="modal-header">
-          <h3>🔔 Configure Notification Step</h3>
+          <h3>${icon('bell')} Configure Notification Step</h3>
           <button class="close-btn" onclick="hideStepConfigForm()">×</button>
         </div>
         <form onsubmit="return false;">
@@ -325,7 +326,7 @@ export function initializeWorkflows() {
     if (currentWorkflow.steps.length === 0) {
       workflowSteps.innerHTML = `
         <div class="empty-workflow">
-          <div class="empty-icon">⚙️</div>
+          <div class="empty-icon">${icon('settings')}</div>
           <p>No workflow steps added yet.<br>Select a step type above to get started.</p>
         </div>
       `;
@@ -343,9 +344,9 @@ export function initializeWorkflows() {
           <span class="step-number">${index + 1}</span>
           <span class="step-type ${step.type}">${formatStepType(step.type)}</span>
           <div class="step-actions">
-            <button class="step-action-btn" onclick="editWorkflowStep(${step.id})" title="Edit">✏️</button>
-            <button class="step-action-btn" onclick="duplicateWorkflowStep(${step.id})" title="Duplicate">📋</button>
-            <button class="step-action-btn btn-danger" onclick="removeWorkflowStep(${step.id})" title="Remove">🗑️</button>
+            <button class="step-action-btn" onclick="editWorkflowStep(${step.id})" title="Edit">${icon('edit')}</button>
+            <button class="step-action-btn" onclick="duplicateWorkflowStep(${step.id})" title="Duplicate">${icon('clipboard')}</button>
+            <button class="step-action-btn btn-danger" onclick="removeWorkflowStep(${step.id})" title="Remove">${icon('trash')}</button>
           </div>
         </div>
         <div class="step-config">
@@ -532,9 +533,9 @@ export function initializeWorkflows() {
           ${workflow.lastRun ? `<span>Last run: ${new Date(workflow.lastRun).toLocaleString()}</span>` : ''}
         </div>
         <div class="workflow-actions">
-          <button class="button" onclick="runWorkflow(${workflow.id})">▶️ Run</button>
-          <button class="button btn-secondary" onclick="editWorkflow(${workflow.id})">✏️ Edit</button>
-          <button class="button btn-danger" onclick="deleteWorkflow(${workflow.id})">🗑️ Delete</button>
+          <button class="button" onclick="runWorkflow(${workflow.id})">${icon('play')} Run</button>
+          <button class="button btn-secondary" onclick="editWorkflow(${workflow.id})">${icon('edit')} Edit</button>
+          <button class="button btn-danger" onclick="deleteWorkflow(${workflow.id})">${icon('trash')} Delete</button>
         </div>
       `;
       activeWorkflowsList.appendChild(workflowDiv);

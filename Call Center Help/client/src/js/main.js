@@ -28,6 +28,7 @@ import {
 } from './modules/draggable.js';
 import { initFloating, getFloatingManager } from './modules/floating.js';
 import { setupKeyboardShortcuts } from './utils/keyboard-shortcuts.js';
+import { icon, hydrateIcons } from './utils/icons.js';
 
 // Import new feature modules
 import { initializeCallLogging } from './modules/call-logging.js';
@@ -533,7 +534,7 @@ function showUpdateNotification() {
   notification.className = 'update-notification';
   notification.innerHTML = `
     <div class="update-notification-content">
-      <div class="update-notification-icon">🔄</div>
+      <div class="update-notification-icon">${icon('refresh')}</div>
       <div class="update-notification-text">
         <div class="update-notification-title">Update Available</div>
         <div class="update-notification-message">A new version of the app is available.</div>
@@ -805,6 +806,7 @@ import { initializeSectionSettings } from './modules/section-settings.js';
 
 // Main initialization function
 document.addEventListener('DOMContentLoaded', async function () {
+  hydrateIcons(document);
   try {
     // Wait for httpOnly session cookie probe before feature modules
     try {

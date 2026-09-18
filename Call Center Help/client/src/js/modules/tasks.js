@@ -1,6 +1,7 @@
 // Task Management Module
 import { escapeHtml } from '../utils/helpers.js';
 import { saveData, loadData, STORAGE_LIMITS } from './storage.js';
+import { icon, iconLabel, initialsAvatar, priorityDot } from '../utils/icons.js';
 
 export function initializeTasks() {
   const addTaskBtn = document.getElementById('add-task');
@@ -35,10 +36,10 @@ export function initializeTasks() {
 
   // Initialize default assignees
   const defaultAssignees = [
-    { id: 'me', name: 'Me', avatar: '👤' },
-    { id: 'alice', name: 'Alice Johnson', avatar: '👩‍💼' },
-    { id: 'bob', name: 'Bob Smith', avatar: '👨‍💻' },
-    { id: 'carol', name: 'Carol Davis', avatar: '👩‍💻' },
+    { id: 'me', name: 'Me' },
+    { id: 'alice', name: 'Alice Johnson' },
+    { id: 'bob', name: 'Bob Smith' },
+    { id: 'carol', name: 'Carol Davis' },
   ];
 
   function initializeAssignees() {
@@ -174,7 +175,7 @@ export function initializeTasks() {
               assignee
                 ? `
               <div class="task-assignee">
-                <span class="assignee-avatar">${escapeHtml(assignee.avatar)}</span>
+                <span class="assignee-avatar">${initialsAvatar(assignee.name)}</span>
                 <span class="assignee-name">${escapeHtml(assignee.name)}</span>
               </div>
             `
@@ -184,10 +185,10 @@ export function initializeTasks() {
         </div>
         <div class="task-actions">
           <button class="action-btn btn-edit" data-id="${task.id}">
-            <span class="btn-icon">✏️</span>
+            <span class="btn-icon">${icon('edit')}</span>
           </button>
           <button class="action-btn btn-delete" data-id="${task.id}">
-            <span class="btn-icon">🗑️</span>
+            <span class="btn-icon">${icon('trash')}</span>
           </button>
         </div>
       `;
@@ -211,12 +212,7 @@ export function initializeTasks() {
   }
 
   function getPriorityIcon(priority) {
-    const icons = {
-      high: '🔴',
-      medium: '🟡',
-      low: '🟢',
-    };
-    return icons[priority] || '⚪';
+    return priorityDot(priority);
   }
 
   function formatDueDate(dueDate) {

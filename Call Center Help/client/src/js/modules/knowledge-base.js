@@ -284,9 +284,9 @@ function renderArticlesList(doc, filteredArticles = null) {
       </div>
       <div class="kb-article-actions">
         <button type="button" class="btn-icon kb-bookmark-btn" data-article-id="${escapeHtml(article.id)}" title="Bookmark">
-          ${kbState.bookmarks.includes(article.id) ? '⭐' : '☆'}
+          ${kbState.bookmarks.includes(article.id) ? icon('star') : '<span class="ui-icon star-outline" aria-hidden="true"></span>'}
         </button>
-        <button type="button" class="btn-icon kb-edit-btn" data-article-id="${escapeHtml(article.id)}" title="Edit">✏️</button>
+        <button type="button" class="btn-icon kb-edit-btn" data-article-id="${escapeHtml(article.id)}" title="Edit">${icon('edit')}</button>
       </div>
     </div>
   `
@@ -558,3 +558,4 @@ export function searchKnowledgeBase(query) {
 
 // Import toast for notifications
 import { showToast } from '../utils/toast.js';
+import { icon, iconLabel, initialsAvatar, priorityDot } from '../utils/icons.js';

@@ -8,6 +8,7 @@ import { escapeHtml } from '../utils/helpers.js';
 import { auth } from './auth.js';
 import { apiFetch } from '../utils/api.js';
 import { saveData, STORAGE_LIMITS } from './storage.js';
+import { icon, iconLabel, initialsAvatar, priorityDot } from '../utils/icons.js';
 
 export function initializeCallLogging() {
   // Initialize call templates first
@@ -253,19 +254,19 @@ export function initializeCallLogging() {
             })()}
           </div>
           <div class="call-details">
-            <span class="caller-phone">📞 ${escapeHtml(call.callerPhone || '')}</span>
-            <span class="call-date">📅 ${new Date(call.startTime).toLocaleDateString()}</span>
+            <span class="caller-phone">${icon('phone')} ${escapeHtml(call.callerPhone || '')}</span>
+            <span class="call-date">${icon('calendar')} ${new Date(call.startTime).toLocaleDateString()}</span>
             <span class="call-time">⏰ ${new Date(call.startTime).toLocaleTimeString()}</span>
-            ${call.duration ? `<span class="call-duration">⏱️ ${formatDuration(call.duration)}</span>` : ''}
+            ${call.duration ? `<span class="call-duration">${icon('clock')} ${formatDuration(call.duration)}</span>` : ''}
           </div>
           ${call.notes ? `<div class="call-notes-preview">${escapeHtml(call.notes.substring(0, 100))}${call.notes.length > 100 ? '...' : ''}</div>` : ''}
         </div>
         <div class="call-actions">
           <button class="action-btn btn-edit" data-id="${call.id}" title="Edit Call">
-            <span class="btn-icon">✏️</span>
+            <span class="btn-icon">${icon('edit')}</span>
           </button>
           <button class="action-btn btn-delete" data-id="${call.id}" title="Delete Call">
-            <span class="btn-icon">🗑️</span>
+            <span class="btn-icon">${icon('trash')}</span>
           </button>
         </div>
       `;
@@ -286,13 +287,13 @@ export function initializeCallLogging() {
 
   function getCallIcon(type) {
     const icons = {
-      inbound: '📥',
-      outbound: '📤',
-      internal: '🏢',
-      transfer: '🔄',
-      callback: '📞',
+      inbound: icon('inbox'),
+      outbound: icon('upload'),
+      internal: icon('building'),
+      transfer: icon('refresh'),
+      callback: icon('phone'),
     };
-    return icons[type] || '📞';
+    return icons[type] || icon('phone');
   }
 
   function formatDuration(durationMs) {
@@ -405,7 +406,7 @@ export function initializeCallLogging() {
       // Start Hold
       currentCall.status = 'on-hold';
       currentCall.holdStartTime = Date.now();
-      holdCallBtn.innerHTML = '▶️ Resume';
+      holdCallBtn.innerHTML = `${icon('play')} Resume`;
       holdCallBtn.classList.add('holding');
       // callTimer no longer pauses visually
       // callTimer.classList.add('timer-paused');
@@ -430,7 +431,7 @@ export function initializeCallLogging() {
       if (holdTimerInterval) clearInterval(holdTimerInterval);
       if (holdTimerEl) holdTimerEl.style.display = 'none';
 
-      holdCallBtn.innerHTML = '⏸️ Hold';
+      holdCallBtn.innerHTML = `${icon('pause')} Hold`;
       holdCallBtn.classList.remove('holding');
       // callTimer.classList.remove('timer-paused');
       showToast('Call resumed', 'success');
@@ -492,7 +493,7 @@ export function initializeCallLogging() {
       callTimer.textContent = '00:00';
       if (holdCallBtn) {
         holdCallBtn.disabled = true;
-        holdCallBtn.innerHTML = '⏸️ Hold';
+        holdCallBtn.innerHTML = `${icon('pause')} Hold`;
         holdCallBtn.classList.remove('holding');
         if (holdTimerEl) holdTimerEl.style.display = 'none';
       }
@@ -649,7 +650,7 @@ export function initializeCallLogging() {
     saveCallBtn.textContent = 'Save Call Log';
     if (holdCallBtn) {
       holdCallBtn.disabled = true;
-      holdCallBtn.innerHTML = '⏸️ Hold';
+      holdCallBtn.innerHTML = `${icon('pause')} Hold`;
       holdCallBtn.classList.remove('holding');
       if (holdTimerEl) holdTimerEl.style.display = 'none';
     }
@@ -754,7 +755,7 @@ export function initializeCallLogging() {
     contactInfo.innerHTML = `
       <div class="contact-card">
         <div class="contact-header">
-          <div class="contact-icon">👤</div>
+          <div class="contact-icon">${icon('user')}</div>
           <div class="contact-title">
             <h4>CRM Contact Found</h4>
             <span class="contact-source">Source: ${contact.source}</span>
@@ -869,8 +870,8 @@ export function initializeCallLogging() {
                     <span class="date">${new Date(call.startTime).toLocaleString()}</span>
                 </div>
                 <div class="item-meta">
-                    <span>📞 ${call.callerPhone}</span>
-                    <span>⏱️ ${call.duration ? formatDuration(call.duration) : '0:00'}</span>
+                    <span>${icon('phone')} ${call.callerPhone}</span>
+                    <span>${icon('clock')} ${call.duration ? formatDuration(call.duration) : '0:00'}</span>
                     <span class="call-type type-${call.callType}">${call.callType}</span>
                 </div>
                 <div class="item-notes">${call.notes || 'No notes'}</div>
@@ -1047,7 +1048,7 @@ export function initializeCallLogging() {
     viewAllBtn.id = 'view-all-history';
     viewAllBtn.className = 'button btn-sm btn-icon';
     viewAllBtn.title = 'View All History';
-    viewAllBtn.textContent = '📜';
+    viewAllBtn.innerHTML = icon('scroll');
     viewAllBtn.addEventListener('click', showFullHistoryModal);
     historyHeader.appendChild(viewAllBtn);
   }

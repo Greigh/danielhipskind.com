@@ -18,7 +18,7 @@ function createExportInterface() {
   exportModal.innerHTML = `
     <div class="modal export-modal">
       <div class="modal-header">
-        <h3>📤 Export Data</h3>
+        <h3>${icon('upload')} Export Data</h3>
         <button class="modal-close-btn">&times;</button>
       </div>
       <div class="modal-body">
@@ -341,3 +341,4 @@ export function exportAllData() {
 
 // Import showToast for notifications
 import { showToast } from '../utils/toast.js';
+import { icon, iconLabel, initialsAvatar, priorityDot } from '../utils/icons.js';

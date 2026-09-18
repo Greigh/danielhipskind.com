@@ -60,7 +60,7 @@
             background: linear-gradient(135deg, #00b4db, #0083b0);
             
             &::before {
-                content: "⏱";
+                content: ''; /* clock via .ui-icon */
             }
         }
         
@@ -68,7 +68,7 @@
             background: linear-gradient(135deg, #56ab2f, #a8e063);
             
             &::before {
-                content: "📝";
+                content: '';
             }
         }
     }

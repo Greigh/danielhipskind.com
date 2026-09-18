@@ -4,6 +4,7 @@
 import { showToast } from '../utils/toast.js';
 import { showConfirmModal } from '../utils/modal.js';
 import { escapeHtml } from '../utils/helpers.js';
+import { icon, iconLabel, initialsAvatar, priorityDot } from '../utils/icons.js';
 
 export function initializeDepartmentLookup() {
   createLookupInterface();
@@ -32,7 +33,7 @@ function createLookupInterface() {
   lookupModal.innerHTML = `
     <div class="modal department-lookup-modal">
       <div class="modal-header">
-        <h3>🏢 Department & Location Lookup</h3>
+        <h3>${icon('building')} Department & Location Lookup</h3>
         <div class="modal-header-actions">
           <button class="btn btn-sm" id="manage-departments-btn">Manage</button>
           <button class="modal-close-btn">&times;</button>
@@ -435,7 +436,7 @@ function displayResults(results, searchTerm) {
   // Display emergency contacts first
   if (grouped.emergency) {
     html += `<div class="result-group">
-      <h4 class="group-title">🚨 Emergency Contacts</h4>
+      <h4 class="group-title">${icon('alert')} Emergency Contacts</h4>
       ${grouped.emergency.map((item) => createResultItem(item, searchTerm)).join('')}
     </div>`;
   }
@@ -443,7 +444,7 @@ function displayResults(results, searchTerm) {
   // Then departments
   if (grouped.department) {
     html += `<div class="result-group">
-      <h4 class="group-title">🏢 Departments</h4>
+      <h4 class="group-title">${icon('building')} Departments</h4>
       ${grouped.department.map((item) => createResultItem(item, searchTerm)).join('')}
     </div>`;
   }
@@ -451,7 +452,7 @@ function displayResults(results, searchTerm) {
   // Then locations
   if (grouped.location) {
     html += `<div class="result-group">
-      <h4 class="group-title">📍 Locations</h4>
+      <h4 class="group-title">${icon('mapPin')} Locations</h4>
       ${grouped.location.map((item) => createResultItem(item, searchTerm)).join('')}
     </div>`;
   }
@@ -475,10 +476,10 @@ function createResultItem(item, searchTerm) {
       </div>
       <div class="result-actions">
         <button class="btn btn-sm btn-outline call-btn" data-number="${escapeHtml(item.number || '')}" title="Call this number">
-          📞 Call
+          ${icon('phone')} Call
         </button>
         <button class="btn btn-sm btn-outline copy-btn" data-number="${escapeHtml(item.number || '')}" title="Copy number">
-          📋 Copy
+          ${icon('clipboard')} Copy
         </button>
       </div>
     </div>
@@ -632,7 +633,7 @@ function createManagementInterface() {
   manageModal.innerHTML = `
     <div class="modal department-management-modal">
       <div class="modal-header">
-        <h3>⚙️ Manage Departments & Locations</h3>
+        <h3>${icon('settings')} Manage Departments & Locations</h3>
         <button class="modal-close-btn">&times;</button>
       </div>
       <div class="modal-body">
@@ -645,7 +646,7 @@ function createManagementInterface() {
           <!-- Department entries will be populated here -->
         </div>
         <div class="filter-management-section">
-          <h4>🔍 Manage Filters</h4>
+          <h4>${icon('search')} Manage Filters</h4>
           <div class="filter-list" id="filter-management-list">
             <!-- Filter options will be populated here -->
           </div>

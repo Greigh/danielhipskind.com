@@ -66,7 +66,7 @@ function createDashboardInterface() {
   controls.className = 'dashboard-controls';
   controls.innerHTML = `
     <div class="dashboard-header">
-      <h3>📊 Custom Dashboard</h3>
+      <h3>${icon('chart')} Custom Dashboard</h3>
       <div class="dashboard-actions">
         <button id="add-widget-btn" class="btn btn-secondary">Add Widget</button>
         <button id="reset-dashboard-btn" class="btn btn-outline">Reset Layout</button>
@@ -349,23 +349,23 @@ function renderPerformanceMetricsWidget() {
 function renderQuickActionsWidget() {
   return `
     <div class="widget-quick-actions">
-      <button class="quick-action-widget-btn">📞 New Call</button>
-      <button class="quick-action-widget-btn">⏱️ Start Timer</button>
-      <button class="quick-action-widget-btn">📝 Add Note</button>
+      <button class="quick-action-widget-btn">${icon('phone')} New Call</button>
+      <button class="quick-action-widget-btn">${icon('clock')} Start Timer</button>
+      <button class="quick-action-widget-btn">${icon('note')} Add Note</button>
     </div>
   `;
 }
 
 function getWidgetIcon(widgetId) {
   const icons = {
-    'call-stats': '📊',
-    'active-timer': '⏱️',
-    'recent-calls': '📞',
-    'pending-tasks': '✅',
-    'performance-metrics': '📈',
-    'quick-actions': '⚡',
+    'call-stats': icon('chart'),
+    'active-timer': icon('clock'),
+    'recent-calls': icon('phone'),
+    'pending-tasks': icon('checkCircle'),
+    'performance-metrics': icon('trend'),
+    'quick-actions': icon('zap'),
   };
-  return icons[widgetId] || '📦';
+  return icons[widgetId] || icon('package');
 }
 
 // Function to refresh all dashboard widgets
@@ -382,3 +382,4 @@ export function refreshDashboardWidgets() {
 
 // Import showToast for notifications
 import { showToast } from '../utils/toast.js';
+import { icon, iconLabel, initialsAvatar, priorityDot } from '../utils/icons.js';

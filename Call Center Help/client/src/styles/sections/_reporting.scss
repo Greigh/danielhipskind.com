@@ -306,7 +306,7 @@
           gap: 0.5rem;
 
           &::before {
-            content: '📊';
+            content: '';
             font-size: 1.25rem;
           }
         }
@@ -425,7 +425,7 @@
       position: relative;
 
       &::before {
-        content: '📋';
+        content: '';
         font-size: 3rem;
         display: block;
         margin-bottom: 0.75rem;

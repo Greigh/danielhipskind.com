@@ -1,5 +1,6 @@
 import { saveData, loadData, STORAGE_LIMITS } from './storage.js';
 import { escapeHtml } from '../utils/helpers.js';
+import { icon, iconLabel, initialsAvatar, priorityDot } from '../utils/icons.js';
 
 export function initializeScripts() {
   const container = document.querySelector('.section-content');
@@ -183,7 +184,7 @@ export function initializeScripts() {
         <div class="script-title">
           <span class="script-icon">${getCategoryIcon(script.category)}</span>
           ${escapeHtml(script.title)}
-          ${script.favorite ? '⭐' : ''}
+          ${script.favorite ? icon('star') : ''}
         </div>
         <div class="script-preview">${escapeHtml(script.content.substring(0, 80))}...</div>
         <div class="script-meta">
@@ -202,8 +203,8 @@ export function initializeScripts() {
   }
 
   function getCategoryIcon(category) {
-    const icons = { sales: '💼', support: '🛠️', complaints: '😠', all: '📚' };
-    return icons[category] || '📄';
+    const icons = { sales: icon('brief'), support: icon('wrench'), complaints: icon('alert'), all: icon('bookOpen') };
+    return icons[category] || icon('file');
   }
 
   // --- Editor Functions ---
@@ -310,12 +311,12 @@ export function initializeScripts() {
       scriptContent.style.display = 'none';
       scriptPreviewPane.style.display = 'block';
       scriptPreviewPane.innerHTML = renderScript(scriptContent.value);
-      togglePreviewBtn.innerHTML = '✏️ Edit';
+      togglePreviewBtn.innerHTML = `${icon('edit')} Edit`;
       copyScriptBtn.style.display = 'inline-block';
     } else {
       scriptContent.style.display = 'block';
       scriptPreviewPane.style.display = 'none';
-      togglePreviewBtn.innerHTML = '👁️ Preview';
+      togglePreviewBtn.innerHTML = `${icon('eye')} Preview`;
       copyScriptBtn.style.display = 'none';
     }
   }
@@ -353,7 +354,7 @@ export function initializeScripts() {
     const textToCopy = scriptPreviewPane.innerText;
     navigator.clipboard.writeText(textToCopy).then(() => {
       const originalText = copyScriptBtn.innerHTML;
-      copyScriptBtn.innerHTML = '✅ Copied!';
+      copyScriptBtn.innerHTML = `${icon('checkCircle')} Copied!`;
       setTimeout(() => (copyScriptBtn.innerHTML = originalText), 2000);
     });
   }

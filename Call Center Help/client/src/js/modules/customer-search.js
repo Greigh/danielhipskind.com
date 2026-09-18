@@ -2,6 +2,7 @@
 // Provides quick lookup across all customer interactions
 
 import { escapeHtml } from '../utils/helpers.js';
+import { icon, iconLabel, initialsAvatar, priorityDot } from '../utils/icons.js';
 
 export function initializeCustomerHistorySearch() {
   createSearchInterface();
@@ -21,7 +22,7 @@ function createSearchInterface() {
   searchModal.innerHTML = `
     <div class="modal customer-search-modal">
       <div class="modal-header">
-        <h3>🔍 Customer History Search</h3>
+        <h3>${icon('search')} Customer History Search</h3>
         <button class="modal-close-btn">&times;</button>
       </div>
       <div class="modal-body">
@@ -176,7 +177,7 @@ function displaySearchResults(results) {
   // Display calls
   if (results.calls.length > 0) {
     html += `<div class="result-section">
-      <h4>📞 Call History (${results.calls.length})</h4>
+      <h4>${icon('phone')} Call History (${results.calls.length})</h4>
       ${results.calls
         .slice(0, 5)
         .map(
@@ -198,7 +199,7 @@ function displaySearchResults(results) {
   // Display notes
   if (results.notes.length > 0) {
     html += `<div class="result-section">
-      <h4>📝 Notes (${results.notes.length})</h4>
+      <h4>${icon('note')} Notes (${results.notes.length})</h4>
       ${results.notes
         .slice(0, 5)
         .map(
@@ -219,7 +220,7 @@ function displaySearchResults(results) {
   // Display tasks
   if (results.tasks.length > 0) {
     html += `<div class="result-section">
-      <h4>✅ Tasks (${results.tasks.length})</h4>
+      <h4>${icon('checkCircle')} Tasks (${results.tasks.length})</h4>
       ${results.tasks
         .slice(0, 5)
         .map(
@@ -241,7 +242,7 @@ function displaySearchResults(results) {
   // Display CRM data
   if (results.crm.length > 0) {
     html += `<div class="result-section">
-      <h4>🏢 CRM Contacts (${results.crm.length})</h4>
+      <h4>${icon('building')} CRM Contacts (${results.crm.length})</h4>
       ${results.crm
         .slice(0, 5)
         .map(

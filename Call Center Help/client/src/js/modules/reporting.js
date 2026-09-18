@@ -1,5 +1,6 @@
 // Advanced Reporting Module
 import { getCallHistory } from './call-logging.js';
+import { icon, iconLabel, initialsAvatar, priorityDot } from '../utils/icons.js';
 
 let reportTypeSelect = null;
 let startDateInput = null;
@@ -120,7 +121,7 @@ function generateCallReport(calls, startDate, endDate) {
 
   return `
     <div class="report-header">
-      <h3>📊 Call Report</h3>
+      <h3>${icon('chart')} Call Report</h3>
       <div class="report-date-range">
         ${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}
       </div>
@@ -128,42 +129,42 @@ function generateCallReport(calls, startDate, endDate) {
 
     <div class="report-metrics-grid">
       <div class="metric-card">
-        <div class="metric-icon">📞</div>
+        <div class="metric-icon">${icon('phone')}</div>
         <div class="metric-content">
           <div class="metric-value">${totalCalls}</div>
           <div class="metric-label">Total Calls</div>
         </div>
       </div>
       <div class="metric-card">
-        <div class="metric-icon">📥</div>
+        <div class="metric-icon">${icon('inbox')}</div>
         <div class="metric-content">
           <div class="metric-value">${inboundCalls}</div>
           <div class="metric-label">Inbound</div>
         </div>
       </div>
       <div class="metric-card">
-        <div class="metric-icon">📤</div>
+        <div class="metric-icon">${icon('upload')}</div>
         <div class="metric-content">
           <div class="metric-value">${outboundCalls}</div>
           <div class="metric-label">Outbound</div>
         </div>
       </div>
       <div class="metric-card">
-        <div class="metric-icon">✅</div>
+        <div class="metric-icon">${icon('checkCircle')}</div>
         <div class="metric-content">
           <div class="metric-value">${completionRate}%</div>
           <div class="metric-label">Completion Rate</div>
         </div>
       </div>
       <div class="metric-card">
-        <div class="metric-icon">⏱️</div>
+        <div class="metric-icon">${icon('clock')}</div>
         <div class="metric-content">
           <div class="metric-value">${formatDuration(avgDuration)}</div>
           <div class="metric-label">Avg Duration</div>
         </div>
       </div>
       <div class="metric-card">
-        <div class="metric-icon">🔄</div>
+        <div class="metric-icon">${icon('refresh')}</div>
         <div class="metric-content">
           <div class="metric-value">${transferCalls}</div>
           <div class="metric-label">Transfers</div>
@@ -214,7 +215,7 @@ function generateCallReport(calls, startDate, endDate) {
                 <td>${call.duration ? formatDuration(call.duration) : 'N/A'}</td>
                 <td><span class="status-badge status-${call.status}">${call.status}</span></td>
                 <td>
-                  <button class="btn-action" onclick="viewCallDetails(${call.id})">👁️</button>
+                  <button class="btn-action" onclick="viewCallDetails(${call.id})">${icon('eye')}</button>
                 </td>
               </tr>
             `
@@ -240,7 +241,7 @@ function generatePerformanceReport(calls, startDate, endDate) {
 
   return `
     <div class="report-header">
-      <h3>📈 Performance Report</h3>
+      <h3>${icon('trend')} Performance Report</h3>
       <div class="report-date-range">
         ${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}
       </div>
@@ -248,35 +249,35 @@ function generatePerformanceReport(calls, startDate, endDate) {
 
     <div class="report-metrics-grid">
       <div class="metric-card performance-metric">
-        <div class="metric-icon">⏱️</div>
+        <div class="metric-icon">${icon('clock')}</div>
         <div class="metric-content">
           <div class="metric-value">${formatDuration(avgHandleTime)}</div>
           <div class="metric-label">Average Handle Time</div>
-          <div class="metric-trend trend-up">↗️ +2.3%</div>
+          <div class="metric-trend trend-up">${icon('arrowUpRight')} +2.3%</div>
         </div>
       </div>
       <div class="metric-card performance-metric">
-        <div class="metric-icon">🎯</div>
+        <div class="metric-icon">${icon('target')}</div>
         <div class="metric-content">
           <div class="metric-value">${firstCallResolution}%</div>
           <div class="metric-label">First Call Resolution</div>
-          <div class="metric-trend trend-up">↗️ +5.1%</div>
+          <div class="metric-trend trend-up">${icon('arrowUpRight')} +5.1%</div>
         </div>
       </div>
       <div class="metric-card performance-metric">
-        <div class="metric-icon">😊</div>
+        <div class="metric-icon">${icon('smile')}</div>
         <div class="metric-content">
           <div class="metric-value">${customerSatisfaction}%</div>
           <div class="metric-label">Customer Satisfaction</div>
-          <div class="metric-trend trend-down">↘️ -1.2%</div>
+          <div class="metric-trend trend-down">${icon('arrowDownRight')} -1.2%</div>
         </div>
       </div>
       <div class="metric-card performance-metric">
-        <div class="metric-icon">⚡</div>
+        <div class="metric-icon">${icon('zap')}</div>
         <div class="metric-content">
           <div class="metric-value">${callsPerHour}</div>
           <div class="metric-label">Calls per Hour</div>
-          <div class="metric-trend trend-up">↗️ +8.7%</div>
+          <div class="metric-trend trend-up">${icon('arrowUpRight')} +8.7%</div>
         </div>
       </div>
     </div>
@@ -293,7 +294,7 @@ function generatePerformanceReport(calls, startDate, endDate) {
     </div>
 
     <div class="performance-insights">
-      <h4>📋 Key Insights</h4>
+      <h4>${icon('clipboard')} Key Insights</h4>
       <div class="insights-grid">
         <div class="insight-card">
           <h5>Top Performer</h5>
@@ -319,7 +320,7 @@ function generateQAReport(calls, startDate, endDate) {
 
   return `
     <div class="report-header">
-      <h3>🔍 Quality Assurance Report</h3>
+      <h3>${icon('search')} Quality Assurance Report</h3>
       <div class="report-date-range">
         ${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}
       </div>
@@ -327,21 +328,21 @@ function generateQAReport(calls, startDate, endDate) {
 
     <div class="report-metrics-grid">
       <div class="metric-card qa-metric">
-        <div class="metric-icon">⭐</div>
+        <div class="metric-icon">${icon('star')}</div>
         <div class="metric-content">
           <div class="metric-value">${avgQAScore.toFixed(1)}%</div>
           <div class="metric-label">Average QA Score</div>
         </div>
       </div>
       <div class="metric-card qa-metric">
-        <div class="metric-icon">👁️</div>
+        <div class="metric-icon">${icon('eye')}</div>
         <div class="metric-content">
           <div class="metric-value">${reviewedCalls}</div>
           <div class="metric-label">Calls Reviewed</div>
         </div>
       </div>
       <div class="metric-card qa-metric">
-        <div class="metric-icon">✅</div>
+        <div class="metric-icon">${icon('checkCircle')}</div>
         <div class="metric-content">
           <div class="metric-value">${complianceRate.toFixed(1)}%</div>
           <div class="metric-label">Compliance Rate</div>
@@ -394,7 +395,7 @@ function generateTrendsReport(calls, startDate, endDate) {
 
   return `
     <div class="report-header">
-      <h3>📈 Trends Analysis</h3>
+      <h3>${icon('trend')} Trends Analysis</h3>
       <div class="report-date-range">
         ${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}
       </div>
@@ -403,15 +404,15 @@ function generateTrendsReport(calls, startDate, endDate) {
     <div class="trends-overview">
       <div class="trend-metric">
         <span class="trend-label">Call Volume Trend:</span>
-        <span class="trend-value trend-up">↗️ +12.5%</span>
+        <span class="trend-value trend-up">${icon('arrowUpRight')} +12.5%</span>
       </div>
       <div class="trend-metric">
         <span class="trend-label">Handle Time Trend:</span>
-        <span class="trend-value trend-down">↘️ -8.3%</span>
+        <span class="trend-value trend-down">${icon('arrowDownRight')} -8.3%</span>
       </div>
       <div class="trend-metric">
         <span class="trend-label">Satisfaction Trend:</span>
-        <span class="trend-value trend-up">↗️ +5.7%</span>
+        <span class="trend-value trend-up">${icon('arrowUpRight')} +5.7%</span>
       </div>
     </div>
 
@@ -475,14 +476,14 @@ function generateAgentReport(calls, startDate, endDate) {
 
   return `
     <div class="report-header">
-      <h3>👥 Agent Performance Report</h3>
+      <h3>${icon('users')} Agent Performance Report</h3>
       <div class="report-date-range">
         ${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}
       </div>
     </div>
 
     <div class="agent-leaderboard">
-      <h4>🏆 Top Performers</h4>
+      <h4>${icon('award')} Top Performers</h4>
       <div class="leaderboard-list">
         ${agents
           .map(

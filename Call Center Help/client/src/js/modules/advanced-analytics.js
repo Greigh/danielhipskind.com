@@ -215,11 +215,11 @@ function renderAdvancedAnalyticsUI(doc) {
         <div class="data-sources">
           <h4>Data Sources</h4>
           <div class="source-list">
-            <span class="source-tag">📞 Calls</span>
-            <span class="source-tag">👥 Agents</span>
-            <span class="source-tag">⭐ Feedback</span>
-            <span class="source-tag">⏱️ Time Tracking</span>
-            <span class="source-tag">🎯 QA Scores</span>
+            <span class="source-tag">${icon('phone')} Calls</span>
+            <span class="source-tag">${icon('users')} Agents</span>
+            <span class="source-tag">${icon('star')} Feedback</span>
+            <span class="source-tag">${icon('clock')} Time Tracking</span>
+            <span class="source-tag">${icon('target')} QA Scores</span>
           </div>
         </div>
         <div class="last-updated">
@@ -253,8 +253,8 @@ function renderDashboard(dashboard) {
             <div class="widget-header">
               <h4>${widget.name}</h4>
               <div class="widget-controls">
-                <button class="btn-icon" onclick="refreshWidget('${widgetId}')" title="Refresh">🔄</button>
-                <button class="btn-icon" onclick="configureWidget('${widgetId}')" title="Configure">⚙️</button>
+                <button class="btn-icon" onclick="refreshWidget('${widgetId}')" title="Refresh">${icon('refresh')}</button>
+                <button class="btn-icon" onclick="configureWidget('${widgetId}')" title="Configure">${icon('settings')}</button>
               </div>
             </div>
             <div class="widget-content" id="widget-${widgetId}">
@@ -673,8 +673,8 @@ function exportDashboard() {
     <h2 class="modal-title">Export Dashboard</h2>
     <p class="modal-message">Choose export format:</p>
     <div class="export-options">
-      <button class="export-option" data-format="json">📄 JSON</button>
-      <button class="export-option" data-format="csv">📊 CSV</button>
+      <button class="export-option" data-format="json">${icon('file')} JSON</button>
+      <button class="export-option" data-format="csv">${icon('chart')} CSV</button>
     </div>
     <div class="modal-actions">
       <button class="modal-cancel">Cancel</button>
@@ -943,3 +943,4 @@ window.configureWidget = () => {
 
 // Import toast for notifications
 import { showToast } from '../utils/toast.js';
+import { icon, iconLabel, initialsAvatar, priorityDot } from '../utils/icons.js';

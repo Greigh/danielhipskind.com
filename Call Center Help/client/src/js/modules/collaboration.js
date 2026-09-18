@@ -1,6 +1,7 @@
 // Team Collaboration Module
 import { escapeHtml } from '../utils/helpers.js';
 import { saveData, loadData, STORAGE_LIMITS } from './storage.js';
+import { icon, iconLabel, initialsAvatar, priorityDot } from '../utils/icons.js';
 
 let collaborationInitialized = false;
 let collaborationStatusInterval = null;
@@ -49,20 +50,20 @@ export function initializeCollaboration() {
       name: 'Alice Johnson',
       role: 'Supervisor',
       status: 'online',
-      avatar: '👩‍💼',
+      avatar: '',
     },
-    { id: 2, name: 'Bob Smith', role: 'Agent', status: 'online', avatar: '👨‍💻' },
-    { id: 3, name: 'Carol Davis', role: 'Agent', status: 'away', avatar: '👩‍💻' },
+    { id: 2, name: 'Bob Smith', role: 'Agent', status: 'online', avatar: '' },
+    { id: 3, name: 'Carol Davis', role: 'Agent', status: 'away', avatar: '' },
     {
       id: 4,
       name: 'David Wilson',
       role: 'Manager',
       status: 'offline',
-      avatar: '👨‍💼',
+      avatar: '',
     },
   ]).slice(0, STORAGE_LIMITS.teamMembers);
   let typingUsers = new Set();
-  let currentUser = { id: 0, name: 'You', avatar: '👤' };
+  let currentUser = { id: 0, name: 'You' };
 
   function updateOnlineCount() {
     const onlineMembers = teamMembers.filter(
@@ -78,7 +79,7 @@ export function initializeCollaboration() {
       const li = document.createElement('li');
       li.className = `team-member ${member.status}`;
       li.innerHTML = `
-        <div class="member-avatar">${member.avatar}</div>
+        <div class="member-avatar">${initialsAvatar(member.name)}</div>
         <div class="member-info">
           <div class="member-name">${member.name}</div>
           <div class="member-role">${member.role}</div>
@@ -136,7 +137,7 @@ export function initializeCollaboration() {
     const messageEl = document.createElement('div');
     messageEl.className = `chat-message ${message.sender.id === currentUser.id ? 'own' : 'other'}`;
     messageEl.innerHTML = `
-      <div class="message-avatar">${escapeHtml(message.sender.avatar || '')}</div>
+      <div class="message-avatar">${initialsAvatar(message.sender.name || 'You')}</div>
       <div class="message-content">
         <div class="message-header">
           <span class="message-sender">${escapeHtml(message.sender.name || '')}</span>

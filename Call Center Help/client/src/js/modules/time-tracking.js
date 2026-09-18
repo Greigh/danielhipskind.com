@@ -181,8 +181,8 @@ function renderActiveTimers(timers) {
         </div>
       </div>
       <div class="timer-controls">
-        <button class="btn-icon" onclick="pauseTimer('${timer.id}')" title="Pause">⏸️</button>
-        <button class="btn-icon" onclick="stopTimer('${timer.id}')" title="Stop">⏹️</button>
+        <button class="btn-icon" onclick="pauseTimer('${timer.id}')" title="Pause">${icon('pause')}</button>
+        <button class="btn-icon" onclick="stopTimer('${timer.id}')" title="Stop">${icon('stop')}</button>
       </div>
     </div>
   `
@@ -232,8 +232,8 @@ function renderProjectsList(doc) {
         </div>
       </div>
       <div class="project-actions">
-        <button class="btn-icon" onclick="startProjectTimer('${project.id}')" title="Start Timer">▶️</button>
-        <button class="btn-icon" onclick="editProject('${project.id}')" title="Edit">✏️</button>
+        <button class="btn-icon" onclick="startProjectTimer('${project.id}')" title="Start Timer">${icon('play')}</button>
+        <button class="btn-icon" onclick="editProject('${project.id}')" title="Edit">${icon('edit')}</button>
       </div>
     </div>
   `
@@ -602,3 +602,4 @@ export function getBillingSummary(dateRange = null) {
 
 // Import toast for notifications
 import { showToast } from '../utils/toast.js';
+import { icon, iconLabel, initialsAvatar, priorityDot } from '../utils/icons.js';
