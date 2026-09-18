@@ -367,8 +367,33 @@ nextApp.prepare().then(() => {
     });
   });
 
-  // Serve Adamas static files
-  app.use('/adamas', express.static(adamasPath));
+  // Serve Adamas static files — never year-cache HTML/SW; only contenthashed assets are immutable
+  function setAdamasCacheHeaders(res, filePath) {
+    const rel = String(filePath || '').replace(/\\/g, '/');
+    if (
+      rel.endsWith('.html') ||
+      rel.endsWith('/sw.js') ||
+      rel.endsWith('sw.js') ||
+      rel.endsWith('sw.facet.js') ||
+      rel.endsWith('build-date.txt')
+    ) {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      return;
+    }
+    if (/\.[a-f0-9]{8,}\.(js|css|woff2?|ttf|png|jpe?g|gif|svg)(\.map)?$/i.test(rel)) {
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      return;
+    }
+    if (/\.(js|css)$/i.test(rel)) {
+      res.setHeader('Cache-Control', 'no-cache, must-revalidate');
+    }
+  }
+
+  app.use(
+    '/adamas',
+    express.static(adamasPath, { setHeaders: setAdamasCacheHeaders })
+  );
 
   app.use('/uploads', express.static(uploadsDir));
   app.use(

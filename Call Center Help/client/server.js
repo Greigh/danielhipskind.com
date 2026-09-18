@@ -12,9 +12,175 @@ const cors = require('cors');
 const winston = require('winston');
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
+const cookie = require('cookie');
 const bodyParser = require('body-parser');
 const { body, validationResult } = require('express-validator');
 const { nanoid } = require('nanoid');
+
+const SESSION_COOKIE = 'adamas_session';
+const SESSION_MAX_AGE_MS = 12 * 60 * 60 * 1000;
+
+function sessionCookieOptions() {
+  // COOKIE_SECURE=true|false overrides; otherwise Secure in production (HTTPS).
+  // Local smoke against http:// should set COOKIE_SECURE=false.
+  const secure =
+    process.env.COOKIE_SECURE === 'true'
+      ? true
+      : process.env.COOKIE_SECURE === 'false'
+        ? false
+        : process.env.NODE_ENV === 'production';
+  return {
+    httpOnly: true,
+    secure,
+    sameSite: 'lax',
+    path: '/',
+    maxAge: SESSION_MAX_AGE_MS,
+  };
+}
+
+function readSessionToken(req) {
+  const header = req.header('Authorization');
+  if (header && header.startsWith('Bearer ')) {
+    return header.slice(7).trim();
+  }
+  const raw = req.headers.cookie || '';
+  if (!raw) return null;
+  try {
+    const parsed = cookie.parse(raw);
+    return parsed[SESSION_COOKIE] || null;
+  } catch {
+    return null;
+  }
+}
+
+function injectHtmlNonce(html, nonce) {
+  return String(html)
+    .replace(/<script(?=[\s>])(?![^>]*\bnonce=)/gi, `<script nonce="${nonce}"`)
+    .replace(/<style(?=[\s>])(?![^>]*\bnonce=)/gi, `<style nonce="${nonce}"`);
+}
+
+function sendHtmlFile(res, filePath) {
+  const nonce = res.locals.cspNonce;
+  let html = fs.readFileSync(filePath, 'utf8');
+  if (nonce) html = injectHtmlNonce(html, nonce);
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  // HTML must revalidate so deploys / Facet redesigns aren't stuck behind CDN/browser cache
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  res.send(html);
+}
+
+function clearSessionCookie(res) {
+  const opts = sessionCookieOptions();
+  res.clearCookie(SESSION_COOKIE, {
+    httpOnly: true,
+    secure: opts.secure,
+    sameSite: 'lax',
+    path: '/',
+  });
+}
+
+/** Reject private/link-local literal hosts; require strict Finesse hostnames. */
+function isAllowedFinesseUrl(rawUrl) {
+  let urlObj;
+  try {
+    urlObj = new URL(rawUrl);
+  } catch {
+    return false;
+  }
+  // HTTPS only — never follow cleartext to internal networks
+  if (urlObj.protocol !== 'https:') return false;
+  if (urlObj.username || urlObj.password) return false;
+  const host = String(urlObj.hostname || '').toLowerCase();
+  if (!host || host === 'localhost' || host.endsWith('.local')) return false;
+  if (
+    /^(10\.|127\.|0\.|169\.254\.|192\.168\.|172\.(1[6-9]|2\d|3[0-1])\.)/.test(
+      host
+    )
+  ) {
+    return false;
+  }
+  if (/^\d{1,3}(\.\d{1,3}){3}$/.test(host)) return false;
+  if (host.includes(':')) return false; // raw IPv6
+  // Exact suffix / label allowlist — no loose "finesse" substring hosts
+  const patterns = [
+    /(^|\.)cisco\.com$/i,
+    /(^|\.)lminfosys\.net$/i,
+    /^finesse(\.|-)/i,
+    /\.finesse\./i,
+  ];
+  // Require hostname to look like a real Finesse server (finesse.X or X.finesse.Y)
+  // Reject attacker domains such as finesse.evil.com unless under known parents
+  const allowedExactEnv = (process.env.FINESSE_ALLOWED_HOSTS || '')
+    .split(',')
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean);
+  if (allowedExactEnv.length > 0) {
+    return allowedExactEnv.some(
+      (h) => host === h || host.endsWith('.' + h)
+    );
+  }
+  return patterns.some((p) => p.test(host));
+}
+
+/** Fetch Finesse without following redirects (SSRF hardening). */
+async function fetchFinesse(url, options = {}) {
+  const response = await fetch(url, { ...options, redirect: 'manual' });
+  if (response.status >= 300 && response.status < 400) {
+    const err = new Error('Finesse redirect blocked');
+    err.status = 400;
+    throw err;
+  }
+  return response;
+}
+
+function maskSsnServer(value) {
+  const digits = String(value || '').replace(/\D/g, '');
+  if (!digits) return { ssn: '', ssnLast4: '' };
+  return {
+    ssn: `***${digits.slice(-4)}`,
+    ssnLast4: digits.slice(-4),
+  };
+}
+
+function sanitizeCallLogPayload(body, userId) {
+  const src = body && typeof body === 'object' ? body : {};
+  const {
+    userId: _u,
+    _id: _id,
+    password: _p,
+    twilio: _t,
+    __v: _v,
+    ...rest
+  } = src;
+  const ssnFields = maskSsnServer(rest.ssn || rest.ssnLast4 || '');
+  return {
+    ...rest,
+    ...ssnFields,
+    userId,
+  };
+}
+
+async function deleteUserAccount(userId, res) {
+  await Models.User.findByIdAndDelete(userId);
+  await Models.Note.deleteMany({ userId });
+  await Models.CallLog.deleteMany({ userId });
+  // Best-effort popup cleanup for this user
+  for (const [id, meta] of popupStore.entries()) {
+    if (meta.userId && String(meta.userId) === String(userId)) {
+      try {
+        fs.unlinkSync(meta.filePath);
+      } catch {
+        /* ignore */
+      }
+      popupStore.delete(id);
+    }
+  }
+  clearSessionCookie(res);
+  return res.json({ message: 'Account deleted' });
+}
 
 const logger = winston.createLogger({
   level: 'info',
@@ -39,8 +205,26 @@ if (process.env.NODE_ENV !== 'production') {
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server);
+const io = socketIo(server, {
+  // Cookies on the Socket.IO handshake (same-origin)
+  cors: {
+    origin: true,
+    credentials: true,
+  },
+});
 const port = process.env.PORT || 8080;
+
+// Fail closed if JWT secret is missing in production; use a noisy default only in non-production.
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('JWT_SECRET environment variable is required in production');
+  }
+  logger.warn(
+    'WARNING: JWT_SECRET is not set. Using an insecure development default.'
+  );
+}
+const EFFECTIVE_JWT_SECRET = JWT_SECRET || 'dev-only-insecure-secret';
 
 // Database connection
 let isDbConnected = false;
@@ -265,61 +449,167 @@ async function logAudit(userId, action, resource, details, req) {
   }
 }
 
-// Middleware
+// Middleware — per-request CSP nonce (no unsafe-inline / unsafe-eval on scripts)
+app.use((req, res, next) => {
+  res.locals.cspNonce = crypto.randomBytes(16).toString('base64');
+  next();
+});
+
 app.use(
   helmet({
     contentSecurityPolicy: {
+      useDefaults: false,
       directives: {
         defaultSrc: ["'self'"],
         scriptSrc: [
           "'self'",
-          "'unsafe-inline'",
-          "'unsafe-eval'",
-          'https://cdn.jsdelivr.net',
-          'https://cdn.socket.io',
+          (req, res) => `'nonce-${res.locals.cspNonce}'`,
+          'https://www.google.com',
+          'https://www.gstatic.com',
         ],
-        styleSrc: ["'self'", "'unsafe-inline'"],
-        imgSrc: ["'self'", 'data:', 'https:'],
-        connectSrc: ["'self'", 'https://cdn.socket.io'],
-        fontSrc: ["'self'"],
+        // Legacy inline event handlers (onclick=) still present in some modules
+        scriptSrcAttr: ["'unsafe-inline'"],
+        styleSrc: [
+          "'self'",
+          (req, res) => `'nonce-${res.locals.cspNonce}'`,
+          'https://www.gstatic.com',
+          'https://fonts.googleapis.com',
+        ],
+        // element.style / style= attributes (not style tags)
+        styleSrcAttr: ["'unsafe-inline'"],
+        imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
+        connectSrc: ["'self'", 'https://www.google.com', 'https://fonts.googleapis.com', 'https://fonts.gstatic.com'],
+        fontSrc: ["'self'", 'https://fonts.gstatic.com', 'https://fonts.googleapis.com', 'data:'],
         objectSrc: ["'none'"],
-        mediaSrc: ["'self'"],
-        frameSrc: ["'none'"],
+        mediaSrc: ["'self'", 'blob:'],
+        frameSrc: ["'self'", 'https://www.google.com'],
+        baseUri: ["'self'"],
+        formAction: ["'self'"],
+        frameAncestors: ["'self'"],
       },
     },
   })
 );
-app.use(cors());
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow non-browser / same-origin tools (no Origin header)
+      if (!origin) return callback(null, true);
+      const allowed = (
+        process.env.CORS_ORIGINS ||
+        process.env.FRONTEND_ORIGIN ||
+        ''
+      )
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
+      if (allowed.length === 0) {
+        // Production must set CORS_ORIGINS — fail closed
+        if (process.env.NODE_ENV === 'production') {
+          return callback(new Error('CORS origin not allowed'));
+        }
+        return callback(null, true);
+      }
+      if (allowed.includes(origin) || allowed.includes('*')) {
+        return callback(null, true);
+      }
+      return callback(new Error('CORS origin not allowed'));
+    },
+    credentials: true,
+  })
+);
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Rate limiting
+// Rate limiting (API only — do not throttle static assets/pages)
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // limit each IP to 100 requests per windowMs
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) => {
+    const p = req.path || '';
+    // Skip static files and HTML pages; only rate-limit API/auth endpoints
+    if (p.startsWith('/api') || p.startsWith('/adamas/api')) return false;
+    return true;
+  },
 });
 app.use(limiter);
 
-// Auth middleware
-const auth = (req, res, next) => {
-  const token = req.header('Authorization')?.replace('Bearer ', '');
+// Stricter limiter for auth endpoints (credential stuffing)
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many auth attempts, please try again later' },
+});
+
+// Auth middleware — httpOnly cookie session, with Bearer fallback for tooling
+const auth = async (req, res, next) => {
+  const token = readSessionToken(req);
   if (!token) return res.status(401).json({ error: 'Access denied' });
   try {
-    const verified = jwt.verify(token, process.env.JWT_SECRET || 'secret');
-    req.user = verified;
+    const verified = jwt.verify(token, EFFECTIVE_JWT_SECRET);
+    // Reject deleted / unknown users so JWTs do not outlive the account
+    const user = await Models.User.findById(verified._id);
+    if (!user) {
+      clearSessionCookie(res);
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+    req.user = {
+      _id: user._id,
+      role: user.role || verified.role || 'agent',
+    };
     next();
   } catch {
-    res.status(400).json({ error: 'Invalid token' });
+    res.status(401).json({ error: 'Invalid token' });
   }
 };
 
-// File upload
+function escapeHtml(text) {
+  return String(text ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function escapeRegExp(string) {
+  return String(string).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// File upload — images only, size-capped, randomized name
+const ALLOWED_UPLOAD_EXTS = new Set([
+  '.png',
+  '.jpg',
+  '.jpeg',
+  '.gif',
+  '.webp',
+]);
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, 'uploads/'),
-  filename: (req, file, cb) =>
-    cb(null, Date.now() + path.extname(file.originalname)),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname || '').toLowerCase();
+    const safeExt = ALLOWED_UPLOAD_EXTS.has(ext) ? ext : '';
+    cb(null, `${Date.now()}-${nanoid(8)}${safeExt}`);
+  },
 });
-const upload = multer({ storage });
+const upload = multer({
+  storage,
+  limits: { fileSize: 2 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const ext = path.extname(file.originalname || '').toLowerCase();
+    if (!ALLOWED_UPLOAD_EXTS.has(ext)) {
+      return cb(new Error('Only image uploads are allowed'));
+    }
+    if (!String(file.mimetype || '').startsWith('image/')) {
+      return cb(new Error('Only image uploads are allowed'));
+    }
+    cb(null, true);
+  },
+});
 
 // Ensure directories
 const srcPath = path.join(__dirname, 'dist');
@@ -328,9 +618,57 @@ const uploadsDir = path.join(__dirname, 'uploads');
 fs.mkdirSync(popupsDir, { recursive: true });
 fs.mkdirSync(uploadsDir, { recursive: true });
 
-// Serve static files
-app.use(express.static(srcPath));
-app.use('/adamas', express.static(srcPath));
+// Serve static files (HTML gets CSP nonces injected)
+function htmlNonceStatic(rootDir) {
+  return (req, res, next) => {
+    if (req.method !== 'GET' && req.method !== 'HEAD') return next();
+    let rel = req.path || '/';
+    if (rel.endsWith('/')) rel += 'index.html';
+    if (!rel.endsWith('.html')) return next();
+    const filePath = path.normalize(path.join(rootDir, rel));
+    if (!filePath.startsWith(path.normalize(rootDir))) return next();
+    if (!fs.existsSync(filePath)) return next();
+    try {
+      return sendHtmlFile(res, filePath);
+    } catch (err) {
+      return next(err);
+    }
+  };
+}
+
+// Cache policy: never cache SW/HTML; long-cache only contenthashed assets
+function setStaticCacheHeaders(res, filePath) {
+  const rel = String(filePath || '').replace(/\\/g, '/');
+  if (rel.endsWith('/sw.js') || rel.endsWith('sw.js') || rel.endsWith('sw.facet.js')) {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Service-Worker-Allowed', '/adamas/');
+    return;
+  }
+  if (rel.endsWith('.html')) {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    return;
+  }
+  // Webpack contenthash: main.abc123.js / main.abc123.css
+  if (/\.[a-f0-9]{8,}\.(js|css|woff2?|ttf|png|jpe?g|gif|svg|mp3|wav|ogg)(\.map)?$/i.test(rel)) {
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    return;
+  }
+  // Non-hashed compat copies (main.js / main.css) — always revalidate
+  if (/\.(js|css)$/i.test(rel)) {
+    res.setHeader('Cache-Control', 'no-cache, must-revalidate');
+  }
+}
+
+const staticOpts = {
+  setHeaders: setStaticCacheHeaders,
+};
+
+app.use(htmlNonceStatic(srcPath));
+app.use(express.static(srcPath, staticOpts));
+app.use('/adamas', htmlNonceStatic(srcPath));
+app.use('/adamas', express.static(srcPath, staticOpts));
 app.use('/callcenterhelper', (req, res) => {
   res.redirect(301, '/adamas' + req.path);
 });
@@ -343,11 +681,11 @@ app.use(
 
 // Routes for static pages with /adamas/ prefix
 app.get('/adamas/privacy', (req, res) => {
-  res.sendFile(path.join(srcPath, 'privacy.html'));
+  sendHtmlFile(res, path.join(srcPath, 'privacy.html'));
 });
 
 // Contact Form Handling
-app.post('/api/contact', async (req, res) => {
+async function handleContactForm(req, res) {
   const { name, email, message } = req.body;
 
   if (!name || !email || !message) {
@@ -357,19 +695,22 @@ app.post('/api/contact', async (req, res) => {
   }
 
   try {
-    // Send email notification
+    // Send email notification (HTML-escaped to prevent mail client injection)
+    const safeName = escapeHtml(name);
+    const safeEmail = escapeHtml(email);
+    const safeMessage = escapeHtml(message).replace(/\n/g, '<br>');
     await transporter.sendMail({
-      from: `"${name}" <${process.env.EMAIL_USER}>`,
+      from: `"${String(name).replace(/["\r\n]/g, '')}" <${process.env.EMAIL_USER}>`,
       replyTo: email,
       to: process.env.EMAIL_USER,
-      subject: `Adamas Contact: Message from ${name}`,
+      subject: `Adamas Contact: Message from ${String(name).replace(/[\r\n]/g, '')}`,
       text: `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`,
       html: `
         <h3>New Contact Message</h3>
-        <p><strong>Name:</strong> ${name}</p>
-        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Name:</strong> ${safeName}</p>
+        <p><strong>Email:</strong> ${safeEmail}</p>
         <div style="margin-top: 1em; padding: 1em; background: #f5f5f5; border-radius: 5px;">
-          ${message.replace(/\n/g, '<br>')}
+          ${safeMessage}
         </div>
       `,
     });
@@ -381,18 +722,21 @@ app.post('/api/contact', async (req, res) => {
       .status(500)
       .json({ error: 'Failed to send message. Please try again later.' });
   }
-});
+}
+
+app.post('/api/contact', handleContactForm);
+app.post('/adamas/api/contact', handleContactForm);
 
 app.get('/adamas/terms', (req, res) => {
-  res.sendFile(path.join(srcPath, 'terms.html'));
+  sendHtmlFile(res, path.join(srcPath, 'terms.html'));
 });
 
 app.get('/adamas/contact', (req, res) => {
-  res.sendFile(path.join(srcPath, 'contact.html'));
+  sendHtmlFile(res, path.join(srcPath, 'contact.html'));
 });
 
 app.get('/adamas/settings', (req, res) => {
-  res.sendFile(path.join(srcPath, 'settings.html'));
+  sendHtmlFile(res, path.join(srcPath, 'settings.html'));
 });
 
 // Ensure JavaScript files have proper charset in Content-Type
@@ -409,6 +753,7 @@ const popupStore = new Map();
 // Auth routes
 app.post(
   '/api/register',
+  authLimiter,
   [
     body('username').isLength({ min: 3 }).trim().escape(),
     body('email').isEmail().normalizeEmail(),
@@ -419,13 +764,14 @@ app.post(
     if (!errors.isEmpty())
       return res.status(400).json({ errors: errors.array() });
 
-    const { username, email, password, role = 'agent' } = req.body;
+    const { username, email, password } = req.body;
+    // Never accept client-supplied role — always provision as agent
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = new Models.User({
       username,
       email,
       password: hashedPassword,
-      role,
+      role: 'agent',
     });
     try {
       await user.save();
@@ -438,6 +784,7 @@ app.post(
 
 app.post(
   '/api/login',
+  authLimiter,
   [body('email').isEmail().normalizeEmail(), body('password').exists()],
   async (req, res) => {
     const errors = validationResult(req);
@@ -451,10 +798,12 @@ app.post(
     }
     const token = jwt.sign(
       { _id: user._id, role: user.role },
-      process.env.JWT_SECRET || 'secret'
+      EFFECTIVE_JWT_SECRET,
+      { expiresIn: '12h' }
     );
+    res.cookie(SESSION_COOKIE, token, sessionCookieOptions());
+    // Token is intentionally omitted from JSON — session lives in httpOnly cookie
     res.json({
-      token,
       user: {
         _id: user._id,
         username: user.username,
@@ -464,6 +813,32 @@ app.post(
     });
   }
 );
+
+// Current session (cookie-based)
+app.get('/api/me', async (req, res) => {
+  const token = readSessionToken(req);
+  if (!token) return res.status(401).json({ error: 'Not authenticated' });
+  try {
+    const verified = jwt.verify(token, EFFECTIVE_JWT_SECRET);
+    const user = await Models.User.findById(verified._id);
+    if (!user) return res.status(401).json({ error: 'Not authenticated' });
+    res.json({
+      user: {
+        _id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch {
+    res.status(401).json({ error: 'Not authenticated' });
+  }
+});
+
+app.post('/api/logout', (req, res) => {
+  clearSessionCookie(res);
+  res.json({ message: 'Logged out' });
+});
 
 // Update Profile
 app.put(
@@ -529,6 +904,8 @@ app.put(
     user.password = await bcrypt.hash(newPassword, 10);
     await user.save();
 
+    // Invalidate current session — client must re-login
+    clearSessionCookie(res);
     res.json({ message: 'Password updated successfully' });
   }
 );
@@ -561,16 +938,7 @@ app.get('/api/calls', auth, async (req, res) => {
 
 app.post('/api/calls', auth, async (req, res) => {
   try {
-    const logData = { ...req.body, userId: req.user._id };
-    // If ID was passed (from local sync), ensure we use it or generate new if conflict?
-    // Mongoose generates _id. If client sends 'id' (timestamp), store it in customData or similar if needed.
-    // But for hybrid sync, we usually assume server is source of truth.
-    // Client will receive the new _id and map it.
-
-    // HOWEVER: The client likely sends 'id' property which is Date.now().
-    // We can store this as 'clientRefId' or just ignore and use _id.
-    // Let's rely on standard Mongoose _id.
-
+    const logData = sanitizeCallLogPayload(req.body, req.user._id);
     const callLog = new Models.CallLog(logData);
     await callLog.save();
     await logAudit(
@@ -588,9 +956,15 @@ app.post('/api/calls', auth, async (req, res) => {
 
 app.put('/api/calls/:id', auth, async (req, res) => {
   try {
+    const existing = await Models.CallLog.findById(req.params.id);
+    if (!existing || String(existing.userId) !== String(req.user._id)) {
+      return res.status(404).json({ error: 'Call log not found' });
+    }
+    const safeBody = sanitizeCallLogPayload(req.body, req.user._id);
+    delete safeBody.userId; // ownership already verified; don't churn id type
     const updated = await Models.CallLog.findByIdAndUpdate(
       req.params.id,
-      { $set: req.body },
+      { $set: { ...safeBody, userId: existing.userId } },
       { new: true }
     );
     if (!updated) return res.status(404).json({ error: 'Call log not found' });
@@ -602,6 +976,10 @@ app.put('/api/calls/:id', auth, async (req, res) => {
 
 app.delete('/api/calls/:id', auth, async (req, res) => {
   try {
+    const existing = await Models.CallLog.findById(req.params.id);
+    if (!existing || String(existing.userId) !== String(req.user._id)) {
+      return res.status(404).json({ error: 'Call log not found' });
+    }
     await Models.CallLog.findByIdAndDelete(req.params.id);
     await logAudit(
       req.user._id,
@@ -650,16 +1028,27 @@ app.put('/api/user/settings', auth, async (req, res) => {
 });
 
 // File upload
-app.post('/api/upload', auth, upload.single('file'), (req, res) => {
-  res.json({ filePath: `/uploads/${req.file.filename}` });
+app.post('/api/upload', auth, (req, res) => {
+  upload.single('file')(req, res, (err) => {
+    if (err) {
+      return res.status(400).json({ error: err.message || 'Upload failed' });
+    }
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+    res.json({ filePath: `/uploads/${req.file.filename}` });
+  });
 });
 
 // Search
 app.get('/api/search', auth, async (req, res) => {
   const { q } = req.query;
+  if (!q || typeof q !== 'string' || q.length > 200) {
+    return res.status(400).json({ error: 'Invalid search query' });
+  }
   const notes = await Models.Note.find({
     userId: req.user._id,
-    content: new RegExp(q, 'i'),
+    content: new RegExp(escapeRegExp(q), 'i'),
   });
   res.json(notes);
 });
@@ -670,16 +1059,32 @@ const transporter = nodemailer.createTransport({
   auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
 });
 
-// Email
+// Email — constrain open-relay risk
 app.post('/api/email/send', auth, (req, res) => {
-  const { to, subject, text } = req.body;
+  const { to, subject, text } = req.body || {};
+  const toAddr = String(to || '').trim();
+  const subj = String(subject || '').slice(0, 200);
+  const body = String(text || '').slice(0, 10000);
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(toAddr)) {
+    return res.status(400).json({ error: 'Invalid recipient email' });
+  }
+  const domainAllow = (process.env.EMAIL_ALLOW_DOMAINS || '')
+    .split(',')
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean);
+  if (domainAllow.length) {
+    const domain = toAddr.split('@')[1].toLowerCase();
+    if (!domainAllow.includes(domain)) {
+      return res.status(403).json({ error: 'Recipient domain not allowed' });
+    }
+  }
   transporter.sendMail(
-    { from: process.env.EMAIL_USER, to, subject, text },
+    { from: process.env.EMAIL_USER, to: toAddr, subject: subj, text: body },
     async (err) => {
       if (err) {
         res.status(500).json({ error: 'Email failed' });
       } else {
-        await logAudit(req.user._id, 'send', 'email', { to }, req);
+        await logAudit(req.user._id, 'send', 'email', { to: toAddr }, req);
         res.json({ message: 'Email sent' });
       }
     }
@@ -692,15 +1097,22 @@ app.get('/api/crm/salesforce', auth, async (req, res) => {
   res.json({ message: 'CRM integration placeholder' });
 });
 
-// Finesse debug endpoint - returns detailed connection info
-app.get('/adamas/api/finesse/debug', async (req, res) => {
-  const { url, username, password } = req.query;
+// Finesse debug — disabled in production unless FINESSE_DEBUG=true.
+// Credentials must be POSTed in the body (never query strings).
+function finesseDebugEnabled(req, res) {
+  if (
+    process.env.NODE_ENV === 'production' &&
+    process.env.FINESSE_DEBUG !== 'true'
+  ) {
+    res.status(404).json({ error: 'Not found' });
+    return false;
+  }
+  return true;
+}
 
-  console.log('🐛 Finesse debug request:', {
-    url,
-    username,
-    hasPassword: !!password,
-  });
+app.post('/adamas/api/finesse/debug', auth, async (req, res) => {
+  if (!finesseDebugEnabled(req, res)) return;
+  const { url, username, password } = req.body || {};
 
   if (!url || !username || !password) {
     return res.status(400).json({
@@ -710,27 +1122,15 @@ app.get('/adamas/api/finesse/debug', async (req, res) => {
   }
 
   try {
-    const urlObj = new URL(url);
-    const allowedHosts = [
-      /\.cisco\.com$/,
-      /finesse/i,
-      /lmgrccx/i,
-      /lminfosys\.net$/,
-    ];
-    const isAllowed = allowedHosts.some((pattern) =>
-      pattern.test(urlObj.hostname)
-    );
-    if (!isAllowed) {
+    if (!isAllowedFinesseUrl(url)) {
       return res.status(400).json({ error: 'Invalid Finesse server URL' });
     }
 
-    const finesseUrl = `${url}/finesse/api/User/${encodeURIComponent(username)}`;
+    const finesseUrl = `${url.replace(/\/$/, '')}/finesse/api/User/${encodeURIComponent(username)}`;
     const authHeader = `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
 
-    console.log('🐛 Debug: Testing connection to:', finesseUrl);
-
     const startTime = Date.now();
-    const response = await fetch(finesseUrl, {
+    const response = await fetchFinesse(finesseUrl, {
       method: 'GET',
       headers: {
         Authorization: authHeader,
@@ -740,24 +1140,17 @@ app.get('/adamas/api/finesse/debug', async (req, res) => {
       },
     });
     const endTime = Date.now();
-
     const responseBody = await response.text();
 
-    const debugInfo = {
+    res.json({
       request: {
         url: finesseUrl,
         method: 'GET',
-        headers: {
-          Authorization: '[REDACTED]',
-          Accept: 'application/xml',
-          'X-Cisco-Finesse-OS': 'CallCenterHelper',
-          'User-Agent': 'CallCenterHelper/1.0',
-        },
+        headers: { Authorization: '[REDACTED]', Accept: 'application/xml' },
       },
       response: {
         status: response.status,
         statusText: response.statusText,
-        headers: Object.fromEntries(response.headers.entries()),
         bodyLength: responseBody.length,
         body:
           responseBody.length > 1000
@@ -765,145 +1158,26 @@ app.get('/adamas/api/finesse/debug', async (req, res) => {
             : responseBody,
         timing: `${endTime - startTime}ms`,
       },
-      server: {
-        nodeVersion: process.version,
-        platform: process.platform,
-        timestamp: new Date().toISOString(),
-      },
-    };
-
-    console.log('🐛 Debug result:', {
-      status: response.status,
-      timing: debugInfo.response.timing,
-      bodyLength: responseBody.length,
     });
-
-    res.json(debugInfo);
   } catch (error) {
-    console.error('🐛 Debug error:', error);
-    res.status(500).json({
-      error: error.message,
-      details: {
-        name: error.name,
-        code: error.code,
-        stack: error.stack,
-      },
-      server: {
-        nodeVersion: process.version,
-        platform: process.platform,
-        timestamp: new Date().toISOString(),
-      },
-    });
+    res.status(500).json({ error: error.message });
   }
 });
 
-// Finesse debug endpoint for User
-app.get('/adamas/api/finesse/debug/User/:username', async (req, res) => {
-  const { url, username, password } = req.query;
-
-  console.log('🐛 Finesse debug request:', {
-    url,
-    username,
-    hasPassword: !!password,
+// Legacy GET debug endpoints — permanently disabled (password-in-query risk)
+app.get('/adamas/api/finesse/debug', auth, (req, res) => {
+  res.status(405).json({
+    error: 'Use POST /adamas/api/finesse/debug with credentials in the body',
   });
-
-  if (!url || !username || !password) {
-    return res.status(400).json({
-      error: 'Missing required parameters',
-      required: ['url', 'username', 'password'],
-    });
-  }
-
-  try {
-    const urlObj = new URL(url);
-    const allowedHosts = [
-      /\.cisco\.com$/,
-      /finesse/i,
-      /lmgrccx/i,
-      /lminfosys\.net$/,
-    ];
-    const isAllowed = allowedHosts.some((pattern) =>
-      pattern.test(urlObj.hostname)
-    );
-    if (!isAllowed) {
-      return res.status(400).json({ error: 'Invalid Finesse server URL' });
-    }
-
-    const finesseUrl = `${url}/finesse/api/User/${encodeURIComponent(username)}`;
-    const authHeader = `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
-
-    console.log('🐛 Debug: Testing connection to:', finesseUrl);
-
-    const startTime = Date.now();
-    const response = await fetch(finesseUrl, {
-      method: 'GET',
-      headers: {
-        Authorization: authHeader,
-        Accept: 'application/xml',
-        'X-Cisco-Finesse-OS': 'CallCenterHelper',
-        'User-Agent': 'CallCenterHelper/1.0',
-      },
-    });
-    const endTime = Date.now();
-
-    const responseBody = await response.text();
-
-    const debugInfo = {
-      request: {
-        url: finesseUrl,
-        method: 'GET',
-        headers: {
-          Authorization: '[REDACTED]',
-          Accept: 'application/xml',
-          'X-Cisco-Finesse-OS': 'CallCenterHelper',
-          'User-Agent': 'CallCenterHelper/1.0',
-        },
-      },
-      response: {
-        status: response.status,
-        statusText: response.statusText,
-        headers: Object.fromEntries(response.headers.entries()),
-        bodyLength: responseBody.length,
-        body:
-          responseBody.length > 1000
-            ? responseBody.substring(0, 1000) + '...'
-            : responseBody,
-        timing: `${endTime - startTime}ms`,
-      },
-      server: {
-        nodeVersion: process.version,
-        platform: process.platform,
-        timestamp: new Date().toISOString(),
-      },
-    };
-
-    console.log('🐛 Debug result:', {
-      status: response.status,
-      timing: debugInfo.response.timing,
-      bodyLength: responseBody.length,
-    });
-
-    res.json(debugInfo);
-  } catch (error) {
-    console.error('🐛 Debug error:', error);
-    res.status(500).json({
-      error: error.message,
-      details: {
-        name: error.name,
-        code: error.code,
-        stack: error.stack,
-      },
-      server: {
-        nodeVersion: process.version,
-        platform: process.platform,
-        timestamp: new Date().toISOString(),
-      },
-    });
-  }
 });
 
+app.get('/adamas/api/finesse/debug/User/:username', auth, (req, res) => {
+  res.status(405).json({
+    error: 'Use POST /adamas/api/finesse/debug with credentials in the body',
+  });
+});
 // Finesse API proxy (GET)
-app.get('/adamas/api/finesse/User/:username', async (req, res) => {
+app.get('/adamas/api/finesse/User/:username', auth, async (req, res) => {
   const { username } = req.params;
   const { url } = req.query;
   const authHeader = req.headers.authorization;
@@ -915,19 +1189,12 @@ app.get('/adamas/api/finesse/User/:username', async (req, res) => {
   }
 
   try {
-    const urlObj = new URL(url);
-    const allowedHosts = [
-      /\.cisco\.com$/,
-      /finesse/i,
-      /lmgrccx/i,
-      /lminfosys\.net$/,
-    ];
-    if (!allowedHosts.some((pattern) => pattern.test(urlObj.hostname))) {
+    if (!isAllowedFinesseUrl(url)) {
       return res.status(400).json({ error: 'Invalid Finesse server URL' });
     }
 
     const finesseUrl = `${url}/finesse/api/User/${encodeURIComponent(username)}`;
-    const response = await fetch(finesseUrl, {
+    const response = await fetchFinesse(finesseUrl, {
       method: 'GET',
       headers: {
         Authorization: authHeader,
@@ -951,7 +1218,7 @@ app.get('/adamas/api/finesse/User/:username', async (req, res) => {
 
 // Finesse API Proxy (POST - Make Call)
 // Route: /finesse/api/User/{id}/Dialogs
-app.post('/adamas/api/finesse/User/:username/Dialogs', async (req, res) => {
+app.post('/adamas/api/finesse/User/:username/Dialogs', auth, async (req, res) => {
   const { username } = req.params;
   const { url } = req.query;
   const authHeader = req.headers.authorization;
@@ -972,14 +1239,7 @@ app.post('/adamas/api/finesse/User/:username/Dialogs', async (req, res) => {
   }
 
   try {
-    const urlObj = new URL(url);
-    const allowedHosts = [
-      /\.cisco\.com$/,
-      /finesse/i,
-      /lmgrccx/i,
-      /lminfosys\.net$/,
-    ];
-    if (!allowedHosts.some((pattern) => pattern.test(urlObj.hostname))) {
+    if (!isAllowedFinesseUrl(url)) {
       return res.status(400).json({ error: 'Invalid Finesse server URL' });
     }
 
@@ -1011,7 +1271,7 @@ app.post('/adamas/api/finesse/User/:username/Dialogs', async (req, res) => {
       requestBody = req.body.rawXml;
     }
 
-    const response = await fetch(finesseUrl, {
+    const response = await fetchFinesse(finesseUrl, {
       method: 'POST',
       headers: {
         Authorization: authHeader,
@@ -1037,7 +1297,7 @@ app.post('/adamas/api/finesse/User/:username/Dialogs', async (req, res) => {
 
 // Finesse API Proxy (PUT - Answer, Hold, Retrieve, Drop)
 // Route: /finesse/api/Dialog/{id}
-app.put('/adamas/api/finesse/Dialog/:dialogId', async (req, res) => {
+app.put('/adamas/api/finesse/Dialog/:dialogId', auth, async (req, res) => {
   const { dialogId } = req.params;
   const { url } = req.query;
   const authHeader = req.headers.authorization;
@@ -1049,14 +1309,7 @@ app.put('/adamas/api/finesse/Dialog/:dialogId', async (req, res) => {
   }
 
   try {
-    const urlObj = new URL(url);
-    const allowedHosts = [
-      /\.cisco\.com$/,
-      /finesse/i,
-      /lmgrccx/i,
-      /lminfosys\.net$/,
-    ];
-    if (!allowedHosts.some((pattern) => pattern.test(urlObj.hostname))) {
+    if (!isAllowedFinesseUrl(url)) {
       return res.status(400).json({ error: 'Invalid Finesse server URL' });
     }
 
@@ -1076,7 +1329,7 @@ app.put('/adamas/api/finesse/Dialog/:dialogId', async (req, res) => {
       requestBody = req.body.rawXml;
     }
 
-    const response = await fetch(finesseUrl, {
+    const response = await fetchFinesse(finesseUrl, {
       method: 'PUT',
       headers: {
         Authorization: authHeader,
@@ -1116,10 +1369,30 @@ app.post('/api/ai-insights', auth, async (req, res) => {
   }
 });
 
-// Webhooks for workflows
+// Webhooks for workflows — require shared secret when configured
 app.post('/api/webhook/:workflow', (req, res) => {
-  // Trigger workflow based on req.params.workflow
-  io.emit('workflow-trigger', req.body);
+  const expected = process.env.WEBHOOK_SECRET;
+  if (expected) {
+    const provided =
+      req.header('X-Webhook-Secret') || req.query.secret || req.body?.secret;
+    if (provided !== expected) {
+      return res.status(401).json({ error: 'Invalid webhook secret' });
+    }
+  } else if (process.env.NODE_ENV === 'production') {
+    return res.status(503).json({ error: 'Webhooks disabled' });
+  }
+  // Trigger workflow for authenticated sockets only (per-user room if userId provided)
+  const targetUserId = req.body?.userId || req.query.userId;
+  const payload = {
+    workflow: String(req.params.workflow || '').slice(0, 100),
+    payload: req.body,
+  };
+  if (targetUserId) {
+    io.to(String(targetUserId)).emit('workflow-trigger', payload);
+  } else {
+    // No broadcast to all sockets — require an explicit room target
+    return res.status(400).json({ error: 'userId required for webhook delivery' });
+  }
   res.json({ message: 'Webhook received' });
 });
 
@@ -1216,14 +1489,37 @@ app.get('/api/user/twilio', auth, async (req, res) => {
   }
 });
 
-// Socket.io for real-time
+// Socket.io — require valid session JWT on handshake
+io.use((socket, next) => {
+  try {
+    let token = socket.handshake.auth && socket.handshake.auth.token;
+    if (!token && socket.handshake.headers && socket.handshake.headers.cookie) {
+      const parsed = cookie.parse(socket.handshake.headers.cookie);
+      token = parsed[SESSION_COOKIE];
+    }
+    if (!token) {
+      return next(new Error('Unauthorized'));
+    }
+    socket.user = jwt.verify(token, EFFECTIVE_JWT_SECRET);
+    return next();
+  } catch {
+    return next(new Error('Unauthorized'));
+  }
+});
+
 io.on('connection', (socket) => {
-  console.log('User connected');
+  console.log('User connected', socket.user && socket.user._id);
   socket.on('join', (userId) => {
-    socket.join(userId);
+    if (!socket.user || String(userId) !== String(socket.user._id)) {
+      return;
+    }
+    socket.join(String(userId));
   });
   socket.on('note-update', (data) => {
-    socket.to(data.userId).emit('note-updated', data);
+    if (!socket.user || !data || String(data.userId) !== String(socket.user._id)) {
+      return;
+    }
+    socket.to(String(data.userId)).emit('note-updated', data);
   });
   socket.on('disconnect', () => {
     console.log('User disconnected');
@@ -1232,34 +1528,65 @@ io.on('connection', (socket) => {
 
 // GDPR: Data export
 app.get('/api/export', auth, async (req, res) => {
-  const user = await Models.User.findById(req.user._id);
+  const userDoc = await Models.User.findById(req.user._id);
+  if (!userDoc) return res.status(404).json({ error: 'User not found' });
+  const user = userDoc.toObject ? userDoc.toObject() : { ...userDoc };
+  delete user.password;
+  if (user.twilio) delete user.twilio.authToken;
   const notes = await Models.Note.find({ userId: req.user._id });
   res.json({ user, notes });
 });
 
 // GDPR: Delete account
 app.delete('/api/user', auth, async (req, res) => {
-  await Models.User.findByIdAndDelete(req.user._id);
-  await Models.Note.deleteMany({ userId: req.user._id });
-  res.json({ message: 'Account deleted' });
+  try {
+    await deleteUserAccount(req.user._id, res);
+  } catch {
+    res.status(500).json({ error: 'Failed to delete account' });
+  }
 });
 
 // Parse JSON bodies for popup creation
 app.use(bodyParser.json({ limit: '2mb' }));
 
+// Stricter limiter for popup HTML writes (disk DoS)
+const popupLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many popup requests' },
+});
+
 // Endpoint to create a popup page. Expects { html: '<html>...</html>' }
-app.post('/popup', (req, res) => {
+// Requires auth to prevent unauthenticated stored XSS on this origin.
+app.post('/popup', auth, popupLimiter, (req, res) => {
   const { html } = req.body || {};
-  if (!html) return res.status(400).json({ error: 'Missing html' });
+  if (!html || typeof html !== 'string')
+    return res.status(400).json({ error: 'Missing html' });
+  if (html.length > 200000)
+    return res.status(400).json({ error: 'Popup HTML too large' });
+
+  // Cap concurrent popups per user
+  let userPopups = 0;
+  for (const meta of popupStore.values()) {
+    if (meta.userId && String(meta.userId) === String(req.user._id)) {
+      userPopups += 1;
+    }
+  }
+  if (userPopups >= 20) {
+    return res.status(429).json({ error: 'Too many active popups' });
+  }
 
   const id = nanoid();
   const filename = `${id}.html`;
   const filePath = path.join(popupsDir, filename);
 
   try {
-    fs.writeFileSync(filePath, html, 'utf8');
+    const hardened = `<!DOCTYPE html><html><head><meta charset="utf-8"/><meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; style-src 'unsafe-inline'; img-src data: https: http:; script-src 'none';"/></head><body>${html}</body></html>`;
+    fs.writeFileSync(filePath, hardened, 'utf8');
     const createdAt = Date.now();
-    popupStore.set(id, { filePath, createdAt });
+    popupStore.set(id, { filePath, createdAt, userId: req.user._id });
     res.json({ id, url: `/popups/${filename}` });
   } catch (err) {
     console.error('Error writing popup file', err);
@@ -1268,10 +1595,13 @@ app.post('/popup', (req, res) => {
 });
 
 // Optional helper endpoint to delete a popup page
-app.delete('/popup/:id', (req, res) => {
+app.delete('/popup/:id', auth, (req, res) => {
   const id = req.params.id;
   const meta = popupStore.get(id);
   if (!meta) return res.status(404).json({ error: 'Not found' });
+  if (meta.userId && String(meta.userId) !== String(req.user._id)) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
   try {
     fs.unlinkSync(meta.filePath);
     popupStore.delete(id);
@@ -1311,7 +1641,11 @@ setInterval(() => {
 // GDPR Compliance: Data Export
 app.get('/api/user/data', auth, async (req, res) => {
   try {
-    const user = await Models.User.findById(req.user._id).select('-password');
+    const userDoc = await Models.User.findById(req.user._id);
+    if (!userDoc) return res.status(404).json({ error: 'User not found' });
+    const user = userDoc.toObject ? userDoc.toObject() : { ...userDoc };
+    delete user.password;
+    if (user.twilio) delete user.twilio.authToken;
     const notes = await Models.Note.find({ userId: req.user._id });
     const auditLogs = await Models.AuditLog.find({ userId: req.user._id });
     const data = { user, notes, auditLogs };
@@ -1325,11 +1659,9 @@ app.get('/api/user/data', auth, async (req, res) => {
 // GDPR Compliance: Data Deletion
 app.delete('/api/user/delete', auth, async (req, res) => {
   try {
-    await Models.Note.deleteMany({ userId: req.user._id });
-    await Models.AuditLog.deleteMany({ userId: req.user._id });
-    await Models.User.findByIdAndDelete(req.user._id);
     await logAudit(req.user._id, 'delete', 'user_account', {}, req);
-    res.json({ message: 'Account deleted' });
+    await Models.AuditLog.deleteMany({ userId: req.user._id });
+    await deleteUserAccount(req.user._id, res);
   } catch {
     res.status(500).json({ error: 'Failed to delete account' });
   }

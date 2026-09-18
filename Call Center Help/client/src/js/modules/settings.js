@@ -4,6 +4,7 @@
 import {
   saveData,
   loadData,
+  loadTheme,
   loadPatterns,
   savePatterns,
   loadSteps,
@@ -21,12 +22,19 @@ import {
   setupSectionToggle,
 } from './draggable.js';
 
-import { setupThemeToggle } from './themes.js';
+import { setupThemeToggle, applyTheme } from './themes.js';
 import {
   playAlertSound,
   initAudio,
   setRepeatAlertSoundMode,
 } from '../utils/audio.js';
+import { auth } from './auth.js';
+import { apiFetch } from '../utils/api.js';
+
+/** Convert kebab-case ids to camelCase setting keys (export-patterns → exportPatterns). */
+function kebabToCamel(id) {
+  return String(id || '').replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+}
 
 // Helper to update slider visual state
 function updateSliderVisual(toggle) {
@@ -163,20 +171,28 @@ export let appSettings = {
 
 // Export the saveSettings function
 let saveTimeout = null;
-export function saveSettings() {
-  if (typeof localStorage !== 'undefined') {
-    localStorage.setItem('appSettings', JSON.stringify(appSettings));
+export function saveSettings(settings) {
+  if (settings && typeof settings === 'object') {
+    Object.assign(appSettings, settings);
+  }
+  if (typeof window !== 'undefined') {
+    window.appSettings = appSettings;
+  }
+  try {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('appSettings', JSON.stringify(appSettings));
+    }
+  } catch (err) {
+    console.error('Failed to persist appSettings:', err);
   }
 
   // Cloud Persist (Debounced)
-  const token = localStorage.getItem('token');
-  if (token) {
+  if (auth.isLoggedIn()) {
     if (saveTimeout) clearTimeout(saveTimeout);
     saveTimeout = setTimeout(() => {
-      fetch('/api/user/settings', {
+      apiFetch('/api/user/settings', {
         method: 'PUT',
         headers: {
-          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(appSettings),
@@ -215,22 +231,38 @@ export function initializeSettings() {
 
   const saved = loadSettings();
   if (Object.keys(saved).length > 0) {
-    appSettings = { ...appSettings, ...saved };
+    Object.assign(appSettings, saved);
+  }
+  if (typeof window !== 'undefined') {
+    window.appSettings = appSettings;
   }
 
-  // Cloud Fetch
-  const token = localStorage.getItem('token');
-  if (token) {
-    fetch('/api/user/settings', {
-      headers: { Authorization: `Bearer ${token}` },
-    })
+  // Cloud Fetch — merge carefully so a completed welcome is not undone
+  if (auth.isLoggedIn()) {
+    apiFetch('/api/user/settings')
       .then((res) => res.json())
       .then((remoteSettings) => {
         if (remoteSettings && Object.keys(remoteSettings).length > 0) {
           console.log('Syncing settings from cloud...');
-          appSettings = { ...appSettings, ...remoteSettings };
-          // Re-apply settings after fetching from cloud
+          const localSeenWelcome = !!appSettings.hasSeenWelcome;
+          Object.assign(appSettings, remoteSettings);
+          // Local welcome completion wins over stale cloud payloads
+          if (localSeenWelcome) {
+            appSettings.hasSeenWelcome = true;
+          }
+          if (typeof window !== 'undefined') {
+            window.appSettings = appSettings;
+          }
           applySettings();
+          // Dismiss wizard if cloud (or preserved local) says welcome done
+          if (appSettings.hasSeenWelcome) {
+            const overlay = document.getElementById('welcome-overlay');
+            if (overlay) {
+              overlay.classList.remove('active');
+              overlay.setAttribute('aria-hidden', 'true');
+              overlay.inert = true;
+            }
+          }
           window.dispatchEvent(
             new CustomEvent('appSettingsChanged', { detail: appSettings })
           );
@@ -591,31 +623,12 @@ export function applySettings() {
     knowledgeBaseTab.style.display = appSettings.showKnowledgeBase
       ? ''
       : 'none';
-
-    // If Knowledge Base is being disabled and user is currently on that tab, switch to main
-    if (
-      !appSettings.showKnowledgeBase &&
-      knowledgeBaseTab.classList.contains('active')
-    ) {
-      // Switch to main tab if available
-      if (typeof window.showMainApp === 'function') {
-        window.showMainApp();
-      }
-    }
   }
 
   // Handle navigation tab visibility for Stats
   const statsTab = document.getElementById('stats-tab');
   if (statsTab) {
     statsTab.style.display = appSettings.showAnalytics ? '' : 'none';
-
-    // If Stats is being disabled and user is currently on that tab, switch to main
-    if (!appSettings.showAnalytics && statsTab.classList.contains('active')) {
-      // Switch to main tab if available
-      if (typeof window.showMainApp === 'function') {
-        window.showMainApp();
-      }
-    }
   }
 
   // Apply export settings
@@ -961,6 +974,21 @@ export function setupSettingsEventListeners() {
         appSettings[settingKey] = isOn;
         saveSettings(appSettings);
         applySettings();
+
+        // If the user disables a nav feature while viewing it, return to Main
+        if (
+          !isOn &&
+          ((settingKey === 'showKnowledgeBase' &&
+            document
+              .getElementById('knowledge-base-tab')
+              ?.classList.contains('active')) ||
+            (settingKey === 'showAnalytics' &&
+              document.getElementById('stats-tab')?.classList.contains('active')))
+        ) {
+          if (typeof window.showMainApp === 'function') {
+            window.showMainApp();
+          }
+        }
       });
     }
   });
@@ -1044,11 +1072,11 @@ export function setupSettingsEventListeners() {
     const toggle = document.getElementById(toggleId);
     if (toggle) {
       // Initialize checked state
-      const settingKey = toggleId.replace(/-/g, '');
+      const settingKey = kebabToCamel(toggleId);
       toggle.checked = appSettings[settingKey] !== false;
 
       toggle.addEventListener('change', function () {
-        const settingKey = toggleId.replace(/-/g, '');
+        const settingKey = kebabToCamel(toggleId);
         appSettings[settingKey] = this.checked;
         saveSettings(appSettings);
       });
@@ -1106,7 +1134,7 @@ export function setupSettingsEventListeners() {
     const toggle = document.getElementById(toggleId);
     if (toggle) {
       toggle.addEventListener('change', function () {
-        const settingKey = toggleId.replace(/-/g, '');
+        const settingKey = kebabToCamel(toggleId);
         appSettings[settingKey] = this.checked;
         saveSettings(appSettings);
       });
@@ -1524,8 +1552,14 @@ function setupAdditionalSettingsListeners() {
   const testSoundBtn = document.getElementById('test-sound-btn');
   if (testSoundBtn) {
     testSoundBtn.addEventListener('click', function () {
-      const soundType = document.getElementById('timer-alert-sound').value;
-      const customUrl = document.getElementById('custom-sound-url').value;
+      const alertSoundEl = document.getElementById('timer-alert-sound');
+      const customUrlEl = document.getElementById('custom-sound-url');
+      if (!alertSoundEl) {
+        console.warn('Test sound: #timer-alert-sound not found');
+        return;
+      }
+      const soundType = alertSoundEl.value;
+      const customUrl = customUrlEl ? customUrlEl.value : '';
       playAlertSound(soundType, customUrl, true); // Play a short test sound immediately
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard
@@ -2185,11 +2219,10 @@ async function initializeTwilioSettings() {
     saveButton.textContent = 'Saving...';
 
     try {
-      const response = await fetch('/api/user/twilio', {
+      const response = await apiFetch('/api/user/twilio', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
         body: JSON.stringify({ accountSid, authToken, phoneNumber }),
       });
@@ -2227,11 +2260,10 @@ async function initializeTwilioSettings() {
       testButton.textContent = 'Sending Test...';
 
       try {
-        const response = await fetch('/api/sms', {
+        const response = await apiFetch('/api/sms', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
           body: JSON.stringify({
             to: phoneNumber,
@@ -2264,11 +2296,7 @@ async function loadTwilioSettings() {
   if (!statusElement) return;
 
   try {
-    const response = await fetch('/api/user/twilio', {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-    });
+    const response = await apiFetch('/api/user/twilio');
 
     if (response.ok) {
       const settings = await response.json();
@@ -2390,190 +2418,401 @@ groupEnableBtns.forEach((btn) => {
 });
 
 // Welcome Screen Logic
-// Welcome Screen Logic
+let welcomeWizardBound = false;
+let welcomeFinishing = false;
+
 function checkWelcomeStatus() {
-  if (!appSettings.hasSeenWelcome) {
-    const overlay = document.getElementById('welcome-overlay');
-    const nextBtn = document.getElementById('wizard-next');
-    const backBtn = document.getElementById('wizard-back');
-    const steps = document.querySelectorAll('.wizard-step');
-    const dots = document.querySelectorAll('.wizard-dots .dot');
+  const overlay = document.getElementById('welcome-overlay');
 
-    // State
-    let currentStep = 1;
-    let selectedRole = 'agent';
-    let selectedTheme = 'dark';
-    let userName = '';
-    let customModules = {};
+  if (appSettings.hasSeenWelcome) {
+    if (overlay) {
+      overlay.classList.remove('active');
+      overlay.setAttribute('aria-hidden', 'true');
+      overlay.inert = true;
+      document.body.classList.remove('welcome-open');
+    }
+    return;
+  }
 
-    if (overlay && nextBtn) {
-      setTimeout(() => overlay.classList.add('active'), 500);
+  const nextBtn = document.getElementById('wizard-next');
+  const backBtn = document.getElementById('wizard-back');
+  const steps = document.querySelectorAll('.wizard-step');
+  const dots = document.querySelectorAll('.wizard-dots .dot');
+  const summaryEl = document.getElementById('welcome-summary');
 
-      // --- Helpers ---
-      function updateStep(step) {
-        steps.forEach((s) => {
-          s.classList.remove('active');
-          if (parseInt(s.dataset.step) === step) s.classList.add('active');
-        });
+  let currentStep = 1;
+  let selectedRole =
+    document.querySelector('.role-card.selected')?.dataset?.role || 'agent';
+  let selectedTheme = loadTheme() || 'light';
+  let userName = '';
+  let customModules = {};
 
-        dots.forEach((d, i) => {
-          // Logic for dots needs to match visible steps vs actual steps?
-          // Simple approach: just light them up.
-          if (i < step) d.classList.add('active');
-          else d.classList.remove('active');
-        });
+  if (!(overlay && nextBtn)) return;
 
-        backBtn.style.visibility = step === 1 ? 'hidden' : 'visible';
+  // Already bound: just ensure visible if still needed
+  if (welcomeWizardBound) {
+    overlay.classList.add('active');
+    overlay.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('welcome-open');
+    return;
+  }
+  welcomeWizardBound = true;
 
-        if (step === 5) {
-          nextBtn.textContent = 'Finish';
-        } else {
-          nextBtn.textContent = 'Next';
-        }
+  // Sync selections from DOM
+  document.querySelectorAll('.theme-card').forEach((card) => {
+    card.classList.toggle('selected', card.dataset.theme === selectedTheme);
+  });
+  document.querySelectorAll('.role-card').forEach((card) => {
+    card.classList.toggle('selected', card.dataset.role === selectedRole);
+    if (!card.hasAttribute('tabindex')) card.setAttribute('tabindex', '0');
+    if (!card.getAttribute('role')) card.setAttribute('role', 'button');
+  });
+  document.querySelectorAll('.theme-card').forEach((card) => {
+    if (!card.hasAttribute('tabindex')) card.setAttribute('tabindex', '0');
+    if (!card.getAttribute('role')) card.setAttribute('role', 'button');
+  });
+
+  overlay.classList.add('active');
+  overlay.setAttribute('aria-hidden', 'false');
+  overlay.inert = false;
+  document.body.classList.add('welcome-open');
+
+  function dismissWelcomeOverlay() {
+    overlay.classList.remove('active');
+    overlay.setAttribute('aria-hidden', 'true');
+    overlay.inert = true;
+    document.body.classList.remove('welcome-open');
+    document.removeEventListener('keydown', onWizardKeydown, true);
+    const mainTab = document.getElementById('main-tab');
+    if (mainTab && typeof mainTab.focus === 'function') {
+      try {
+        mainTab.focus();
+      } catch {
+        /* ignore */
       }
-
-      // --- Interaction Handlers ---
-
-      const welcomeLoginBtn = document.getElementById('welcome-login-btn');
-      if (welcomeLoginBtn) {
-        welcomeLoginBtn.addEventListener('click', () => {
-          overlay.classList.remove('active');
-          if (window.showLogin) window.showLogin();
-        });
-      }
-
-      // Step 1: Role Selection
-      const roleCards = document.querySelectorAll('.role-card');
-      roleCards.forEach((card) => {
-        card.addEventListener('click', () => {
-          roleCards.forEach((c) => c.classList.remove('selected'));
-          card.classList.add('selected');
-          selectedRole = card.dataset.role;
-        });
-      });
-
-      // Step 2 handled by checkboxes naturally
-
-      // Step 3: Theme Selection
-      const themeCards = document.querySelectorAll('.theme-card');
-      themeCards.forEach((card) => {
-        card.addEventListener('click', () => {
-          themeCards.forEach((c) => c.classList.remove('selected'));
-          card.classList.add('selected');
-          selectedTheme = card.dataset.theme;
-        });
-      });
-
-      // --- Navigation ---
-      nextBtn.addEventListener('click', () => {
-        // Logic for moving forward
-        let nextStep = currentStep + 1;
-
-        // Skip Step 2 if not custom
-        if (currentStep === 1 && selectedRole !== 'custom') {
-          nextStep = 3;
-        }
-
-        if (currentStep === 3) {
-          if (window.setTheme) window.setTheme(selectedTheme);
-        }
-
-        if (currentStep < 5) {
-          currentStep = nextStep;
-          updateStep(currentStep);
-        } else {
-          // FINISH (Step 5)
-          const nameInput = document.getElementById('welcome-name');
-          if (nameInput) userName = nameInput.value;
-
-          // Collect modules if custom
-          if (selectedRole === 'custom') {
-            document.querySelectorAll('input[name="modules"]').forEach((cb) => {
-              customModules[cb.value] = cb.checked;
-            });
-          }
-
-          applyRolePreset(selectedRole, customModules);
-
-          appSettings.theme = selectedTheme;
-          if (userName) appSettings.userName = userName;
-
-          appSettings.hasSeenWelcome = true;
-          saveSettings(appSettings);
-
-          overlay.classList.remove('active');
-          applySettings();
-        }
-      });
-
-      backBtn.addEventListener('click', () => {
-        let prevStep = currentStep - 1;
-
-        // Skip Step 2 going back if not custom
-        if (currentStep === 3 && selectedRole !== 'custom') {
-          prevStep = 1;
-        }
-
-        if (prevStep >= 1) {
-          currentStep = prevStep;
-          updateStep(currentStep);
-        }
-      });
     }
   }
+
+  function roleLabel(role) {
+    return (
+      {
+        agent: 'Agent',
+        manager: 'Manager',
+        minimal: 'Minimalist',
+        custom: 'Custom',
+      }[role] || role
+    );
+  }
+
+  function updateSummary() {
+    if (!summaryEl) return;
+    const themeName = selectedTheme === 'dark' ? 'Dark' : 'Light';
+    const nameBit = userName ? ` · ${userName}` : '';
+    summaryEl.textContent = `${roleLabel(selectedRole)} workspace · ${themeName} theme${nameBit}`;
+  }
+
+  function updateStep(step) {
+    currentStep = step;
+    steps.forEach((s) => {
+      const active = parseInt(s.dataset.step, 10) === step;
+      s.classList.toggle('active', active);
+      s.hidden = !active;
+    });
+
+    const path =
+      selectedRole === 'custom' ? [1, 2, 3, 4, 5] : [1, 3, 4, 5];
+    const visibleIndex = Math.max(0, path.indexOf(step));
+
+    dots.forEach((d, i) => {
+      if (selectedRole !== 'custom' && i === 1) {
+        d.style.display = 'none';
+        d.classList.remove('active');
+        return;
+      }
+      d.style.display = '';
+      const pathIdx = selectedRole === 'custom' ? i : i === 0 ? 0 : i - 1;
+      d.classList.toggle('active', pathIdx <= visibleIndex);
+    });
+
+    if (backBtn) {
+      backBtn.style.visibility = step === 1 ? 'hidden' : 'visible';
+      backBtn.disabled = step === 1;
+    }
+
+    nextBtn.textContent = step === 5 ? 'Finish' : 'Next';
+    nextBtn.disabled = false;
+
+    if (step === 4) {
+      const nameInput = document.getElementById('welcome-name');
+      if (nameInput) userName = nameInput.value.trim();
+    }
+    if (step === 5) updateSummary();
+
+    // Focus first interactive control in the active step
+    const activeStep = overlay.querySelector('.wizard-step.active');
+    const focusable = activeStep?.querySelector(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    if (focusable && step !== 1) {
+      try {
+        focusable.focus({ preventScroll: true });
+      } catch {
+        /* ignore */
+      }
+    }
+  }
+
+  function selectRole(card) {
+    if (!card) return;
+    document.querySelectorAll('.role-card').forEach((c) => {
+      c.classList.remove('selected');
+      c.setAttribute('aria-pressed', 'false');
+    });
+    card.classList.add('selected');
+    card.setAttribute('aria-pressed', 'true');
+    selectedRole = card.dataset.role || 'agent';
+    updateStep(currentStep);
+  }
+
+  function selectTheme(card) {
+    if (!card || !card.dataset.theme) return;
+    document.querySelectorAll('.theme-card').forEach((c) => {
+      c.classList.remove('selected');
+      c.setAttribute('aria-pressed', 'false');
+    });
+    card.classList.add('selected');
+    card.setAttribute('aria-pressed', 'true');
+    selectedTheme = card.dataset.theme;
+    applyTheme(selectedTheme);
+  }
+
+  document.querySelectorAll('.role-card').forEach((card) => {
+    card.setAttribute(
+      'aria-pressed',
+      card.classList.contains('selected') ? 'true' : 'false'
+    );
+    card.addEventListener('click', () => selectRole(card));
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        selectRole(card);
+      }
+    });
+  });
+
+  document.querySelectorAll('.theme-card').forEach((card) => {
+    card.setAttribute(
+      'aria-pressed',
+      card.classList.contains('selected') ? 'true' : 'false'
+    );
+    card.addEventListener('click', () => selectTheme(card));
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        selectTheme(card);
+      }
+    });
+  });
+
+  // Keep module-card selected class in sync (for browsers without :has)
+  document.querySelectorAll('.module-card input[name="modules"]').forEach((cb) => {
+    const sync = () => {
+      cb.closest('.module-card')?.classList.toggle('selected', cb.checked);
+    };
+    sync();
+    cb.addEventListener('change', sync);
+  });
+
+  function goNext() {
+    if (welcomeFinishing) return;
+
+    let nextStep = currentStep + 1;
+    if (currentStep === 1 && selectedRole !== 'custom') {
+      nextStep = 3;
+    }
+
+    if (currentStep === 3) {
+      applyTheme(selectedTheme);
+    }
+
+    if (currentStep === 4) {
+      const nameInput = document.getElementById('welcome-name');
+      if (nameInput) userName = nameInput.value.trim();
+    }
+
+    if (currentStep < 5) {
+      updateStep(nextStep);
+      return;
+    }
+
+    // FINISH
+    welcomeFinishing = true;
+    nextBtn.disabled = true;
+    nextBtn.textContent = 'Saving…';
+
+    const nameInput = document.getElementById('welcome-name');
+    if (nameInput) userName = nameInput.value.trim();
+
+    if (selectedRole === 'custom') {
+      customModules = {};
+      document.querySelectorAll('input[name="modules"]').forEach((cb) => {
+        customModules[cb.value] = cb.checked;
+      });
+    }
+
+    try {
+      applyRolePreset(selectedRole, customModules);
+      applyTheme(selectedTheme);
+      if (userName) appSettings.userName = userName;
+      appSettings.hasSeenWelcome = true;
+      saveSettings(appSettings);
+      dismissWelcomeOverlay();
+      applySettings();
+      if (typeof window.showMainApp === 'function') {
+        window.showMainApp();
+      }
+    } catch (err) {
+      console.error('Welcome finish failed:', err);
+      welcomeFinishing = false;
+      nextBtn.disabled = false;
+      nextBtn.textContent = 'Finish';
+      // Still dismiss so the user is not trapped; flag already attempted
+      appSettings.hasSeenWelcome = true;
+      try {
+        saveSettings(appSettings);
+      } catch {
+        /* ignore */
+      }
+      dismissWelcomeOverlay();
+      applySettings();
+    }
+  }
+
+  function goBack() {
+    if (welcomeFinishing || currentStep <= 1) return;
+    let prevStep = currentStep - 1;
+    if (currentStep === 3 && selectedRole !== 'custom') {
+      prevStep = 1;
+    }
+    updateStep(prevStep);
+  }
+
+  nextBtn.addEventListener('click', goNext);
+  backBtn?.addEventListener('click', goBack);
+
+  function onWizardKeydown(e) {
+    if (!overlay.classList.contains('active')) return;
+
+    // Focus trap
+    if (e.key === 'Tab') {
+      const focusables = [
+        ...overlay.querySelectorAll(
+          'button:not([disabled]), [href], input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])'
+        ),
+      ].filter((el) => el.offsetParent !== null || el === document.activeElement);
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+      return;
+    }
+
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      goBack();
+      return;
+    }
+
+    if (e.key === 'Enter') {
+      const tag = (e.target && e.target.tagName) || '';
+      if (tag === 'TEXTAREA') return;
+      // Allow default on buttons; for inputs/cards advance
+      if (tag === 'INPUT' || e.target?.classList?.contains('role-card') || e.target?.classList?.contains('theme-card')) {
+        e.preventDefault();
+        goNext();
+      }
+    }
+  }
+  document.addEventListener('keydown', onWizardKeydown, true);
+
+  // Hide inactive steps for a11y
+  steps.forEach((s) => {
+    s.hidden = !s.classList.contains('active');
+  });
+  updateStep(1);
 }
 
 function applyRolePreset(role, customModules = {}) {
-  // Defaults set to false for clarity before enabling
   const allModules = [
     'showFormatter',
+    'showCallflow',
     'showCalllogging',
     'showScripts',
     'showHoldtimer',
     'showNotes',
     'showAnalytics',
+    'showAdvancedAnalytics',
     'showCrm',
     'showTasks',
     'showCollaboration',
     'showPerformanceMonitoring',
+    'showKnowledgeBase',
+    'showWorkflows',
+    'showMultichannel',
+    'showVoicerecording',
+    'showQuickActions',
+    'showTimeTracking',
+    'showApiIntegration',
+    'showFeedback',
   ];
 
-  // Helper to reset
   const resetAll = () => {
-    allModules.forEach((m) => (appSettings[m] = false));
+    allModules.forEach((m) => {
+      appSettings[m] = false;
+    });
   };
 
-  if (role === 'custom') {
-    // Apply exact check states
-    Object.keys(customModules).forEach((key) => {
-      appSettings[key] = customModules[key];
-    });
-    // Ensure Quick actions is on by default for custom?
-    appSettings.showQuickActions = appSettings.showQuickActions ?? true;
-  } else {
-    resetAll(); // Clear first for presets
+  resetAll();
 
-    if (role === 'agent') {
-      appSettings.showFormatter = true;
-      appSettings.showCalllogging = true;
-      appSettings.showScripts = true;
-      appSettings.showHoldtimer = true;
-      appSettings.showNotes = true;
-      appSettings.showQuickActions = true;
-    } else if (role === 'manager') {
-      appSettings.showAnalytics = true;
-      appSettings.showPerformanceMonitoring = true; // Often paired with analytics
-      appSettings.showCollaboration = true;
-      appSettings.showTasks = true;
-      appSettings.showCrm = true;
-      appSettings.showFormatter = true; // Useful for everyone
-      appSettings.showCalllogging = true; // Reviewing calls
-      appSettings.showQuickActions = true;
-    } else if (role === 'minimal') {
+  if (role === 'custom') {
+    Object.keys(customModules).forEach((key) => {
+      if (Object.prototype.hasOwnProperty.call(appSettings, key)) {
+        appSettings[key] = !!customModules[key];
+      }
+    });
+    // Keep a usable chrome baseline if user unchecked everything
+    if (!allModules.some((m) => appSettings[m])) {
       appSettings.showFormatter = true;
       appSettings.showHoldtimer = true;
       appSettings.showQuickActions = true;
     }
+  } else if (role === 'agent') {
+    appSettings.showFormatter = true;
+    appSettings.showCalllogging = true;
+    appSettings.showScripts = true;
+    appSettings.showHoldtimer = true;
+    appSettings.showNotes = true;
+    appSettings.showQuickActions = true;
+  } else if (role === 'manager') {
+    appSettings.showAnalytics = true;
+    appSettings.showAdvancedAnalytics = true;
+    appSettings.showPerformanceMonitoring = true;
+    appSettings.showCollaboration = true;
+    appSettings.showTasks = true;
+    appSettings.showCrm = true;
+    appSettings.showFormatter = true;
+    appSettings.showCalllogging = true;
+    appSettings.showQuickActions = true;
+  } else if (role === 'minimal') {
+    appSettings.showFormatter = true;
+    appSettings.showHoldtimer = true;
+    appSettings.showQuickActions = true;
   }
 
   saveSettings(appSettings);

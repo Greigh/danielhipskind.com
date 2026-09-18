@@ -1,6 +1,8 @@
 // Customer History Search Module
 // Provides quick lookup across all customer interactions
 
+import { escapeHtml } from '../utils/helpers.js';
+
 export function initializeCustomerHistorySearch() {
   createSearchInterface();
   setupSearchEventListeners();
@@ -181,11 +183,11 @@ function displaySearchResults(results) {
           (call) => `
         <div class="result-item call-result">
           <div class="result-header">
-            <strong>${call.callerName}</strong> - ${call.callerPhone}
-            <span class="result-type">${call.callType}</span>
+            <strong>${escapeHtml(call.callerName || '')}</strong> - ${escapeHtml(call.callerPhone || '')}
+            <span class="result-type">${escapeHtml(call.callType || '')}</span>
           </div>
           <div class="result-meta">${new Date(call.startTime).toLocaleString()}</div>
-          ${call.notes ? `<div class="result-content">${call.notes.substring(0, 100)}...</div>` : ''}
+          ${call.notes ? `<div class="result-content">${escapeHtml((call.notes || '').substring(0, 100))}...</div>` : ''}
         </div>
       `
         )
@@ -203,10 +205,10 @@ function displaySearchResults(results) {
           (note) => `
         <div class="result-item note-result">
           <div class="result-header">
-            <strong>${note.title}</strong>
+            <strong>${escapeHtml(note.title || '')}</strong>
           </div>
           <div class="result-meta">${new Date(note.timestamp).toLocaleString()}</div>
-          <div class="result-content">${note.content.substring(0, 100)}...</div>
+          <div class="result-content">${escapeHtml((note.content || '').substring(0, 100))}...</div>
         </div>
       `
         )
@@ -224,11 +226,11 @@ function displaySearchResults(results) {
           (task) => `
         <div class="result-item task-result">
           <div class="result-header">
-            <strong>${task.title}</strong>
-            <span class="result-type priority-${task.priority}">${task.priority}</span>
+            <strong>${escapeHtml(task.title || '')}</strong>
+            <span class="result-type priority-${escapeHtml(task.priority || '')}">${escapeHtml(task.priority || '')}</span>
           </div>
-          <div class="result-meta">Due: ${task.dueDate || 'No due date'}</div>
-          ${task.description ? `<div class="result-content">${task.description.substring(0, 100)}...</div>` : ''}
+          <div class="result-meta">Due: ${escapeHtml(task.dueDate || 'No due date')}</div>
+          ${task.description ? `<div class="result-content">${escapeHtml((task.description || '').substring(0, 100))}...</div>` : ''}
         </div>
       `
         )
@@ -246,11 +248,11 @@ function displaySearchResults(results) {
           (contact) => `
         <div class="result-item crm-result">
           <div class="result-header">
-            <strong>${contact.name}</strong>
-            ${contact.company ? `- ${contact.company}` : ''}
+            <strong>${escapeHtml(contact.name || '')}</strong>
+            ${contact.company ? `- ${escapeHtml(contact.company || '')}` : ''}
           </div>
-          <div class="result-meta">${contact.phone} | ${contact.email}</div>
-          ${contact.notes ? `<div class="result-content">${contact.notes.substring(0, 100)}...</div>` : ''}
+          <div class="result-meta">${escapeHtml(contact.phone || '')} | ${escapeHtml(contact.email || '')}</div>
+          ${contact.notes ? `<div class="result-content">${escapeHtml((contact.notes || '').substring(0, 100))}...</div>` : ''}
         </div>
       `
         )

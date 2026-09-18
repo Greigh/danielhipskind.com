@@ -6,33 +6,33 @@ export const themes = {
   light: {
     name: 'Light',
     colors: {
-      primary: '#1976d2',
-      secondary: '#dc004e',
-      background: '#ffffff',
-      surface: '#f5f5f5',
-      text: '#333333',
-      textSecondary: '#666666',
-      border: '#e0e0e0',
-      success: '#4caf50',
-      warning: '#ff9800',
-      error: '#f44336',
-      info: '#2196f3',
+      primary: '#0e7490',
+      secondary: '#0f766e',
+      background: '#d8e0e8',
+      surface: '#f7fafc',
+      text: '#0b1320',
+      textSecondary: '#475569',
+      border: '#c5d0db',
+      success: '#0f766e',
+      warning: '#b45309',
+      error: '#b91c1c',
+      info: '#0e7490',
     },
   },
   dark: {
     name: 'Dark',
     colors: {
-      primary: '#90caf9',
-      secondary: '#f48fb1',
-      background: '#121212',
-      surface: '#1e1e1e',
-      text: '#ffffff',
-      textSecondary: '#b0b0b0',
-      border: '#333333',
-      success: '#81c784',
-      warning: '#ffb74d',
-      error: '#ef5350',
-      info: '#64b5f6',
+      primary: '#22d3ee',
+      secondary: '#2dd4bf',
+      background: '#070b12',
+      surface: '#121a26',
+      text: '#e8eef6',
+      textSecondary: '#94a3b8',
+      border: '#243044',
+      success: '#2dd4bf',
+      warning: '#fbbf24',
+      error: '#f87171',
+      info: '#22d3ee',
     },
   },
   highContrast: {
@@ -77,10 +77,27 @@ export function applyTheme(themeName) {
   // Set data-theme attribute
   root.setAttribute('data-theme', themeName);
 
-  // Apply CSS custom properties
+  // Apply CSS custom properties + Facet aliases
   Object.entries(theme.colors).forEach(([key, value]) => {
     root.style.setProperty(`--${key}`, value);
   });
+
+  const c = theme.colors;
+  root.style.setProperty('--primary-blue', c.primary);
+  root.style.setProperty('--primary-color', c.primary);
+  root.style.setProperty('--page-bg', c.background);
+  root.style.setProperty('--bg-color', c.surface);
+  root.style.setProperty('--bg-primary', c.surface);
+  root.style.setProperty('--bg-secondary', c.background);
+  root.style.setProperty('--card-bg', c.surface);
+  root.style.setProperty('--surface-raised', c.surface);
+  root.style.setProperty('--surface', c.surface);
+  root.style.setProperty('--text-color', c.text);
+  root.style.setProperty('--text-primary', c.text);
+  root.style.setProperty('--text-secondary', c.textSecondary);
+  root.style.setProperty('--text-muted', c.textSecondary);
+  root.style.setProperty('--border-color', c.border);
+  root.style.setProperty('--border-strong', c.border);
 
   // Special handling for high contrast
   if (themeName === 'highContrast') {
@@ -99,6 +116,15 @@ export function applyTheme(themeName) {
   // Save theme preference
   saveTheme(themeName);
   updateThemeIndicator(themeName);
+
+  // Sync dark-mode checkbox if present
+  updateThemeToggle(themeName);
+}
+
+// Expose for wizard / keyboard shortcuts
+if (typeof window !== 'undefined') {
+  window.setTheme = applyTheme;
+  window.applyTheme = applyTheme;
 }
 
 export function switchToLight() {
@@ -115,7 +141,8 @@ export function switchToHighContrast() {
 
 export function setupThemeToggle() {
   const themeToggle = document.getElementById('theme-toggle');
-  if (themeToggle) {
+  if (themeToggle && !themeToggle.hasAttribute('data-theme-toggle-bound')) {
+    themeToggle.setAttribute('data-theme-toggle-bound', 'true');
     // Create theme selector dropdown
     themeToggle.innerHTML = `
             <select id="theme-selector" style="padding: 5px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-color);">
@@ -127,7 +154,6 @@ export function setupThemeToggle() {
 
     const selector = document.getElementById('theme-selector');
     if (selector) {
-      // Set current theme
       const currentTheme = loadTheme() || 'light';
       selector.value = currentTheme;
 
@@ -139,7 +165,11 @@ export function setupThemeToggle() {
 
   // Legacy dark mode toggle support
   const darkModeToggle = document.getElementById('dark-mode-toggle');
-  if (darkModeToggle) {
+  if (
+    darkModeToggle &&
+    !darkModeToggle.hasAttribute('data-theme-toggle-bound')
+  ) {
+    darkModeToggle.setAttribute('data-theme-toggle-bound', 'true');
     const currentTheme = loadTheme() || 'light';
     darkModeToggle.checked = currentTheme === 'dark';
 

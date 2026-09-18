@@ -11,8 +11,10 @@ const path = require('path');
   const server = http.createServer((req, res) => {
     try {
       let urlPath = decodeURIComponent(req.url.split('?')[0]);
-      // Handle the production publicPath '/callcenterhelper/' by stripping it
-      if (urlPath.startsWith('/callcenterhelper/')) {
+      // Handle production publicPath prefixes used by webpack builds
+      if (urlPath.startsWith('/adamas/')) {
+        urlPath = urlPath.replace('/adamas', '');
+      } else if (urlPath.startsWith('/callcenterhelper/')) {
         urlPath = urlPath.replace('/callcenterhelper', '');
       }
 
@@ -48,11 +50,11 @@ const path = require('path');
       const content = fs.readFileSync(filePath);
       res.writeHead(200, { 'Content-Type': contentType });
       res.end(content);
-      res.writeHead(500, { 'Content-Type': 'text/plain' });
-      res.end('Server error');
     } catch {
-      res.writeHead(500, { 'Content-Type': 'text/plain' });
-      res.end('Server error');
+      if (!res.headersSent) {
+        res.writeHead(500, { 'Content-Type': 'text/plain' });
+        res.end('Server error');
+      }
     }
   });
 

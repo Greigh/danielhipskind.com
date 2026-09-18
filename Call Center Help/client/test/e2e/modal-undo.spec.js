@@ -4,6 +4,9 @@
  */
 
 const { test, expect } = require('@playwright/test');
+const path = require('path');
+
+const DIST_PATH = path.join(__dirname, '../../dist');
 
 test.describe('Modal Confirmation System', () => {
   test.beforeEach(async ({ page }) => {

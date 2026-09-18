@@ -50,6 +50,10 @@ export function removeTimerInstance(id) {
     if (timer.interval) {
       clearInterval(timer.interval);
     }
+    if (timer.soundInterval) {
+      clearInterval(timer.soundInterval);
+      timer.soundInterval = null;
+    }
     timerInstances.delete(id);
   }
 }
@@ -94,6 +98,11 @@ export function stopTimer(id = 'main') {
   timer.isRunning = false;
   timer.pausedTime = 0;
   clearInterval(timer.interval);
+  if (timer.soundInterval) {
+    clearInterval(timer.soundInterval);
+    timer.soundInterval = null;
+  }
+  timer.soundPlaying = false;
 
   // Add to history
   if (timer.seconds > 0) {
@@ -103,6 +112,9 @@ export function stopTimer(id = 'main') {
       description: timer.description,
       endTime: new Date().toISOString(),
     });
+    if (timer.history.length > 50) {
+      timer.history = timer.history.slice(-50);
+    }
   }
 
   timer.seconds = 0;
@@ -659,6 +671,9 @@ function logHoldTime(duration) {
 
   // Add to history
   holdTimer.holdHistory.unshift(holdEntry);
+  if (holdTimer.holdHistory.length > 100) {
+    holdTimer.holdHistory = holdTimer.holdHistory.slice(0, 100);
+  }
 
   // Update counters
   holdTimer.holdCount++;
@@ -685,6 +700,16 @@ function showTimerWarning(currentTime) {
 
 // Initialize the holdTimer with default values
 export function initializeTimer() {
+  // Tear down any previous running intervals before replacing state
+  try {
+    if (typeof holdTimer !== 'undefined' && holdTimer) {
+      if (holdTimer.intervalId) clearInterval(holdTimer.intervalId);
+      if (holdTimer.soundInterval) clearInterval(holdTimer.soundInterval);
+    }
+  } catch {
+    /* ignore */
+  }
+
   // Load saved timer data
   const savedData = loadData('timerData', {
     totalHoldTime: 0,

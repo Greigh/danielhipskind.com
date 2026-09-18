@@ -2,12 +2,15 @@
 // Supports sending emails for follow-ups
 
 import { config } from '../utils/config.js';
-import * as auth from './auth.js';
+import { apiFetch } from '../utils/api.js';
+import { saveData, loadData, STORAGE_LIMITS } from './storage.js';
 
 export const emailState = {
   provider: localStorage.getItem('email-provider') || 'smtp',
-  config: JSON.parse(localStorage.getItem('email-config') || '{}'),
-  templates: JSON.parse(localStorage.getItem('email-templates') || '[]'),
+  config: loadData('email-config', {}),
+  templates: loadData('email-templates', []).slice(
+    -(STORAGE_LIMITS.callTemplates || 50)
+  ),
 };
 
 export function initializeEmail() {
@@ -40,9 +43,9 @@ function renderEmailUI() {
 
 export async function sendEmail(to, subject, body) {
   // Send email via API
-  const res = await fetch('/api/email/send', {
+  const res = await apiFetch('/api/email/send', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...auth.getAuthHeader() },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ to, subject, body }),
   });
   return res.ok;

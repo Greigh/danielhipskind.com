@@ -18,45 +18,6 @@ const historySaveTimeouts = new Map();
 // State for history display
 let showAllHistory = false;
 
-// Helper to get all relevant document roots (main window + popups)
-function getAllRoots() {
-  const roots = new Set();
-  try {
-    roots.add(document);
-  } catch {
-    /* ignore */
-  }
-
-  // Check for floating manager in current window
-  if (window.floatingManager && window.floatingManager.browserWindows) {
-    window.floatingManager.browserWindows.forEach((win) => {
-      if (!win.closed && win.document) {
-        roots.add(win.document);
-      }
-    });
-  }
-
-  // Check if we are a child window
-  if (window.opener) {
-    try {
-      if (window.opener.document) roots.add(window.opener.document);
-      if (
-        window.opener.floatingManager &&
-        window.opener.floatingManager.browserWindows
-      ) {
-        window.opener.floatingManager.browserWindows.forEach((win) => {
-          if (!win.closed && win.document) {
-            roots.add(win.document);
-          }
-        });
-      }
-    } catch {
-      /* ignore security errors */
-    }
-  }
-  return Array.from(roots);
-}
-
 export function initializePatterns() {
   const savedPatterns = loadPatterns();
   if (savedPatterns.length > 0) {
@@ -65,8 +26,11 @@ export function initializePatterns() {
   }
   updatePatternTable();
 
-  // Expose module for testing and keyboard shortcuts
+  // Expose module for testing, keyboard shortcuts, and floating windows.
+  // Preserve any existing exports (e.g. from `import * as patternsModule`)
+  // and always include attach helpers so pop-out formatters keep working.
   window.patternsModule = {
+    ...(window.patternsModule || {}),
     initializePatterns,
     updatePatternTable,
     addPattern,
@@ -77,6 +41,11 @@ export function initializePatterns() {
     reorderPattern,
     formatNumber,
     displayHistory,
+    clearPattern,
+    pasteFromClipboard,
+    copyResult,
+    attachPatternEventListeners,
+    setupPatternEventListeners,
   };
 
   // Expose patterns state for keyboard shortcuts
@@ -88,28 +57,19 @@ export function initializePatterns() {
   };
 }
 
-export function updatePatternTable(specificRoot) {
-  // Update all visible pattern lists within the page (and popups)
-  let roots = [];
-  if (specificRoot) {
-    roots = [specificRoot];
-  } else {
-    roots = getAllRoots();
-  }
+export function updatePatternTable() {
+  // Update all visible pattern lists within the page to support
+  // settings area + any floating clones that include a pattern list.
+  const tbodies = document.querySelectorAll('tbody#patternList');
+  if (!tbodies || tbodies.length === 0) return;
 
-  roots.forEach((root) => {
-    const tbodies = root.querySelectorAll(
-      'tbody#patternList, tbody[id$="-patternList"]'
-    );
-    if (!tbodies || tbodies.length === 0) return;
-
-    tbodies.forEach((tbody) => {
-      tbody.innerHTML = '';
-      patterns.forEach((pattern) => {
-        const row = document.createElement('tr');
-        row.setAttribute('draggable', 'true');
-        row.setAttribute('data-pattern-id', pattern.id);
-        row.innerHTML = `
+  tbodies.forEach((tbody) => {
+    tbody.innerHTML = '';
+    patterns.forEach((pattern) => {
+      const row = document.createElement('tr');
+      row.setAttribute('draggable', 'true');
+      row.setAttribute('data-pattern-id', pattern.id);
+      row.innerHTML = `
         <td class="drag-cell" aria-hidden="true">⣿</td>
         <td class="start-cell">${pattern.start || '(none)'}</td>
         <td class="minlen-cell">${pattern.minLength}</td>
@@ -123,103 +83,102 @@ export function updatePatternTable(specificRoot) {
           </button>
         </td>
       `;
-        tbody.appendChild(row);
-      });
+      tbody.appendChild(row);
+    });
 
-      // Attach event listeners for edit/move/delete buttons inside this tbody
-      tbody.querySelectorAll('.edit-pattern-btn').forEach((btn) => {
-        const newBtn = btn.cloneNode(true);
-        btn.parentNode.replaceChild(newBtn, btn);
-        newBtn.addEventListener('click', function () {
-          const id = parseInt(this.getAttribute('data-pattern-id'));
-          startEditPattern(id, this.closest('tbody'));
-        });
+    // Attach event listeners for edit/move/delete buttons inside this tbody
+    tbody.querySelectorAll('.edit-pattern-btn').forEach((btn) => {
+      const newBtn = btn.cloneNode(true);
+      btn.parentNode.replaceChild(newBtn, btn);
+      newBtn.addEventListener('click', function () {
+        const id = parseInt(this.getAttribute('data-pattern-id'));
+        startEditPattern(id, this.closest('tbody'));
       });
+    });
 
-      tbody.querySelectorAll('.delete-pattern-btn').forEach((btn) => {
-        // Remove existing listeners by cloning if necessary to avoid duplicates
-        const newBtn = btn.cloneNode(true);
-        btn.parentNode.replaceChild(newBtn, btn);
-        newBtn.addEventListener('click', async function () {
-          const id = parseInt(this.getAttribute('data-pattern-id'));
+    tbody.querySelectorAll('.delete-pattern-btn').forEach((btn) => {
+      // Remove existing listeners by cloning if necessary to avoid duplicates
+      const newBtn = btn.cloneNode(true);
+      btn.parentNode.replaceChild(newBtn, btn);
+      newBtn.addEventListener('click', async function () {
+        const id = parseInt(this.getAttribute('data-pattern-id'));
+        try {
+          let confirmed = false;
           try {
-            let confirmed = false;
-            try {
-              const modalModule = await import('../utils/modal.js');
-              if (
-                modalModule &&
-                typeof modalModule.showConfirmModal === 'function'
-              ) {
-                confirmed = await modalModule.showConfirmModal({
-                  title: 'Delete Pattern',
-                  message:
-                    'Are you sure you want to delete this pattern? This action can be undone for 5 seconds.',
-                  confirmLabel: 'Delete',
-                  cancelLabel: 'Cancel',
-                  danger: true,
-                });
-              } else {
-                confirmed = window.confirm(
-                  'Are you sure you want to delete this pattern?'
-                );
-              }
-            } catch (impErr) {
-              console.warn(
-                'Modal import failed, falling back to window.confirm',
-                impErr
-              );
+            const modalModule = await import('../utils/modal.js');
+            if (
+              modalModule &&
+              typeof modalModule.showConfirmModal === 'function'
+            ) {
+              confirmed = await modalModule.showConfirmModal({
+                title: 'Delete Pattern',
+                message:
+                  'Are you sure you want to delete this pattern? This action can be undone for 5 seconds.',
+                confirmLabel: 'Delete',
+                cancelLabel: 'Cancel',
+                danger: true,
+              });
+            } else {
               confirmed = window.confirm(
                 'Are you sure you want to delete this pattern?'
               );
             }
+          } catch (impErr) {
+            console.warn(
+              'Modal import failed, falling back to window.confirm',
+              impErr
+            );
+            confirmed = window.confirm(
+              'Are you sure you want to delete this pattern?'
+            );
+          }
 
-            if (confirmed) {
-              deletePattern(id, { undoable: true });
-              try {
-                showToast('Pattern removed', 'info');
-              } catch (e) {
-                console.warn('showToast failed', e);
-              }
+          if (confirmed) {
+            deletePattern(id, { undoable: true });
+            try {
+              showToast('Pattern removed', 'info');
+            } catch (e) {
+              console.warn('showToast failed', e);
             }
-          } catch (error) {
-            console.error('Error handling delete pattern click:', error);
           }
-        });
+        } catch (error) {
+          console.error('Error handling delete pattern click:', error);
+        }
       });
-      // Insert placeholder row for empty patterns
-      if (patterns.length === 0) {
-        const row = document.createElement('tr');
-        row.className = 'no-patterns';
-        row.innerHTML = `<td colspan="4" class="text-muted">No patterns configured yet. Add a pattern using the fields above.</td>`;
-        tbody.appendChild(row);
-      }
+    });
+    // Insert placeholder row for empty patterns
+    if (patterns.length === 0) {
+      const row = document.createElement('tr');
+      row.className = 'no-patterns';
+      row.innerHTML = `<td colspan="4" class="text-muted">No patterns configured yet. Add a pattern using the fields above.</td>`;
+      tbody.appendChild(row);
+    }
 
-      // Drag and drop handlers for reorder
-      tbody.querySelectorAll('tr[draggable="true"]').forEach((row) => {
-        row.addEventListener('dragstart', (e) => {
-          e.dataTransfer.setData(
-            'text/plain',
-            row.getAttribute('data-pattern-id')
-          );
-          e.dataTransfer.effectAllowed = 'move';
-          row.classList.add('dragging');
-        });
-        row.addEventListener('dragend', () => {
-          row.classList.remove('dragging');
-        });
-        row.addEventListener('dragover', (e) => {
-          e.preventDefault();
-          e.dataTransfer.dropEffect = 'move';
-        });
-        row.addEventListener('drop', (e) => {
-          e.preventDefault();
-          const srcId = parseInt(e.dataTransfer.getData('text/plain'));
-          const dstId = parseInt(row.getAttribute('data-pattern-id'));
-          if (srcId && dstId && srcId !== dstId) {
-            reorderPatternById(srcId, dstId);
-            showToast('Pattern reordered', 'info');
-          }
-        });
+    // Drag and drop handlers for reorder
+    tbody.querySelectorAll('tr[draggable="true"]').forEach((row) => {
+      row.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData(
+          'text/plain',
+          row.getAttribute('data-pattern-id')
+        );
+        e.dataTransfer.effectAllowed = 'move';
+        row.classList.add('dragging');
+      });
+      row.addEventListener('dragend', () => {
+        row.classList.remove('dragging');
+      });
+      row.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+      });
+      row.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const srcId = parseInt(e.dataTransfer.getData('text/plain'));
+        const dstId = parseInt(row.getAttribute('data-pattern-id'));
+        if (srcId && dstId && srcId !== dstId) {
+          reorderPatternById(srcId, dstId);
+          showToast('Pattern reordered', 'info');
+        }
       });
     });
   });
@@ -311,12 +270,8 @@ export function startEditPattern(id, root = document) {
   if (root && root.tagName === 'TBODY') tbody = root;
   else
     tbody =
-      (root &&
-        root.querySelector &&
-        (root.querySelector('tbody#patternList') ||
-          root.querySelector('tbody[id$="-patternList"]'))) ||
-      document.querySelector('tbody#patternList') ||
-      document.querySelector('tbody[id$="-patternList"]');
+      (root && root.querySelector && root.querySelector('tbody#patternList')) ||
+      document.querySelector('tbody#patternList');
   if (!tbody) return;
   const row = tbody.querySelector(`tr[data-pattern-id="${id}"]`);
   if (!row) return;
@@ -354,12 +309,8 @@ export function saveEditPattern(id, root = document) {
   if (root && root.tagName === 'TBODY') tbody = root;
   else
     tbody =
-      (root &&
-        root.querySelector &&
-        (root.querySelector('tbody#patternList') ||
-          root.querySelector('tbody[id$="-patternList"]'))) ||
-      document.querySelector('tbody#patternList') ||
-      document.querySelector('tbody[id$="-patternList"]');
+      (root && root.querySelector && root.querySelector('tbody#patternList')) ||
+      document.querySelector('tbody#patternList');
   if (!tbody) return;
   const row = tbody.querySelector(`tr[data-pattern-id="${id}"]`);
   if (!row) return;
@@ -585,9 +536,7 @@ export function deleteHistoryItem(index) {
 
 export function displayHistory(root = document) {
   const history = loadHistory();
-  const historyContainer =
-    root.querySelector('#patternHistory') ||
-    root.querySelector('[id$="-patternHistory"]');
+  const historyContainer = root.querySelector('#patternHistory');
   if (!historyContainer) return;
 
   if (history.length === 0) {
@@ -973,10 +922,14 @@ export function normalizeNumber(text) {
 
 // Ensure this function is exported for dynamic import
 // Attach listeners scoped to a root element (defaults to document)
+let documentPatternsAttached = false;
 export function attachPatternEventListeners(root = document) {
   // Avoid double-attaching to the same root
   try {
-    if (
+    if (root === document || root === document.documentElement) {
+      if (documentPatternsAttached) return;
+      documentPatternsAttached = true;
+    } else if (
       root &&
       root.getAttribute &&
       root.getAttribute('data-patterns-attached') === 'true'
@@ -1075,7 +1028,7 @@ export function attachPatternEventListeners(root = document) {
   }
   // Ensure update pattern table attaches all event handlers and DnD
   try {
-    updatePatternTable(root);
+    updatePatternTable();
   } catch {
     /* ignore */
   }

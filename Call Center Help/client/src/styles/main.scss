@@ -62,33 +62,52 @@
 // Vendor overrides (last)
 @use 'vendor/third-party';
 
-// Global body styles
+// Global body — faceted slate atmosphere
 body {
   margin: 0;
   padding: 0;
-  font-family: var(--font-sans); // Changed to CSS variable
-  background: var(--gray-50);
-  color: var(--gray-900);
-  line-height: 1.6;
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+  line-height: 1.55;
+  background-color: var(--page-bg);
+  background-image:
+    linear-gradient(155deg, var(--page-bg) 0%, var(--page-bg-accent) 48%, #c2cedb 100%),
+    repeating-linear-gradient(
+      -28deg,
+      transparent,
+      transparent 46px,
+      rgb(11 19 32 / 0.025) 46px,
+      rgb(11 19 32 / 0.025) 47px
+    );
+  background-attachment: fixed;
+  min-height: 100vh;
 }
 
-// Dark mode for body
 [data-theme='dark'] {
   body {
-    background: var(--dark-bg);
+    background-color: var(--dark-bg);
+    background-image:
+      linear-gradient(160deg, #070b12 0%, #0f1724 55%, #101820 100%),
+      repeating-linear-gradient(
+        -28deg,
+        transparent,
+        transparent 46px,
+        rgb(94 234 212 / 0.03) 46px,
+        rgb(94 234 212 / 0.03) 47px
+      );
     color: var(--dark-text);
   }
 }
 
-// Themed static page for privacy, terms, contact
 .themed-static-page {
-  background: var(--gray-50);
-  border-radius: 0.75rem;
-  box-shadow: var(--shadow-lg);
-  padding: 1.5rem;
-  margin-top: 2rem;
-  margin-bottom: 2rem;
-  color: var(--gray-900);
+  background: var(--surface-raised);
+  border-radius: var(--radius-panel);
+  border: 1px solid var(--border-color);
+  box-shadow: none;
+  padding: 1.75rem;
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  color: var(--text-primary);
   font-size: 1rem;
   line-height: 1.7;
   text-align: left;
@@ -128,13 +147,13 @@ body {
 
 [data-theme='dark'] .themed-static-page {
   background: var(--dark-surface);
-  color: var(--gray-100);
-  box-shadow: var(--shadow-xl);
+  color: var(--dark-text);
+  box-shadow: none;
   border: 1px solid var(--dark-border);
 }
 
 [data-theme='dark'] .themed-static-page a {
-  color: #90caf9;
+  color: var(--primary-blue-light);
   text-decoration: underline;
 }
 

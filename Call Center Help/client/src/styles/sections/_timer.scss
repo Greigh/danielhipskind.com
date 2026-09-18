@@ -7,11 +7,11 @@
   .timer-display {
     text-align: center;
     margin-bottom: 1.5rem;
-    padding: 2rem;
-    background: linear-gradient(135deg, var(--surface) 0%, rgba(25, 118, 210, 0.02) 100%);
-    border-radius: 0.75rem;
-    border: 2px solid var(--border-color);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    padding: 1.75rem 1.5rem;
+    background: var(--surface);
+    border-radius: var(--radius-panel);
+    border: 1px solid var(--border-color);
+    box-shadow: none;
     position: relative;
     overflow: hidden;
 
@@ -21,51 +21,51 @@
       top: 0;
       left: 0;
       right: 0;
-      height: 4px;
-      background: linear-gradient(90deg, var(--primary-blue), var(--success), var(--warning));
-      border-radius: 0.75rem 0.75rem 0 0;
+      height: 3px;
+      background: var(--primary);
+      border-radius: 0;
     }
   }
 
   .timer-time {
-    font-family: $font-family-mono;
-    font-size: clamp(2.5rem, 8vw, 4rem);
-    font-weight: 700;
-    color: var(--primary-blue);
-    margin-bottom: 0.75rem;
-    text-shadow: 0 2px 8px rgba(25, 118, 210, 0.2);
+    font-family: var(--font-mono);
+    font-size: clamp(2.5rem, 8vw, 3.75rem);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    color: var(--accent-ink);
+    margin-bottom: 0.65rem;
+    text-shadow: none;
     line-height: 1;
     position: relative;
     z-index: 1;
 
-    // Add styles for editable state
     &.editable {
-      border-bottom: 2px dashed var(--primary-blue);
+      border-bottom: 2px dashed var(--primary);
       padding-bottom: 2px;
       cursor: text;
-      transition: all 0.2s ease;
+      transition: background 0.15s ease;
 
       &:hover {
-        background: rgba(25, 118, 210, 0.05);
+        background: var(--primary-muted);
       }
 
       &:focus {
         outline: none;
-        border-bottom: 2px solid var(--primary-blue);
-        background: rgba(25, 118, 210, 0.1);
+        border-bottom: 2px solid var(--primary);
+        background: var(--primary-muted);
       }
     }
   }
 
   .timer-status {
-    font-size: 1.125rem;
+    font-size: 0.8rem;
     font-weight: 600;
     color: var(--text-secondary);
     text-transform: uppercase;
-    letter-spacing: 0.15em;
-    background: rgba(0, 0, 0, 0.05);
-    padding: 0.25rem 0.75rem;
-    border-radius: 9999px;
+    letter-spacing: 0.12em;
+    background: var(--bg-secondary);
+    padding: 0.3rem 0.65rem;
+    border-radius: var(--radius-control);
     display: inline-block;
     position: relative;
     z-index: 1;

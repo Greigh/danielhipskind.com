@@ -90,9 +90,53 @@ setup_ssh_auth() {
     fi
 }
 
+# Optionally sync standalone Greigh/Adamas into the nested client before build.
+# Deploy ALWAYS builds from: "$SCRIPT_DIR/Call Center Help/client"
+# Set ADAMS_SRC to your Adamas checkout (default: sibling ../Adamas if present).
+sync_adamas_into_client() {
+    local CLIENT_DIR="$SCRIPT_DIR/Call Center Help/client"
+    local SRC="${ADAMS_SRC:-}"
+    if [ -z "$SRC" ] && [ -d "$SCRIPT_DIR/../Adamas" ]; then
+        SRC="$SCRIPT_DIR/../Adamas"
+    fi
+    if [ -z "$SRC" ] && [ -d "$SCRIPT_DIR/../adamas" ]; then
+        SRC="$SCRIPT_DIR/../adamas"
+    fi
+    if [ -z "$SRC" ] || [ ! -f "$SRC/package.json" ]; then
+        echo "ℹ️  No ADAMS_SRC / sibling Adamas checkout found — building nested client as-is"
+        echo "   Tip: export ADAMS_SRC=/path/to/Greigh/Adamas before deploy to sync Facet first"
+        return 0
+    fi
+    echo "🔄 Syncing Adamas from $SRC → Call Center Help/client ..."
+    mkdir -p "$CLIENT_DIR"
+    # Prefer rsync; fall back to tar if rsync is unavailable
+    if command -v rsync >/dev/null 2>&1; then
+        rsync -a --delete \
+            --exclude='.git' \
+            --exclude='node_modules' \
+            --exclude='dist' \
+            --exclude='uploads' \
+            --exclude='logs' \
+            --exclude='*.log' \
+            --exclude='.DS_Store' \
+            "$SRC/" "$CLIENT_DIR/" || return 1
+    else
+        tar -C "$SRC" \
+            --exclude='.git' --exclude='node_modules' --exclude='dist' \
+            --exclude='uploads' --exclude='logs' --exclude='.DS_Store' \
+            -cf - . | tar -C "$CLIENT_DIR" -xf - || return 1
+    fi
+    if ! grep -q '0e7490' "$CLIENT_DIR/src/styles/base/_variables.scss" 2>/dev/null; then
+        echo "❌ Synced client is missing Facet token #0e7490 — aborting"
+        return 1
+    fi
+    echo "✅ Nested client synced from Adamas"
+}
+
 # Build Call Center Helper client
 build_call_center() {
-    echo "🏗️  Building Call Center Helper client..."
+    echo "🏗️  Building Call Center Helper / Adamas client..."
+    sync_adamas_into_client || return 1
     cd "$SCRIPT_DIR/Call Center Help/client" || return 1
 
     if [ -f "package.json" ]; then
@@ -101,11 +145,22 @@ build_call_center() {
         rm -rf node_modules
         npm install --include=dev || return 1
         npm run build || return 1
+
+        # Fail closed if the production CSS is still the old Material blue theme
+        if [ -f "dist/styles/main.css" ] && ! grep -q '0e7490' "dist/styles/main.css"; then
+            echo "❌ Built dist/styles/main.css is missing Facet #0e7490 — refusing to deploy stale UI"
+            return 1
+        fi
+        if [ ! -f "dist/sw.facet.js" ]; then
+            echo "❌ dist/sw.facet.js missing — refuse deploy without cache-bust worker"
+            return 1
+        fi
+
         # Restore local dependencies to keep dev server working
         echo "📦 Restoring local development dependencies..."
         npm install --include=dev
 
-        echo "✅ Call Center Helper built successfully"
+        echo "✅ Call Center Helper / Adamas built successfully"
     else
         echo "⚠️  Call Center Helper package.json not found, skipping"
     fi
@@ -316,6 +371,17 @@ verify_deployment() {
             return 1
         fi
     done
+
+    # Confirm Adamas Facet CSS actually landed (not the old #1976d2 build)
+    echo "🎨 Verifying Adamas Facet CSS on live origin..."
+    LIVE_CSS=$(curl -sf "https://danielhipskind.com/adamas/styles/main.css" || true)
+    if echo "$LIVE_CSS" | grep -q '0e7490'; then
+        echo "✅ Live Adamas CSS contains Facet #0e7490"
+    else
+        echo "❌ Live Adamas CSS missing Facet #0e7490 — deploy did not update /adamas/"
+        echo "   First bytes: $(echo "$LIVE_CSS" | head -c 120)"
+        return 1
+    fi
 
     # SSL certificate check
     if openssl s_client -connect danielhipskind.com:443 -servername danielhipskind.com < /dev/null 2>/dev/null | openssl x509 -noout -dates >/dev/null; then

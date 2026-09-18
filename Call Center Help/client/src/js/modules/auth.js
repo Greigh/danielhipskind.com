@@ -1,14 +1,47 @@
-// Auth Module for user authentication with role-based access
+// Auth Module — httpOnly cookie sessions (token never stored in localStorage)
 import { showToast } from '../utils/toast.js';
+import { apiFetch } from '../utils/api.js';
+
+const USER_KEY = 'user';
 
 export class Auth {
   constructor() {
-    this.token = localStorage.getItem('token');
-    this.user = JSON.parse(localStorage.getItem('user') || 'null');
+    // Migrate away from legacy localStorage JWT
+    try {
+      localStorage.removeItem('token');
+    } catch {
+      /* ignore */
+    }
+    this.user = JSON.parse(sessionStorage.getItem(USER_KEY) || 'null');
+    this._ready = this.restoreSession();
+  }
+
+  /** Resolves when /api/me session probe finishes */
+  whenReady() {
+    return this._ready;
+  }
+
+  async restoreSession() {
+    try {
+      const res = await apiFetch('/api/me');
+      if (res.ok) {
+        const data = await res.json();
+        this.user = data.user || data;
+        sessionStorage.setItem(USER_KEY, JSON.stringify(this.user));
+        return true;
+      }
+      // Explicit unauthenticated response — drop stale profile
+      this.user = null;
+      sessionStorage.removeItem(USER_KEY);
+      return false;
+    } catch {
+      // Offline / server down — keep optimistic sessionStorage profile
+      return !!this.user;
+    }
   }
 
   async login(email, password) {
-    const res = await fetch('/api/login', {
+    const res = await apiFetch('/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
@@ -22,10 +55,14 @@ export class Auth {
     }
 
     if (res.ok) {
-      this.token = data.token;
       this.user = data.user;
-      localStorage.setItem('token', this.token);
-      localStorage.setItem('user', JSON.stringify(this.user));
+      sessionStorage.setItem(USER_KEY, JSON.stringify(this.user));
+      // Drop any leftover bearer token from older builds
+      try {
+        localStorage.removeItem('token');
+      } catch {
+        /* ignore */
+      }
       return true;
     }
 
@@ -38,7 +75,7 @@ export class Auth {
   }
 
   async register(username, email, password, role = 'agent') {
-    const res = await fetch('/api/register', {
+    const res = await apiFetch('/api/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, email, password, role }),
@@ -64,9 +101,12 @@ export class Auth {
   }
 
   async updateProfile(username, email) {
-    const res = await fetch('/api/user/profile', {
+    const res = await apiFetch('/api/user/profile', {
       method: 'PUT',
-      headers: this.getAuthHeader(),
+      headers: {
+        'Content-Type': 'application/json',
+        ...this.getAuthHeader(),
+      },
       body: JSON.stringify({ username, email }),
     });
 
@@ -78,9 +118,8 @@ export class Auth {
     }
 
     if (res.ok) {
-      // Update local user data
       this.user = { ...this.user, ...data };
-      localStorage.setItem('user', JSON.stringify(this.user));
+      sessionStorage.setItem(USER_KEY, JSON.stringify(this.user));
       return true;
     }
 
@@ -92,9 +131,12 @@ export class Auth {
   }
 
   async updatePassword(currentPassword, newPassword) {
-    const res = await fetch('/api/user/password', {
+    const res = await apiFetch('/api/user/password', {
       method: 'PUT',
-      headers: this.getAuthHeader(),
+      headers: {
+        'Content-Type': 'application/json',
+        ...this.getAuthHeader(),
+      },
       body: JSON.stringify({ currentPassword, newPassword }),
     });
 
@@ -116,19 +158,47 @@ export class Auth {
     throw new Error(errorMessage);
   }
 
-  logout() {
-    this.token = null;
+  async logout() {
+    try {
+      await apiFetch('/api/logout', { method: 'POST' });
+    } catch {
+      /* best-effort */
+    }
     this.user = null;
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    sessionStorage.removeItem(USER_KEY);
+    try {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      localStorage.removeItem('crmAccessToken');
+      sessionStorage.removeItem('crmAccessToken');
+    } catch {
+      /* ignore */
+    }
+    try {
+      if (typeof window !== 'undefined' && window.adamasSocket) {
+        window.adamasSocket.disconnect();
+        window.adamasSocket = null;
+      }
+    } catch {
+      /* ignore */
+    }
+    try {
+      const { crmManager } = await import('./crm/CRMManager.js');
+      if (crmManager && typeof crmManager.clearPersistedSecrets === 'function') {
+        crmManager.clearPersistedSecrets();
+      }
+    } catch {
+      /* ignore */
+    }
   }
 
+  /** Cookie carries the JWT; Authorization header kept empty for same-origin calls. */
   getAuthHeader() {
-    return this.token ? { Authorization: `Bearer ${this.token}` } : {};
+    return {};
   }
 
   isLoggedIn() {
-    return !!this.token;
+    return !!this.user;
   }
 
   getUser() {
@@ -186,15 +256,8 @@ export function initializeAuthUI() {
       try {
         const success = await auth.login(email, password);
         if (success) {
-          // Import SyncManager dynamically to avoid circular dependencies if any
-          try {
-            const { syncManager } = await import('./sync.js');
-            await syncManager.handleLoginSync();
-          } catch (err) {
-            console.warn('Sync failed or skipped:', err);
-            // Fallback: just proceed
-            window.showMainApp();
-          }
+          showToast('Login successful!', 'success');
+          window.showMainApp();
         }
       } catch (error) {
         showToast(`Login failed: ${error.message}`, 'error');
@@ -213,7 +276,6 @@ export function initializeAuthUI() {
         const success = await auth.register(username, email, password);
         if (success) {
           showToast('Registration successful! Please login.', 'success');
-          // Switch to login form
           showLoginForm();
         }
       } catch (error) {
@@ -240,7 +302,6 @@ export function initializeAuthUI() {
   if (skipLoginBtn) {
     skipLoginBtn.addEventListener('click', (e) => {
       e.preventDefault();
-      // Continue to main app without login
       window.showMainApp();
     });
   }

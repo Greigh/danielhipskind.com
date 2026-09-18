@@ -1,26 +1,49 @@
 // Team Collaboration Module
+import { escapeHtml } from '../utils/helpers.js';
+import { saveData, loadData, STORAGE_LIMITS } from './storage.js';
+
+let collaborationInitialized = false;
+let collaborationStatusInterval = null;
+
 export function initializeCollaboration() {
+  if (collaborationInitialized) return;
+
   const chatInput = document.getElementById('chat-input');
   const sendBtn = document.getElementById('send-message');
   const chatMessages = document.getElementById('chat-messages');
   const teamMembersList = document.getElementById('team-members-list');
-  const onlineCount = document.getElementById('online-count');
-  const typingIndicator = document.getElementById('typing-indicator');
+  let onlineCount = document.getElementById('online-count');
+  let typingIndicator = document.getElementById('typing-indicator');
 
-  // Check if required elements exist
-  if (
-    !chatInput ||
-    !sendBtn ||
-    !chatMessages ||
-    !teamMembersList ||
-    !onlineCount ||
-    !typingIndicator
-  ) {
+  // Check if core chat elements exist
+  if (!chatInput || !sendBtn || !chatMessages || !teamMembersList) {
     return;
   }
 
-  let messages = JSON.parse(localStorage.getItem('chatMessages')) || [];
-  let teamMembers = JSON.parse(localStorage.getItem('teamMembers')) || [
+  collaborationInitialized = true;
+
+  // Create optional UI affordances when markup is incomplete
+  if (!onlineCount) {
+    onlineCount = document.createElement('div');
+    onlineCount.id = 'online-count';
+    onlineCount.className = 'online-count';
+    const membersHeader = teamMembersList.previousElementSibling;
+    if (membersHeader && membersHeader.tagName === 'H4') {
+      membersHeader.insertAdjacentElement('afterend', onlineCount);
+    } else {
+      teamMembersList.parentElement?.prepend(onlineCount);
+    }
+  }
+  if (!typingIndicator) {
+    typingIndicator = document.createElement('div');
+    typingIndicator.id = 'typing-indicator';
+    typingIndicator.className = 'typing-indicator';
+    typingIndicator.style.display = 'none';
+    chatMessages.insertAdjacentElement('afterend', typingIndicator);
+  }
+
+  let messages = loadData('chatMessages', []);
+  let teamMembers = loadData('teamMembers', [
     {
       id: 1,
       name: 'Alice Johnson',
@@ -37,7 +60,7 @@ export function initializeCollaboration() {
       status: 'offline',
       avatar: '👨‍💼',
     },
-  ];
+  ]).slice(0, STORAGE_LIMITS.teamMembers);
   let typingUsers = new Set();
   let currentUser = { id: 0, name: 'You', avatar: '👤' };
 
@@ -101,7 +124,10 @@ export function initializeCollaboration() {
     };
 
     messages.push(message);
-    localStorage.setItem('chatMessages', JSON.stringify(messages.slice(-100))); // Keep last 100 messages
+    saveData(
+      'chatMessages',
+      messages.slice(-(STORAGE_LIMITS.chatMessages || 100))
+    ); // Keep last N messages
     renderMessage(message);
     chatMessages.scrollTop = chatMessages.scrollHeight;
   }
@@ -110,13 +136,13 @@ export function initializeCollaboration() {
     const messageEl = document.createElement('div');
     messageEl.className = `chat-message ${message.sender.id === currentUser.id ? 'own' : 'other'}`;
     messageEl.innerHTML = `
-      <div class="message-avatar">${message.sender.avatar}</div>
+      <div class="message-avatar">${escapeHtml(message.sender.avatar || '')}</div>
       <div class="message-content">
         <div class="message-header">
-          <span class="message-sender">${message.sender.name}</span>
+          <span class="message-sender">${escapeHtml(message.sender.name || '')}</span>
           <span class="message-time">${new Date(message.timestamp).toLocaleTimeString()}</span>
         </div>
-        <div class="message-text">${message.content}</div>
+        <div class="message-text">${escapeHtml(message.content || '')}</div>
       </div>
     `;
 
@@ -209,7 +235,8 @@ export function initializeCollaboration() {
   updateTypingIndicator();
 
   // Simulate team member status changes
-  setInterval(() => {
+  if (collaborationStatusInterval) clearInterval(collaborationStatusInterval);
+  collaborationStatusInterval = setInterval(() => {
     teamMembers.forEach((member) => {
       if (Math.random() > 0.95) {
         const statuses = ['online', 'away', 'offline'];

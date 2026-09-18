@@ -1,35 +1,26 @@
 <div class="login-card">
   <div class="login-card-inner">
-    <h3>Login</h3>
+    <h3>Adamas</h3>
+    <p class="login-footer text-muted small" style="margin-top: 0; margin-bottom: 1rem">
+      Sign in to sync notes, settings, and call tools.
+    </p>
     <div class="form-row">
       <label for="login-email" class="sr-only">Email</label>
-      <input
-        id="login-email"
-        name="email"
-        type="email"
-        autocomplete="username"
-        placeholder="Email"
-      />
+      <input id="login-email" type="email" placeholder="Email" autocomplete="username" />
     </div>
     <div class="form-row">
       <label for="login-password" class="sr-only">Password</label>
       <input
         id="login-password"
-        name="password"
         type="password"
-        autocomplete="current-password"
         placeholder="Password"
+        autocomplete="current-password"
       />
     </div>
     <div class="form-actions">
-      <button id="login-submit" class="button">Login</button>
-      <button id="register-submit" class="button btn-secondary">
-        Register
-      </button>
-      <button id="login-close" class="button btn-link">Close</button>
-    </div>
-    <div class="login-footer text-muted small">
-      Use your workspace credentials to sign in.
+      <button id="login-submit" class="button">Sign in</button>
+      <button id="register-submit" class="button btn-outline">Create account</button>
+      <button id="login-close" class="button btn-ghost">Close</button>
     </div>
   </div>
 </div>

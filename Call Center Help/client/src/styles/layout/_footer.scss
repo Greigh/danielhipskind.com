@@ -2,28 +2,29 @@
 @use 'sass:map';
 
 .copyright-footer {
-  background-color: var(--footer-bg);
-  padding: 0.75rem 0;
+  background-color: transparent;
+  padding: 1rem 0 1.5rem;
   margin-top: auto;
   width: 100%;
   text-align: center;
-  font-size: 0.875rem;
-  border-top: 1px solid var(--border-color);
-  
+  font-size: 0.8rem;
+  border-top: none;
+
   p {
     color: var(--footer-text);
     margin: 0;
-    
+
     a {
-      color: var(--primary-blue);
+      color: var(--primary);
       text-decoration: none;
-      
+      font-weight: 500;
+
       &:hover {
         text-decoration: underline;
       }
     }
   }
-  
+
   .container {
     max-width: 1200px;
     margin: 0 auto;
@@ -31,10 +32,13 @@
   }
 }
 
-// Dark theme support
 [data-theme="dark"] {
   .copyright-footer {
-    background-color: var(--dark-surface);
-    border-top-color: var(--dark-border);
+    background-color: transparent;
+    border-top-color: transparent;
+
+    a {
+      color: var(--primary-blue-light);
+    }
   }
 }

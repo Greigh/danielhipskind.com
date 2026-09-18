@@ -1,56 +1,61 @@
 @use '../base/variables' as *;
 @use 'sass:map';
 
-// Card Components
+// Panels use hairline borders — not elevated card chrome
 .card {
-  background: var(--white);
-  border-radius: 0.5rem;
-  box-shadow: var(--shadow-md);
+  background: var(--card-bg);
+  border-radius: var(--radius-panel);
+  border: 1px solid var(--border-color);
+  box-shadow: none;
   overflow: hidden;
-  transition: map.get($transitions, base);
+  transition: border-color 0.2s ease;
 
   &:hover {
-    box-shadow: var(--shadow-lg);
+    box-shadow: none;
+    border-color: var(--border-strong);
   }
 }
 
 .card-header {
-  background: var(--gray-50);
-  padding: 1rem;
-  border-bottom: 1px solid var(--gray-200);
+  background: var(--surface);
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid var(--border-color);
 
   h3 {
     margin: 0;
-    font-size: 1.125rem;
+    font-family: var(--font-display);
+    font-size: 1.05rem;
     font-weight: 600;
-    color: var(--gray-900);
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
   }
 }
 
 .card-body {
-  padding: 1.5rem;
+  padding: 1.25rem;
 }
 
 .card-footer {
-  background: var(--gray-50);
-  padding: 1rem;
-  border-top: 1px solid var(--gray-200);
+  background: var(--surface);
+  padding: 0.9rem 1rem;
+  border-top: 1px solid var(--border-color);
 }
 
-// Settings cards
 .settings-section {
   background: var(--card-bg);
-  border-radius: 0.5rem;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-  box-shadow: var(--shadow-sm);
+  border-radius: var(--radius-panel);
+  padding: 1.35rem;
+  margin-bottom: 1.15rem;
+  box-shadow: none;
   border: 1px solid var(--border-color);
 
   h3 {
-    margin: 0 0 0.5rem 0;
+    margin: 0 0 0.4rem 0;
     color: var(--text);
-    font-size: 1.25rem;
+    font-family: var(--font-display);
+    font-size: 1.15rem;
     font-weight: 600;
+    letter-spacing: -0.02em;
   }
 
   p {
@@ -81,57 +86,33 @@
 
 .setting-description {
   font-size: 0.875rem;
-  color: var(--gray-500);
+  color: var(--text-muted);
   margin-top: 0.25rem;
 }
 
-// Dark mode
 [data-theme="dark"] {
-  .card {
+  .card,
+  .settings-section {
     background: var(--dark-surface);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    border-color: var(--dark-border);
 
     &:hover {
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+      border-color: var(--gray-400);
     }
   }
 
-  .card-header {
-    background: var(--dark-bg);
-    border-bottom-color: var(--dark-border);
+  .card-header,
+  .card-footer {
+    background: rgb(255 255 255 / 0.03);
+    border-color: var(--dark-border);
 
     h3 {
       color: var(--dark-text);
     }
   }
 
-  .card-footer {
-    background: var(--dark-bg);
-    border-top-color: var(--dark-border);
-  }
-
-  .settings-section {
-    background: var(--dark-surface);
-    border-color: var(--dark-border);
-
-    h3 {
-      color: #90caf9;
-    }
-
-    p {
-      color: var(--dark-text-muted);
-    }
-  }
-
-  .setting-item {
-    border-bottom-color: var(--dark-border);
-  }
-
+  .settings-section h3,
   .setting-label {
     color: var(--dark-text);
-  }
-
-  .setting-description {
-    color: var(--dark-text-muted);
   }
 }

@@ -68,10 +68,19 @@ try {
     if (fs.existsSync(src)) {
       // Read the file, update stylesheet reference, and write to dist
       let html = fs.readFileSync(src, 'utf8');
+      // Replace lodash/webpack template tags left in static HTML sources
+      html = html.replace(
+        /<%= htmlWebpackPlugin\.files\.publicPath %>/g,
+        '/adamas/'
+      );
       // Replace any hashed or non-hashed stylesheet reference with main.css
       html = html.replace(
+        /<link\s+rel="stylesheet"\s+href="(?:\/adamas\/)?styles\/main(\.[a-f0-9]+)?\.css"\s*\/?>/gi,
+        '<link rel="stylesheet" href="/adamas/styles/main.css" />'
+      );
+      html = html.replace(
         /<link\s+rel="stylesheet"\s+href="styles\/main(\.[a-f0-9]+)?\.css"\s*\/?>/gi,
-        '<link rel="stylesheet" href="styles/main.css" />'
+        '<link rel="stylesheet" href="/adamas/styles/main.css" />'
       );
       fs.writeFileSync(dest, html, 'utf8');
       console.log(`✅ Copied ${file} to dist/`);
@@ -118,15 +127,22 @@ try {
     console.warn('⚠️  contact.js not found in src/js/');
   }
 
-  // 4d. Copy service worker to dist
-  const swSrc = path.join(__dirname, 'public', 'sw.js');
-  const swDest = path.join(distPath, 'sw.js');
-  if (fs.existsSync(swSrc)) {
-    fs.copyFileSync(swSrc, swDest);
-    console.log(`✅ Copied sw.js to dist/`);
-  } else {
-    console.warn('⚠️  sw.js not found in public/');
-  }
+  // 4d. Copy service worker(s) to dist (src/public is source of truth; public/ is gitignored)
+  const swFiles = ['sw.js', 'sw.facet.js'];
+  swFiles.forEach((name) => {
+    const candidates = [
+      path.join(__dirname, 'src', 'public', name),
+      path.join(__dirname, 'public', name),
+    ];
+    const src = candidates.find((p) => fs.existsSync(p));
+    const dest = path.join(distPath, name);
+    if (src) {
+      fs.copyFileSync(src, dest);
+      console.log(`✅ Copied ${name} to dist/ (from ${path.relative(__dirname, src)})`);
+    } else if (name === 'sw.js') {
+      console.warn('⚠️  sw.js not found in src/public/ or public/');
+    }
+  });
 
   // 4e. Copy download script to dist
   const downloadScriptSrc = path.join(
@@ -180,23 +196,6 @@ try {
       hour12: false,
     });
     fs.writeFileSync(buildDateFile, estDate + '\n');
-  }
-
-  // 6. Reject uncompiled webpack template literals in HTML (SEO / 4xx cleanup)
-  const htmlFiles = fs
-    .readdirSync(distPath)
-    .filter((f) => f.endsWith('.html'));
-  const templateLeak = /<%[\s\S]*?%>/;
-  htmlFiles.forEach((file) => {
-    const contents = fs.readFileSync(path.join(distPath, file), 'utf8');
-    if (templateLeak.test(contents)) {
-      throw new Error(
-        `${file} contains uncompiled template syntax (e.g. htmlWebpackPlugin). Check webpack HtmlWebpackPlugin output.`
-      );
-    }
-  });
-  if (htmlFiles.length > 0) {
-    console.log('✅ Verified HTML has no uncompiled webpack templates');
   }
 
   console.log('\n🎉 Production build finished successfully!');

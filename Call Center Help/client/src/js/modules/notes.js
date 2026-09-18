@@ -7,11 +7,13 @@ import {
 } from './storage.js';
 import { appSettings } from './settings.js'; // Add this import
 import { auth } from './auth.js';
+import { apiFetch } from '../utils/api.js';
 import {
   setupDraggable,
   setupFloating,
   setupSectionToggle,
 } from './draggable.js';
+import { escapeHtml } from '../utils/helpers.js';
 
 export async function renderNotes() {
   const notesFeed = document.getElementById('notes-feed');
@@ -21,9 +23,7 @@ export async function renderNotes() {
 
   if (auth.isLoggedIn()) {
     try {
-      const res = await fetch('/api/notes', {
-        headers: auth.getAuthHeader(),
-      });
+      const res = await apiFetch('/api/notes');
       if (res.ok) {
         notes = await res.json();
       }
@@ -75,7 +75,7 @@ export async function renderNotes() {
     } else {
       contentDiv.innerHTML = note.text
         .split('\n')
-        .map((line) => `<div>${line}</div>`)
+        .map((line) => `<div>${escapeHtml(line)}</div>`)
         .join('');
     }
 
@@ -522,7 +522,7 @@ function renderNotesInstance(notesId) {
     } else {
       contentDiv.innerHTML = note.text
         .split('\n')
-        .map((line) => `<div>${line}</div>`)
+        .map((line) => `<div>${escapeHtml(line)}</div>`)
         .join('');
     }
 
@@ -662,11 +662,10 @@ export function initializeNotes() {
 
     // Save to server if logged in
     if (auth.isLoggedIn()) {
-      fetch('/api/notes', {
+      apiFetch('/api/notes', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...auth.getAuthHeader(),
         },
         body: JSON.stringify({ content: text }),
       }).catch((err) => console.error('Failed to save note to server', err));

@@ -133,7 +133,7 @@ describe('CRM E2E - provider UI & persistence', () => {
       ) {
         try {
           window.__crm_saveConfig();
-        } catch {
+        } catch (e) {
           /* ignore */
         }
       }

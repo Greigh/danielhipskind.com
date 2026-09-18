@@ -1,5 +1,6 @@
 // Draggable sections and floating windows module
 import { appSettings } from './settings.js';
+import { apiFetch } from '../utils/api.js';
 
 export let draggedElement = null;
 export let floatingWindows = new Map();
@@ -15,7 +16,7 @@ function addPoppedOutIndicator(sectionId, text = 'Popped Out') {
     span.textContent = text;
     span.style.marginLeft = '8px';
     span.style.fontSize = '0.85em';
-    span.style.color = '#1976d2';
+    span.style.color = '#0e7490';
     const header =
       section.querySelector('.section-header .title-container') ||
       section.querySelector('.section-header');
@@ -69,7 +70,7 @@ document.addEventListener('click', (e) => {
 
   // If we have a server popup id, attempt to delete it
   if (stored && stored.popupId) {
-    fetch(`/popup/${stored.popupId}`, { method: 'DELETE' }).catch(() => {
+    apiFetch(`/popup/${stored.popupId}`, { method: 'DELETE' }).catch(() => {
       // ignore errors
     });
   }
@@ -360,7 +361,14 @@ function openSectionInFloatingWindow(sectionId) {
       return;
     }
 
-    // Hide original section
+    // Create a deep clone of the original section BEFORE hiding it so the
+    // clone does not inherit display:none from the docked original.
+    const wrapper = section.cloneNode(true);
+    wrapper.id = `floating-${sectionId}`;
+    wrapper.style.display = '';
+    wrapper.removeAttribute('data-patterns-attached');
+
+    // Hide original section after cloning
     section.style.display = 'none';
 
     // Create floating window
@@ -392,10 +400,6 @@ function openSectionInFloatingWindow(sectionId) {
     } catch {
       /* ignore */
     }
-
-    // Create a deep clone of the original section so it preserves header and full structure
-    const wrapper = section.cloneNode(true);
-    wrapper.id = `floating-${sectionId}`;
 
     // Update all IDs in the wrapper to avoid collisions
     wrapper.querySelectorAll('[id]').forEach((element) => {
@@ -463,7 +467,7 @@ function openSectionInFloatingWindow(sectionId) {
       span.textContent = 'Floating';
       span.style.marginLeft = '8px';
       span.style.fontSize = '0.85em';
-      span.style.color = '#1976d2';
+      span.style.color = '#0e7490';
       const header =
         section.querySelector('.section-header .title-container') ||
         section.querySelector('.section-header');
@@ -474,11 +478,17 @@ function openSectionInFloatingWindow(sectionId) {
     (async () => {
       try {
         console.log('DRAGGABLE: Starting pattern attachment for', sectionId);
-        const mod = window.patternsModule || (await import('./patterns.js'));
+        let mod = window.patternsModule;
+        if (!mod || typeof mod.attachPatternEventListeners !== 'function') {
+          mod = await import('./patterns.js');
+        }
         if (mod && typeof mod.attachPatternEventListeners === 'function') {
           console.log('DRAGGABLE: Calling attachPatternEventListeners');
           mod.attachPatternEventListeners(wrapper);
-          window.patternsModule = mod;
+          window.patternsModule = {
+            ...(window.patternsModule || {}),
+            ...mod,
+          };
           wrapper.setAttribute('data-patterns-attached', 'true');
           console.log(
             'DRAGGABLE: Patterns attached successfully, resolving promise'
@@ -563,7 +573,7 @@ function openSectionInBrowserPopup(sectionId) {
                 }
                 
                 h1 {
-                    color: #1976d2;
+                    color: #0e7490;
                     margin-top: 0;
                     text-align: center;
                     border-bottom: 2px solid #e3f2fd;
@@ -571,7 +581,7 @@ function openSectionInBrowserPopup(sectionId) {
                 }
                 
                 .button, button {
-                    background: linear-gradient(90deg, #3498db 60%, #1976d2 100%);
+                    background: #0e7490;
                     color: #fff;
                     border: none;
                     border-radius: 5px;
@@ -583,7 +593,7 @@ function openSectionInBrowserPopup(sectionId) {
                 }
                 
                 .button:hover, button:hover {
-                    background: linear-gradient(90deg, #1976d2 60%, #3498db 100%);
+                    background: #0e7490;
                 }
                 
                 /* Add styles for form elements */
@@ -670,7 +680,7 @@ function openSectionInBrowserPopup(sectionId) {
     // Instead of writing directly into the blank popup, prefer creating a
     // server-served URL for larger content. POST popupHTML to the server
     // and open the returned URL.
-    fetch('/popup', {
+    apiFetch('/popup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ html: popupHTML }),
@@ -748,7 +758,7 @@ function openSectionInBrowserPopup(sectionId) {
       });
   } else {
     // Popup was blocked — try to POST HTML to server and open returned URL in new tab
-    fetch('/popup', {
+    apiFetch('/popup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ html: popupHTML }),

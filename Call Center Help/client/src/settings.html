@@ -3,12 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet" />
     <title>Settings - Adamas</title>
     <link
       rel="icon"
-      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💎</text></svg>"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%230e7490' d='M32 4L8 24l24 36 24-36L32 4zm0 10.5L46.5 26 32 48.2 17.5 26 32 14.5z'/%3E%3C/svg%3E"
     />
-    <link rel="stylesheet" href="/adamas/styles/main.css" />
+    <link rel="stylesheet" href="<%= htmlWebpackPlugin.files.publicPath %>styles/main.css" />
 
     <!-- SEO & Open Graph -->
     <meta name="description" content="Configure your Adamas workspace. Manage roles, integrations, and preferences." />
@@ -68,7 +71,7 @@
                         <label for="account-username" class="setting-label">Username</label>
                       </div>
                       <div class="setting-control">
-                        <input type="text" id="account-username" name="username" class="form-input" autocomplete="username" />
+                        <input type="text" id="account-username" name="username" class="form-input" />
                       </div>
                     </div>
                     <div class="setting-item">
@@ -76,7 +79,7 @@
                         <label for="account-email" class="setting-label">Email</label>
                       </div>
                       <div class="setting-control">
-                        <input type="email" id="account-email" name="email" class="form-input" autocomplete="email" />
+                        <input type="email" id="account-email" name="email" class="form-input" />
                       </div>
                     </div>
                     <div class="form-actions">
@@ -89,14 +92,6 @@
                  <div class="settings-group" style="margin-top: 1.5rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">
                   <h4 class="settings-group-title">Change Password</h4>
                   <form id="change-password-form" class="settings-form">
-                    <input
-                      type="text"
-                      id="change-password-username"
-                      name="username"
-                      autocomplete="username"
-                      style="display: none"
-                      aria-hidden="true"
-                    />
                     <div class="setting-item">
                       <div class="setting-info">
                         <label for="current-password" class="setting-label">Current Password</label>
@@ -283,7 +278,7 @@
                 <!-- Search and Quick Actions -->
                 <div class="visible-sections-controls">
                   <div class="search-container">
-                    <input type="text" id="sections-search" placeholder="Search sections..." class="search-input" autocomplete="off">
+                    <input type="text" id="sections-search" placeholder="Search sections..." class="search-input">
                     <span class="search-icon">🔍</span>
                   </div>
                   <div class="quick-actions">
@@ -309,7 +304,6 @@
                         id="toggle-minimal-mode"
                         name="toggle-minimal-mode"
                         aria-label="Minimal Mode"
-                        autocomplete="off"
                       />
                       <span class="slider"></span>
                     </label>
@@ -349,7 +343,6 @@
                             name="toggle-notes"
                             class="hidden-toggle"
                             aria-label="Notes"
-                            autocomplete="off"
                           />
                           <span class="toggle-slider" aria-hidden="true"></span>
                         </label>
@@ -374,7 +367,6 @@
                             name="toggle-holdtimer"
                             class="hidden-toggle"
                             aria-label="Hold Timer"
-                            autocomplete="off"
                           />
                           <span class="toggle-slider" aria-hidden="true"></span>
                         </label>
@@ -419,7 +411,6 @@
                             name="toggle-callflow"
                             class="hidden-toggle"
                             aria-label="Call Flow Builder"
-                            autocomplete="off"
                           />
                           <span class="toggle-slider" aria-hidden="true"></span>
                         </label>
@@ -444,7 +435,6 @@
                             name="toggle-calllogging"
                             class="hidden-toggle"
                             aria-label="Call Logging"
-                            autocomplete="off"
                           />
                           <span class="toggle-slider" aria-hidden="true"></span>
                         </label>
@@ -469,7 +459,6 @@
                             name="toggle-scripts"
                             class="hidden-toggle"
                             aria-label="Scripts"
-                            autocomplete="off"
                           />
                           <span class="toggle-slider" aria-hidden="true"></span>
                         </label>
@@ -514,7 +503,6 @@
                             name="toggle-tasks"
                             class="hidden-toggle"
                             aria-label="Tasks"
-                            autocomplete="off"
                           />
                           <span class="toggle-slider" aria-hidden="true"></span>
                         </label>
@@ -604,7 +592,6 @@
                             id="toggle-analytics"
                             name="toggle-analytics"
                             aria-label="Stats"
-                            autocomplete="off"
                           />
                           <span class="slider"></span>
                         </label>
@@ -628,7 +615,6 @@
                             id="toggle-advanced-analytics"
                             name="toggle-advanced-analytics"
                             aria-label="Advanced Analytics"
-                            autocomplete="off"
                           />
                           <span class="slider"></span>
                         </label>
@@ -659,7 +645,6 @@
                             id="toggle-multichannel"
                             name="toggle-multichannel"
                             aria-label="Multichannel"
-                            autocomplete="off"
                           />
                           <span class="slider"></span>
                         </label>
@@ -680,7 +665,6 @@
                             id="toggle-telephony"
                             name="toggle-telephony"
                             aria-label="Telephony"
-                            autocomplete="off"
                           />
                           <span class="slider"></span>
                         </label>
@@ -701,7 +685,6 @@
                             id="toggle-email"
                             name="toggle-email"
                             aria-label="Email"
-                            autocomplete="off"
                           />
                           <span class="slider"></span>
                         </label>
@@ -722,7 +705,6 @@
                             id="toggle-twilio"
                             name="toggle-twilio"
                             aria-label="Twilio Integration"
-                            autocomplete="off"
                           />
                           <span class="slider"></span>
                         </label>
@@ -752,7 +734,6 @@
                             id="toggle-workflows"
                             name="toggle-workflows"
                             aria-label="Workflows"
-                            autocomplete="off"
                           />
                           <span class="slider"></span>
                         </label>
@@ -773,7 +754,6 @@
                             id="toggle-time-tracking"
                             name="toggle-time-tracking"
                             aria-label="Time Tracking"
-                            autocomplete="off"
                           />
                           <span class="slider"></span>
                         </label>
@@ -794,7 +774,6 @@
                             id="toggle-voice-commands"
                             name="toggle-voice-commands"
                             aria-label="Voice Commands"
-                            autocomplete="off"
                           />
                           <span class="slider"></span>
                         </label>
@@ -815,7 +794,6 @@
                             id="toggle-scripts"
                             name="toggle-scripts"
                             aria-label="Scripts"
-                            autocomplete="off"
                           />
                           <span class="slider"></span>
                         </label>
@@ -836,7 +814,6 @@
                             id="toggle-tasks"
                             name="toggle-tasks"
                             aria-label="Tasks"
-                            autocomplete="off"
                           />
                           <span class="slider"></span>
                         </label>
@@ -866,7 +843,6 @@
                             id="toggle-knowledge-base"
                             name="toggle-knowledge-base"
                             aria-label="Knowledge Base"
-                            autocomplete="off"
                           />
                           <span class="slider"></span>
                         </label>
@@ -887,7 +863,6 @@
                             id="toggle-training"
                             name="toggle-training"
                             aria-label="Training"
-                            autocomplete="off"
                           />
                           <span class="slider"></span>
                         </label>
@@ -924,7 +899,6 @@
                             id="toggle-feedback"
                             name="toggle-feedback"
                             aria-label="Feedback"
-                            autocomplete="off"
                           />
                           <span class="slider"></span>
                         </label>
@@ -954,7 +928,6 @@
                             id="toggle-advanced-analytics"
                             name="toggle-advanced-analytics"
                             aria-label="Advanced Analytics"
-                            autocomplete="off"
                           />
                           <span class="slider"></span>
                         </label>
@@ -975,7 +948,6 @@
                             id="toggle-api-integration"
                             name="toggle-api-integration"
                             aria-label="API Integration"
-                            autocomplete="off"
                           />
                           <span class="slider"></span>
                         </label>
@@ -996,7 +968,6 @@
                             id="toggle-camera"
                             name="toggle-camera"
                             aria-label="Camera"
-                            autocomplete="off"
                           />
                           <span class="slider"></span>
                         </label>
@@ -1017,7 +988,6 @@
                             id="toggle-voicerecording"
                             name="toggle-voicerecording"
                             aria-label="Voice Recording"
-                            autocomplete="off"
                           />
                           <span class="slider"></span>
                         </label>
@@ -1047,7 +1017,6 @@
                             id="toggle-calllogging"
                             name="toggle-calllogging"
                             aria-label="Call Logging"
-                            autocomplete="off"
                           />
                           <span class="slider"></span>
                         </label>
@@ -1068,7 +1037,6 @@
                             id="toggle-collaboration"
                             name="toggle-collaboration"
                             aria-label="Collaboration"
-                            autocomplete="off"
                           />
                           <span class="slider"></span>
                         </label>
@@ -1110,7 +1078,6 @@
                         id="alert-sounds-toggle"
                         name="alert-sounds-toggle"
                         aria-label="Alert Sounds"
-                        autocomplete="off"
                       />
                       <span class="slider"></span>
                     </label>
@@ -1176,7 +1143,7 @@
                     </div>
                   </div>
                   <div class="setting-control">
-                    <select id="crm-provider" name="crm-provider" aria-label="CRM Provider" autocomplete="off">
+                    <select id="crm-provider" name="crm-provider" aria-label="CRM Provider">
                       <option value="none">None</option>
                       <option value="salesforce">Salesforce</option>
                       <option value="hubspot">HubSpot</option>
@@ -1202,7 +1169,6 @@
                         name="salesforce-url"
                         placeholder="https://yourcompany.my.salesforce.com"
                         aria-label="Salesforce URL"
-                        autocomplete="off"
                       />
                     </div>
                   </div>
@@ -1240,7 +1206,6 @@
                         name="salesforce-password"
                         placeholder="Your Password"
                         aria-label="Salesforce Password"
-                        autocomplete="current-password"
                       />
                     </div>
                   </div>
@@ -1259,7 +1224,6 @@
                         name="salesforce-token"
                         placeholder="Your Security Token"
                         aria-label="Salesforce Security Token"
-                        autocomplete="off"
                       />
                     </div>
                   </div>
@@ -1336,7 +1300,7 @@
                       <div class="setting-description">Your Salesforce instance URL (e.g., https://yourcompany.my.salesforce.com)</div>
                     </div>
                     <div class="setting-control">
-                        <input type="url" id="salesforce-url-alt" name="salesforce-url-alt" placeholder="https://yourcompany.my.salesforce.com" aria-label="Salesforce instance URL" autocomplete="off" />
+                        <input type="url" id="salesforce-url-alt" name="salesforce-url-alt" placeholder="https://yourcompany.my.salesforce.com" aria-label="Salesforce instance URL" />
                       </div>
                   </div>
                   <div class="setting-item">
@@ -1469,7 +1433,6 @@
                         name="hubspot-api-key-alt"
                         placeholder="Your API Key"
                         aria-label="HubSpot API Key"
-                        autocomplete="off"
                       />
                     </div>
                   </div>
@@ -1492,7 +1455,6 @@
                         name="dynamics-url-alt"
                         placeholder="https://yourorg.crm.dynamics.com"
                         aria-label="Dynamics 365 URL"
-                        autocomplete="off"
                       />
                     </div>
                   </div>
@@ -1511,7 +1473,6 @@
                         name="dynamics-client-id-alt"
                         placeholder="Your Client ID"
                         aria-label="Dynamics Client ID"
-                        autocomplete="off"
                       />
                     </div>
                   </div>
@@ -1530,7 +1491,6 @@
                         name="dynamics-client-secret-alt"
                         placeholder="Your Client Secret"
                         aria-label="Dynamics Client Secret"
-                        autocomplete="off"
                       />
                     </div>
                   </div>
@@ -1549,7 +1509,6 @@
                         name="dynamics-tenant-id-alt"
                         placeholder="Your Tenant ID"
                         aria-label="Dynamics Tenant ID"
-                        autocomplete="off"
                       />
                     </div>
                   </div>
@@ -1625,7 +1584,6 @@
                       name="twilio-account-sid"
                       placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
                       aria-label="Twilio Account SID"
-                      autocomplete="off"
                     />
                   </div>
                 </div>
@@ -1644,7 +1602,6 @@
                       name="twilio-auth-token"
                       placeholder="Your Auth Token"
                       aria-label="Twilio Auth Token"
-                      autocomplete="off"
                     />
                   </div>
                 </div>
@@ -1663,7 +1620,6 @@
                       name="twilio-phone-number"
                       placeholder="+1234567890"
                       aria-label="Twilio Phone Number"
-                      autocomplete="tel"
                     />
                   </div>
                 </div>
@@ -1725,7 +1681,6 @@
                           name="export-patterns"
                           aria-label="Export Patterns"
                           checked
-                          autocomplete="off"
                         />
                         <span class="slider"></span>
                       </label>
@@ -1750,7 +1705,6 @@
                           name="export-steps"
                           aria-label="Export Steps"
                           checked
-                          autocomplete="off"
                         />
                         <span class="slider"></span>
                       </label>
@@ -1775,7 +1729,6 @@
                           name="export-notes"
                           aria-label="Export Notes"
                           checked
-                          autocomplete="off"
                         />
                         <span class="slider"></span>
                       </label>
@@ -1800,7 +1753,6 @@
                           name="export-settings"
                           aria-label="Export Settings"
                           checked
-                          autocomplete="off"
                         />
                         <span class="slider"></span>
                       </label>

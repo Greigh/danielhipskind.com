@@ -4,6 +4,10 @@ import { startHoldTimer } from './timer.js';
 import { applyCallLogSettings } from './call-templates.js';
 import { showToast } from '../utils/toast.js';
 import { showConfirmModal } from '../utils/modal.js';
+import { escapeHtml } from '../utils/helpers.js';
+import { auth } from './auth.js';
+import { apiFetch } from '../utils/api.js';
+import { saveData, STORAGE_LIMITS } from './storage.js';
 
 export function initializeCallLogging() {
   // Initialize call templates first
@@ -106,14 +110,33 @@ export function initializeCallLogging() {
   let callHistory = JSON.parse(localStorage.getItem('callHistory')) || [];
   let callTimerInterval = null;
   let holdTimerInterval = null;
-  const token = localStorage.getItem('token'); // Simple check for auth
-  const isHybridMode = !!token; // If token exists, we are in 'Cloud' mode
+  let autoSaveInterval = null;
+  const CALL_HISTORY_MAX = STORAGE_LIMITS.callHistory || 200;
+  const isHybridMode = () => auth.isLoggedIn();
+
+  function maskSsn(value) {
+    const raw = String(value || '').replace(/\D/g, '');
+    return raw ? `***${raw.slice(-4)}` : '';
+  }
+
+  function persistCallHistory() {
+    if (callHistory.length > CALL_HISTORY_MAX) {
+      callHistory = callHistory.slice(0, CALL_HISTORY_MAX);
+    }
+    // Never persist raw SSNs in localStorage
+    const sanitized = callHistory.map((call) => ({
+      ...call,
+      ssn: maskSsn(call.ssn || call.ssnLast4 || ''),
+      ssnLast4: (
+        call.ssnLast4 || String(call.ssn || '').replace(/\D/g, '')
+      ).slice(-4),
+    }));
+    saveData('callHistory', sanitized);
+  }
 
   // Load history based on mode
-  if (isHybridMode) {
-    fetch('/api/calls', {
-      headers: { Authorization: `Bearer ${token}` },
-    })
+  if (isHybridMode()) {
+    apiFetch('/api/calls')
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -215,8 +238,8 @@ export function initializeCallLogging() {
         <div class="call-icon">${getCallIcon(call.callType)}</div>
         <div class="call-info">
           <div class="call-header">
-            <strong class="caller-name">${call.callerName}</strong>
-            <span class="call-type type-${call.callType}">${call.callType}</span>
+            <strong class="caller-name">${escapeHtml(call.callerName || '')}</strong>
+            <span class="call-type type-${escapeHtml(call.callType || '')}">${escapeHtml(call.callType || '')}</span>
             ${call.crmId ? '<span class="crm-badge">CRM</span>' : ''}
             ${(() => {
               // Count verified (boolean true) fields only
@@ -230,12 +253,12 @@ export function initializeCallLogging() {
             })()}
           </div>
           <div class="call-details">
-            <span class="caller-phone">📞 ${call.callerPhone}</span>
+            <span class="caller-phone">📞 ${escapeHtml(call.callerPhone || '')}</span>
             <span class="call-date">📅 ${new Date(call.startTime).toLocaleDateString()}</span>
             <span class="call-time">⏰ ${new Date(call.startTime).toLocaleTimeString()}</span>
             ${call.duration ? `<span class="call-duration">⏱️ ${formatDuration(call.duration)}</span>` : ''}
           </div>
-          ${call.notes ? `<div class="call-notes-preview">${call.notes.substring(0, 100)}${call.notes.length > 100 ? '...' : ''}</div>` : ''}
+          ${call.notes ? `<div class="call-notes-preview">${escapeHtml(call.notes.substring(0, 100))}${call.notes.length > 100 ? '...' : ''}</div>` : ''}
         </div>
         <div class="call-actions">
           <button class="action-btn btn-edit" data-id="${call.id}" title="Edit Call">
@@ -331,13 +354,21 @@ export function initializeCallLogging() {
     }
 
     // Auto-save notes and other fields
-    setInterval(() => {
+    if (autoSaveInterval) clearInterval(autoSaveInterval);
+    autoSaveInterval = setInterval(() => {
       if (currentCall && currentCall.status === 'active') {
         currentCall.notes = callNotesTextarea.value;
         // Update live values
         currentCall.customData = getCustomFieldValues();
         if (callerAccount) currentCall.accountNumber = callerAccount.value;
-        if (callerSsn) currentCall.ssn = callerSsn.value;
+        // Never keep full SSN in the live call object — last 4 only
+        if (callerSsn) {
+          const raw = callerSsn.value.replace(/\D/g, '');
+          currentCall.ssnLast4 = raw ? raw.slice(-4) : '';
+          currentCall.ssn = currentCall.ssnLast4
+            ? `***${currentCall.ssnLast4}`
+            : '';
+        }
       }
     }, 5000);
 
@@ -411,7 +442,15 @@ export function initializeCallLogging() {
   function endCall() {
     if (currentCall) {
       clearInterval(callTimerInterval);
-      if (holdTimerInterval) clearInterval(holdTimerInterval);
+      callTimerInterval = null;
+      if (holdTimerInterval) {
+        clearInterval(holdTimerInterval);
+        holdTimerInterval = null;
+      }
+      if (autoSaveInterval) {
+        clearInterval(autoSaveInterval);
+        autoSaveInterval = null;
+      }
 
       // If ending while on hold, add final hold segment
       if (currentCall.status === 'on-hold') {
@@ -547,37 +586,14 @@ export function initializeCallLogging() {
     updateCallHistory(); // Update UI immediately
 
     // Persist
-    const token = localStorage.getItem('token');
-    if (token) {
-      // Cloud Mode
-      // const method = isNew ? 'POST' : 'PUT';
-      // const url = isNew ? '/api/calls' : `/api/calls/${callRecord.id}`;
-      // If it was a mongo ID (string), use it. If number (timestamp), existing backend might need _id.
-      // However, for new POST, we don't send ID in URL.
-      // For PUT, we need a valid ID. If it's a local timestamp ID and we try to PUT to server, it will fail 404.
-      // Sync Issue Strategy:
-      // If we created a call LOCALLY (e.g. before login) and then logged in?
-      // We only sync from server on load. If we create new while logged in, it works.
-      // If we edit an old local call while logged in? It won't have a Mongo _id.
-      // Ideally we should disable editing local calls when logged in, or create a copy.
-      // For this scope: We assume user starts fresh or we handle 'Not Found' by Creating new.
-
-      // If ID is numeric (local timestamp), treat as NEW POST if we are trying to update?
-      // Actually, simplified: Always POST if ID looks local (number)?
-      // Start with standard logic:
-
-      // Note: To make PUT work with Mongo, we need the valid Mongo _id.
-      // If callRecord.id is a timestamp, we can't PUT to /api/calls/:timestamp.
-      // We should probably just POST it as a new log if it doesn't have a Mongo ID.
-
+    if (auth.isLoggedIn()) {
       const isMongoId =
         typeof callRecord.id === 'string' && callRecord.id.length === 24;
 
       if (isNew || !isMongoId) {
-        fetch('/api/calls', {
+        apiFetch('/api/calls', {
           method: 'POST',
           headers: {
-            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(callRecord),
@@ -594,10 +610,9 @@ export function initializeCallLogging() {
           .catch(() => showToast('Failed to save to cloud', 'error'));
       } else {
         // Update existing valid Mongo ID
-        fetch(`/api/calls/${callRecord.id}`, {
+        apiFetch(`/api/calls/${callRecord.id}`, {
           method: 'PUT',
           headers: {
-            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(callRecord),
@@ -607,7 +622,7 @@ export function initializeCallLogging() {
       }
     } else {
       // Local Mode
-      localStorage.setItem('callHistory', JSON.stringify(callHistory));
+      persistCallHistory();
       if (showSuccessToast)
         showToast(
           isNew ? 'Call logged locally' : 'Call log updated',
@@ -684,14 +699,12 @@ export function initializeCallLogging() {
       callHistory = callHistory.filter((call) => call.id !== id);
       updateCallHistory();
 
-      const token = localStorage.getItem('token');
-      if (token) {
+      if (auth.isLoggedIn()) {
         // Cloud Delete
         // Check if it's a real server ID
         if (typeof id === 'string' && id.length === 24) {
-          fetch(`/api/calls/${id}`, {
+          apiFetch(`/api/calls/${id}`, {
             method: 'DELETE',
-            headers: { Authorization: `Bearer ${token}` },
           })
             .then(() => showToast('Call deleted from cloud', 'success'))
             .catch(() => showToast('Failed to delete from cloud', 'error'));
@@ -701,7 +714,7 @@ export function initializeCallLogging() {
         }
       } else {
         // Local Delete
-        localStorage.setItem('callHistory', JSON.stringify(callHistory));
+        persistCallHistory();
         showToast('Call deleted', 'success');
       }
     }

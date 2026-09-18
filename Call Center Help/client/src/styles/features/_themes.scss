@@ -16,18 +16,20 @@ body {
 }
 
 // Theme indicator
-.theme-indicator {
+// Theme toast (transient) — distinct from settings "Current Theme" label
+.theme-toast {
   position: fixed;
   bottom: 1rem;
   right: 1rem;
-  background: var(--primary-blue);
+  background: var(--accent-ink);
   color: var(--white);
-  padding: 0.5rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
+  padding: 0.45rem 0.7rem;
+  border-radius: var(--radius-control);
+  border: 1px solid rgb(255 255 255 / 0.1);
+  font-size: 0.7rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
   opacity: 0;
   transform: translateY(20px);
   transition: map.get($transitions, base);
@@ -40,6 +42,24 @@ body {
   }
 }
 
+// Settings appearance label (was colliding with .theme-indicator toast)
+.theme-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  opacity: 1;
+  position: static;
+  transform: none;
+  background: transparent;
+  padding: 0;
+  border: none;
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: 500;
+}
+
 // Dark theme styles
 [data-theme="dark"] {
   body {
@@ -47,9 +67,10 @@ body {
     color: var(--dark-text);
   }
 
-  .theme-indicator {
-    background: #90caf9;
-    color: var(--dark-bg);
+  .theme-toast {
+    background: var(--dark-surface);
+    color: var(--primary-blue-light);
+    border-color: var(--dark-border);
   }
 
   // Override any remaining light mode styles
@@ -86,11 +107,11 @@ body {
 // Theme preference detection
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --background-color: #121212;
-    --text-color: #ffffff;
-    --primary-color: #bb86fc;
-    --secondary-color: #03dac6;
-    --error-color: #cf6679;
+    --background-color: var(--dark-bg);
+    --text-color: var(--dark-text);
+    --primary-color: #22d3ee;
+    --secondary-color: #2dd4bf;
+    --error-color: #f87171;
   }
 }
 

@@ -117,35 +117,65 @@ export class CRMManager {
   // Persistence helpers
   persistState() {
     if (typeof localStorage === 'undefined') return;
-    localStorage.setItem('crmProvider', this.currentProviderName);
-    if (this.state.accessToken) {
-      localStorage.setItem('crmAccessToken', this.state.accessToken);
-    } else {
+    // Prefer sessionStorage for short-lived CRM tokens (cleared on tab close)
+    try {
+      sessionStorage.setItem('crmProvider', this.currentProviderName || '');
+      if (this.state.accessToken) {
+        sessionStorage.setItem('crmAccessToken', this.state.accessToken);
+      } else {
+        sessionStorage.removeItem('crmAccessToken');
+      }
+      // Migrate away from long-lived localStorage secrets
       localStorage.removeItem('crmAccessToken');
+      if (this.currentProviderName) {
+        localStorage.setItem('crmProvider', this.currentProviderName);
+      }
+    } catch {
+      /* ignore */
     }
   }
 
   loadState() {
     if (typeof localStorage === 'undefined') return;
-    const savedProvider = localStorage.getItem('crmProvider');
-    const savedToken = localStorage.getItem('crmAccessToken');
+    const savedProvider =
+      sessionStorage.getItem('crmProvider') ||
+      localStorage.getItem('crmProvider');
+    const savedToken =
+      sessionStorage.getItem('crmAccessToken') ||
+      localStorage.getItem('crmAccessToken');
 
     if (savedProvider && this.providers.has(savedProvider)) {
       this.currentProviderName = savedProvider;
       this.state.currentProvider = savedProvider;
     }
 
-    // We optimistically assume connected if token exists (logic similar to original module)
-    // Ideally validation happens on load, but for now we follow existing pattern
     if (savedToken) {
       this.state.accessToken = savedToken;
       this.state.isConnected = true;
-      // Hydrate the provider instance if needed
       if (this.activeProvider) {
         this.activeProvider.isConnected = true;
         this.activeProvider.accessToken = savedToken;
       }
+      // Move token out of localStorage if it was there
+      try {
+        sessionStorage.setItem('crmAccessToken', savedToken);
+        localStorage.removeItem('crmAccessToken');
+      } catch {
+        /* ignore */
+      }
     }
+  }
+
+  clearPersistedSecrets() {
+    try {
+      sessionStorage.removeItem('crmAccessToken');
+      localStorage.removeItem('crmAccessToken');
+      localStorage.removeItem('salesforceInstanceUrl');
+    } catch {
+      /* ignore */
+    }
+    this.state.accessToken = null;
+    this.state.isConnected = false;
   }
 }
 

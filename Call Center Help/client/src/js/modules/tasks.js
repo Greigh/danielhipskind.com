@@ -1,4 +1,7 @@
 // Task Management Module
+import { escapeHtml } from '../utils/helpers.js';
+import { saveData, loadData, STORAGE_LIMITS } from './storage.js';
+
 export function initializeTasks() {
   const addTaskBtn = document.getElementById('add-task');
   const taskTitleInput = document.getElementById('task-title');
@@ -14,27 +17,21 @@ export function initializeTasks() {
   const completedCount = document.getElementById('completed-count');
   const totalCount = document.getElementById('total-count');
 
-  // Check if required elements exist
-  if (
-    !addTaskBtn ||
-    !taskTitleInput ||
-    !taskDescriptionInput ||
-    !taskPrioritySelect ||
-    !taskDueDateInput ||
-    !taskAssigneeSelect ||
-    !taskList ||
-    !searchInput ||
-    !sortSelect ||
-    !progressBar ||
-    !completedCount ||
-    !totalCount
-  ) {
+  // Core controls required; optional fields (description, due date, etc.) are guarded
+  if (!addTaskBtn || !taskTitleInput || !taskPrioritySelect || !taskList) {
     return;
   }
 
-  let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+  let tasks = loadData('tasks', []);
   let currentFilter = 'all';
   let currentSort = 'created-desc';
+
+  function persistTasks() {
+    tasks = Array.isArray(tasks)
+      ? tasks.slice(-STORAGE_LIMITS.tasks)
+      : [];
+    saveData('tasks', tasks);
+  }
 
   // Initialize default assignees
   const defaultAssignees = [
@@ -45,6 +42,7 @@ export function initializeTasks() {
   ];
 
   function initializeAssignees() {
+    if (!taskAssigneeSelect) return;
     taskAssigneeSelect.innerHTML =
       '<option value="">Select assignee...</option>';
     defaultAssignees.forEach((assignee) => {
@@ -57,10 +55,12 @@ export function initializeTasks() {
 
   function addTask() {
     const title = taskTitleInput.value.trim();
-    const description = taskDescriptionInput.value.trim();
+    const description = taskDescriptionInput
+      ? taskDescriptionInput.value.trim()
+      : '';
     const priority = taskPrioritySelect.value;
-    const dueDate = taskDueDateInput.value;
-    const assignee = taskAssigneeSelect.value;
+    const dueDate = taskDueDateInput ? taskDueDateInput.value : '';
+    const assignee = taskAssigneeSelect ? taskAssigneeSelect.value : '';
 
     if (!title) {
       showToast('Please enter a task title', 'error');
@@ -82,16 +82,16 @@ export function initializeTasks() {
     };
 
     tasks.push(task);
-    localStorage.setItem('tasks', JSON.stringify(tasks));
+    persistTasks();
     updateTaskList();
     updateProgress();
 
     // Clear form
     taskTitleInput.value = '';
-    taskDescriptionInput.value = '';
+    if (taskDescriptionInput) taskDescriptionInput.value = '';
     taskPrioritySelect.value = 'medium';
-    taskDueDateInput.value = '';
-    taskAssigneeSelect.value = '';
+    if (taskDueDateInput) taskDueDateInput.value = '';
+    if (taskAssigneeSelect) taskAssigneeSelect.value = '';
 
     showToast('Task added successfully', 'success');
 
@@ -114,7 +114,7 @@ export function initializeTasks() {
     });
 
     // Apply search filter
-    const searchTerm = searchInput.value.toLowerCase();
+    const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
     if (searchTerm) {
       filteredTasks = filteredTasks.filter(
         (task) =>
@@ -163,19 +163,19 @@ export function initializeTasks() {
           </div>
           <div class="task-main">
             <div class="task-title-section">
-              <h4 class="task-title ${task.status === 'completed' ? 'completed' : ''}">${task.title}</h4>
+              <h4 class="task-title ${task.status === 'completed' ? 'completed' : ''}">${escapeHtml(task.title || '')}</h4>
               <div class="task-meta">
-                <span class="task-priority priority-${task.priority}">${getPriorityIcon(task.priority)} ${task.priority}</span>
-                <span class="task-due-date ${isOverdue(task) ? 'overdue' : ''}">${dueDateText}</span>
+                <span class="task-priority priority-${escapeHtml(task.priority || '')}">${getPriorityIcon(task.priority)} ${escapeHtml(task.priority || '')}</span>
+                <span class="task-due-date ${isOverdue(task) ? 'overdue' : ''}">${escapeHtml(dueDateText)}</span>
               </div>
             </div>
-            ${task.description ? `<div class="task-description">${task.description}</div>` : ''}
+            ${task.description ? `<div class="task-description">${escapeHtml(task.description)}</div>` : ''}
             ${
               assignee
                 ? `
               <div class="task-assignee">
-                <span class="assignee-avatar">${assignee.avatar}</span>
-                <span class="assignee-name">${assignee.name}</span>
+                <span class="assignee-avatar">${escapeHtml(assignee.avatar)}</span>
+                <span class="assignee-name">${escapeHtml(assignee.name)}</span>
               </div>
             `
                 : ''
@@ -251,7 +251,7 @@ export function initializeTasks() {
     if (task) {
       task.status = task.status === 'completed' ? 'pending' : 'completed';
       task.updatedAt = new Date();
-      localStorage.setItem('tasks', JSON.stringify(tasks));
+      persistTasks();
       updateTaskList();
       updateProgress();
 
@@ -336,7 +336,7 @@ export function initializeTasks() {
         task.assignee = newAssignee;
         task.updatedAt = new Date();
 
-        localStorage.setItem('tasks', JSON.stringify(tasks));
+        persistTasks();
         updateTaskList();
         updateProgress();
         modal.remove();
@@ -354,7 +354,7 @@ export function initializeTasks() {
   function deleteTask(taskId) {
     if (confirm('Are you sure you want to delete this task?')) {
       tasks = tasks.filter((t) => t.id !== taskId);
-      localStorage.setItem('tasks', JSON.stringify(tasks));
+      persistTasks();
       updateTaskList();
       updateProgress();
       showToast('Task deleted successfully', 'success');
@@ -368,9 +368,9 @@ export function initializeTasks() {
     const total = tasks.length;
     const percentage = total > 0 ? (completed / total) * 100 : 0;
 
-    progressBar.style.width = `${percentage}%`;
-    completedCount.textContent = completed;
-    totalCount.textContent = total;
+    if (progressBar) progressBar.style.width = `${percentage}%`;
+    if (completedCount) completedCount.textContent = completed;
+    if (totalCount) totalCount.textContent = total;
   }
 
   function checkDueDateNotifications() {
@@ -418,11 +418,15 @@ export function initializeTasks() {
     });
   });
 
-  searchInput.addEventListener('input', updateTaskList);
-  sortSelect.addEventListener('change', () => {
-    currentSort = sortSelect.value;
-    updateTaskList();
-  });
+  if (searchInput) {
+    searchInput.addEventListener('input', updateTaskList);
+  }
+  if (sortSelect) {
+    sortSelect.addEventListener('change', () => {
+      currentSort = sortSelect.value;
+      updateTaskList();
+    });
+  }
 
   // Initialize
   initializeAssignees();

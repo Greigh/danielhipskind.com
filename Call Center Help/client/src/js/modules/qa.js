@@ -1,5 +1,7 @@
 // Quality Assurance Tools Module
 import { getCallHistory } from './call-logging.js';
+import { saveData, loadData, STORAGE_LIMITS } from './storage.js';
+import { escapeHtml } from '../utils/helpers.js';
 
 export function initializeQA() {
   const callSelect = document.getElementById('call-to-review');
@@ -19,7 +21,12 @@ export function initializeQA() {
     return;
   }
 
-  let qaReports = JSON.parse(localStorage.getItem('qaReports')) || [];
+  let qaReports = loadData('qaReports', []);
+
+  function persistQaReports() {
+    qaReports = qaReports.slice(-STORAGE_LIMITS.qaReports);
+    saveData('qaReports', qaReports);
+  }
 
   function populateCallSelect() {
     const calls = getCallHistory();
@@ -57,7 +64,7 @@ export function initializeQA() {
     };
 
     qaReports.push(report);
-    localStorage.setItem('qaReports', JSON.stringify(qaReports));
+    persistQaReports();
     updateQAReports();
 
     // Reset form
@@ -103,21 +110,21 @@ export function initializeQA() {
         li.className = 'qa-report-item';
         li.innerHTML = `
         <div class="report-header">
-          <strong>${call ? call.callerName : 'Unknown Call'}</strong>
-          <span class="qa-score">Score: ${report.score}%</span>
+          <strong>${escapeHtml(call ? call.callerName : 'Unknown Call')}</strong>
+          <span class="qa-score">Score: ${Number(report.score) || 0}%</span>
         </div>
         <div class="report-meta">
-          ${new Date(report.timestamp).toLocaleString()} by ${report.reviewer}
+          ${escapeHtml(new Date(report.timestamp).toLocaleString())} by ${escapeHtml(report.reviewer || '')}
         </div>
         <div class="report-criteria">
-          ${Object.entries(report.criteria)
+          ${Object.entries(report.criteria || {})
             .map(
               ([key, value]) =>
-                `<span class="criterion ${value ? 'passed' : 'failed'}">${key}: ${value ? '✓' : '✗'}</span>`
+                `<span class="criterion ${value ? 'passed' : 'failed'}">${escapeHtml(key)}: ${value ? '✓' : '✗'}</span>`
             )
             .join('')}
         </div>
-        ${report.notes ? `<div class="report-notes">${report.notes}</div>` : ''}
+        ${report.notes ? `<div class="report-notes">${escapeHtml(report.notes)}</div>` : ''}
       `;
         qaReportsList.appendChild(li);
       });

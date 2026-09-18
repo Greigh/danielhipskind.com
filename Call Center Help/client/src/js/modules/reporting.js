@@ -7,8 +7,12 @@ let endDateInput = null;
 let reportOutput = null;
 let currentReportData = null;
 let chartInstances = [];
+let reportingInitialized = false;
+let reportingRefreshInterval = null;
 
 export function initializeAdvancedReporting() {
+  if (reportingInitialized) return;
+
   reportTypeSelect = document.getElementById('report-type');
   startDateInput = document.getElementById('report-start-date');
   endDateInput = document.getElementById('report-end-date');
@@ -19,22 +23,30 @@ export function initializeAdvancedReporting() {
   const refreshBtn = document.getElementById('refresh-report');
   const scheduleReportBtn = document.getElementById('schedule-report');
 
-  if (generateBtn) generateBtn.addEventListener('click', generateReport);
-  if (clearFiltersBtn) clearFiltersBtn.addEventListener('click', clearFilters);
-  if (exportReportBtn) exportReportBtn.addEventListener('click', exportReport);
-  if (refreshBtn) refreshBtn.addEventListener('click', () => generateReport());
-  if (scheduleReportBtn)
-    scheduleReportBtn.addEventListener('click', scheduleReport);
+  // Core controls are required; optional buttons are guarded
+  if (!reportTypeSelect || !reportOutput) {
+    return;
+  }
 
-  // Set default date range (last 30 days)
-  const today = new Date();
-  const thirtyDaysAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
-  if (startDateInput)
+  reportingInitialized = true;
+
+  generateBtn?.addEventListener('click', generateReport);
+  clearFiltersBtn?.addEventListener('click', clearFilters);
+  exportReportBtn?.addEventListener('click', exportReport);
+  refreshBtn?.addEventListener('click', () => generateReport());
+  scheduleReportBtn?.addEventListener('click', scheduleReport);
+
+  // Set default date range (last 30 days) when date inputs exist
+  if (startDateInput && endDateInput) {
+    const today = new Date();
+    const thirtyDaysAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
     startDateInput.value = thirtyDaysAgo.toISOString().split('T')[0];
-  if (endDateInput) endDateInput.value = today.toISOString().split('T')[0];
+    endDateInput.value = today.toISOString().split('T')[0];
+  }
 
   // Auto-refresh every 5 minutes
-  setInterval(() => {
+  if (reportingRefreshInterval) clearInterval(reportingRefreshInterval);
+  reportingRefreshInterval = setInterval(() => {
     if (currentReportData) {
       generateReport();
     }
@@ -42,9 +54,10 @@ export function initializeAdvancedReporting() {
 }
 
 function generateReport() {
+  if (!reportTypeSelect || !reportOutput) return;
   const reportType = reportTypeSelect.value;
-  const startDate = new Date(startDateInput.value);
-  const endDate = new Date(endDateInput.value);
+  const startDate = new Date(startDateInput?.value || Date.now());
+  const endDate = new Date(endDateInput?.value || Date.now());
 
   // Add one day to end date to include the full end date
   endDate.setHours(23, 59, 59, 999);
@@ -621,19 +634,22 @@ function formatDuration(ms) {
 }
 
 function clearFilters() {
-  reportTypeSelect.selectedIndex = 0;
+  if (reportTypeSelect) reportTypeSelect.selectedIndex = 0;
 
   const today = new Date();
   const thirtyDaysAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
-  startDateInput.value = thirtyDaysAgo.toISOString().split('T')[0];
-  endDateInput.value = today.toISOString().split('T')[0];
+  if (startDateInput)
+    startDateInput.value = thirtyDaysAgo.toISOString().split('T')[0];
+  if (endDateInput) endDateInput.value = today.toISOString().split('T')[0];
 
-  reportOutput.innerHTML = `
+  if (reportOutput) {
+    reportOutput.innerHTML = `
     <div class="no-reports">
       <h4>No Reports Generated</h4>
       <p>Select your report parameters above and click "Generate Report" to view results.</p>
     </div>
   `;
+  }
 
   currentReportData = null;
   showToast('Filters cleared', 'info');

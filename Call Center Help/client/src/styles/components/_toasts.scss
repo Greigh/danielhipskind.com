@@ -1,26 +1,26 @@
-// Toast notification styles
 @use '../base/variables' as *;
 @use 'sass:map';
 
 .toast-container {
   position: fixed;
-  top: 20px;
-  right: 20px;
+  top: 1rem;
+  right: 1rem;
   z-index: 10000;
   pointer-events: none;
 }
 
 .toast {
-  background: var(--bg-primary);
+  background: var(--surface-raised);
   border: 1px solid var(--border-color);
-  border-radius: 0.25rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-left: 3px solid var(--primary);
+  border-radius: var(--radius-control);
+  box-shadow: var(--shadow-md);
   margin-bottom: 0.5rem;
-  min-width: 300px;
-  max-width: 500px;
+  min-width: 280px;
+  max-width: 440px;
   opacity: 0;
-  transform: translateX(100%);
-  transition: all 0.3s ease-in-out;
+  transform: translateX(12px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
   pointer-events: auto;
 
   &.show {
@@ -32,7 +32,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.75rem;
+    padding: 0.75rem 0.85rem;
   }
 
   &-message {
@@ -40,144 +40,59 @@
     font-size: 0.9rem;
     line-height: 1.4;
     margin-right: 0.5rem;
+    color: var(--text-primary);
   }
 
   &-close {
     background: none;
     border: none;
-    color: var(--text-secondary);
+    color: var(--text-muted);
     cursor: pointer;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     line-height: 1;
     padding: 0;
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 50%;
-    transition: all 0.2s ease;
+    border-radius: var(--radius-control);
 
     &:hover {
       background: var(--bg-hover);
       color: var(--text-primary);
     }
-
-    &:focus {
-      outline: 2px solid var(--primary-blue);
-      outline-offset: 2px;
-    }
   }
 
-  // Toast types
   &-success {
-    border-color: #10b981;
-    background: linear-gradient(135deg, #10b981, #059669);
+    border-left-color: var(--success);
+    background: var(--surface-raised);
 
     .toast-message {
-      color: white;
-    }
-
-    .toast-close {
-      color: rgba(255, 255, 255, 0.8);
-
-      &:hover {
-        color: white;
-        background: rgba(255, 255, 255, 0.1);
-      }
+      color: var(--text-primary);
     }
   }
 
   &-error {
-    border-color: #ef4444;
-    background: linear-gradient(135deg, #ef4444, #dc2626);
-
-    .toast-message {
-      color: white;
-    }
-
-    .toast-close {
-      color: rgba(255, 255, 255, 0.8);
-
-      &:hover {
-        color: white;
-        background: rgba(255, 255, 255, 0.1);
-      }
-    }
+    border-left-color: var(--error);
   }
 
   &-warning {
-    border-color: #f59e0b;
-    background: linear-gradient(135deg, #f59e0b, #d97706);
-
-    .toast-message {
-      color: white;
-    }
-
-    .toast-close {
-      color: rgba(255, 255, 255, 0.8);
-
-      &:hover {
-        color: white;
-        background: rgba(255, 255, 255, 0.1);
-      }
-    }
+    border-left-color: var(--warning);
   }
 
   &-info {
-    border-color: var(--primary-blue);
-    background: linear-gradient(
-      135deg,
-      var(--primary-blue),
-      var(--primary-blue-dark)
-    );
+    border-left-color: var(--info);
+  }
+}
+
+[data-theme="dark"] {
+  .toast {
+    background: var(--dark-surface);
+    border-color: var(--dark-border);
 
     .toast-message {
-      color: white;
+      color: var(--dark-text);
     }
-
-    .toast-close {
-      color: rgba(255, 255, 255, 0.8);
-
-      &:hover {
-        color: white;
-        background: rgba(255, 255, 255, 0.1);
-      }
-    }
-  }
-}
-
-// Dark mode adjustments
-[data-theme='dark'] {
-  .toast {
-    &-success {
-      background: linear-gradient(135deg, #065f46, #047857);
-    }
-
-    &-error {
-      background: linear-gradient(135deg, #7f1d1d, #991b1b);
-    }
-
-    &-warning {
-      background: linear-gradient(135deg, #92400e, #b45309);
-    }
-
-    &-info {
-      background: linear-gradient(135deg, var(--primary-blue-dark), #1e40af);
-    }
-  }
-}
-
-// Mobile responsiveness
-@media (max-width: 768px) {
-  .toast-container {
-    left: 10px;
-    right: 10px;
-    top: 10px;
-  }
-
-  .toast {
-    min-width: auto;
-    max-width: none;
   }
 }

@@ -1,3 +1,6 @@
+import { saveData, loadData, STORAGE_LIMITS } from './storage.js';
+import { escapeHtml } from '../utils/helpers.js';
+
 export function initializeScripts() {
   const container = document.querySelector('.section-content');
   if (!container) return; // Guard clause
@@ -28,12 +31,40 @@ export function initializeScripts() {
   }
 
   // State
-  let scripts =
-    JSON.parse(localStorage.getItem('scripts')) || getDefaultScripts();
+  let scripts = loadData('scripts', null) || getDefaultScripts();
   let currentCategory = 'all';
   let currentScript = null;
   let isPreviewMode = false;
   let searchTerm = '';
+
+  function persistScripts() {
+    // Cap total scripts across categories
+    const max = STORAGE_LIMITS.scripts || 100;
+    let total = 0;
+    const capped = {};
+    for (const [cat, list] of Object.entries(scripts || {})) {
+      const arr = Array.isArray(list) ? list : [];
+      capped[cat] = arr;
+      total += arr.length;
+    }
+    if (total > max) {
+      // Trim from largest categories first (keep newest at end)
+      let overflow = total - max;
+      const cats = Object.keys(capped).sort(
+        (a, b) => capped[b].length - capped[a].length
+      );
+      for (const cat of cats) {
+        if (overflow <= 0) break;
+        const drop = Math.min(overflow, Math.max(0, capped[cat].length - 1));
+        if (drop > 0) {
+          capped[cat] = capped[cat].slice(drop);
+          overflow -= drop;
+        }
+      }
+      scripts = capped;
+    }
+    saveData('scripts', scripts);
+  }
 
   // Default Scripts Data
   function getDefaultScripts() {
@@ -151,13 +182,13 @@ export function initializeScripts() {
       scriptItem.innerHTML = `
         <div class="script-title">
           <span class="script-icon">${getCategoryIcon(script.category)}</span>
-          ${script.title}
+          ${escapeHtml(script.title)}
           ${script.favorite ? '⭐' : ''}
         </div>
-        <div class="script-preview">${script.content.substring(0, 80)}...</div>
+        <div class="script-preview">${escapeHtml(script.content.substring(0, 80))}...</div>
         <div class="script-meta">
-          <span class="script-category-tag">${script.category}</span>
-          <span class="script-usage">Used ${script.usage} times</span>
+          <span class="script-category-tag">${escapeHtml(script.category)}</span>
+          <span class="script-usage">Used ${Number(script.usage) || 0} times</span>
         </div>
       `;
       scriptItem.addEventListener('click', () => loadScript(script));
@@ -205,7 +236,7 @@ export function initializeScripts() {
     openEditor(script);
     script.usage++;
     script.lastUsed = new Date();
-    localStorage.setItem('scripts', JSON.stringify(scripts));
+    persistScripts();
   }
 
   function createNewScript() {
@@ -248,7 +279,7 @@ export function initializeScripts() {
       currentScript.content = content;
     }
 
-    localStorage.setItem('scripts', JSON.stringify(scripts));
+    persistScripts();
     updateCategoryUI(); // In case new category added
     closeEditor();
   }
@@ -337,7 +368,7 @@ export function initializeScripts() {
       const newCat = prompt('Enter new category name:');
       if (newCat && !scripts[newCat]) {
         scripts[newCat] = [];
-        localStorage.setItem('scripts', JSON.stringify(scripts));
+        persistScripts();
         updateCategoryUI();
         alert(`Category "${newCat}" added.`);
       }
@@ -352,7 +383,7 @@ export function initializeScripts() {
           )
         ) {
           delete scripts[catToDelete];
-          localStorage.setItem('scripts', JSON.stringify(scripts));
+          persistScripts();
           currentCategory = 'all';
           updateCategoryUI();
           updateScriptList();
@@ -433,7 +464,9 @@ export const trainingState = {
   currentScript: null,
   practiceMode: false,
   feedback: [],
-  certifications: JSON.parse(localStorage.getItem('certifications') || '[]'),
+  certifications: loadData('certifications', []).slice(
+    -(STORAGE_LIMITS.certifications || 100)
+  ),
 };
 
 export function startPracticeMode(scriptId) {
@@ -446,8 +479,7 @@ export function startPracticeMode(scriptId) {
 }
 
 function findScriptById(id) {
-  const scripts =
-    JSON.parse(localStorage.getItem('scripts')) || getDefaultScripts();
+  const scripts = loadData('scripts', null) || getDefaultScripts();
   for (const category in scripts) {
     const found = scripts[category].find((s) => s.id == id);
     if (found) return found;
@@ -499,10 +531,10 @@ export function completeCertification(scriptId) {
     score: trainingState.feedback.slice(-1)[0]?.score || 0,
   };
   trainingState.certifications.push(cert);
-  localStorage.setItem(
-    'certifications',
-    JSON.stringify(trainingState.certifications)
+  trainingState.certifications = trainingState.certifications.slice(
+    -(STORAGE_LIMITS.certifications || 100)
   );
+  saveData('certifications', trainingState.certifications);
 }
 
 export function getCertifications() {

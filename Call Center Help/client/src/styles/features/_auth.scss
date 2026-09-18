@@ -1,31 +1,49 @@
-// Auth/Login styles
-.login-container {
+// Auth / login — brand-forward, quiet panel
+.login-container,
+.login-card {
   max-width: 400px;
   margin: 2rem auto;
-  padding: 2rem;
+  padding: 0;
   background: var(--card-bg, #fff);
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-panel, 0.5rem);
+  border: 1px solid var(--border-color, #c5d0db);
+  box-shadow: none;
+}
+
+.login-card-inner {
+  padding: 1.75rem 1.5rem;
+
+  h3 {
+    font-family: var(--font-display);
+    font-size: 1.45rem;
+    letter-spacing: -0.02em;
+    margin: 0 0 0.35rem;
+    color: var(--text-primary, #0b1320);
+  }
 }
 
 .login-header {
-  text-align: center;
-  margin-bottom: 2rem;
+  text-align: left;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color, #c5d0db);
 
   h1 {
-    color: var(--text-primary, #333);
-    margin-bottom: 0.5rem;
+    color: var(--text-primary, #0b1320);
+    margin-bottom: 0.35rem;
+    font-family: var(--font-display);
     font-size: 1.5rem;
+    letter-spacing: -0.02em;
   }
 
   p {
-    color: var(--text-secondary, #666);
+    color: var(--text-secondary, #475569);
     margin: 0;
   }
 }
 
 .login-forms {
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .auth-form {
@@ -36,79 +54,64 @@
   }
 
   h2 {
-    color: var(--text-primary, #333);
-    margin-bottom: 1.5rem;
-    text-align: center;
+    color: var(--text-primary, #0b1320);
+    margin-bottom: 1.25rem;
+    text-align: left;
+    font-family: var(--font-display);
   }
 }
 
-.form-group {
-  margin-bottom: 1rem;
-
-  label {
-    display: block;
-    margin-bottom: 0.5rem;
-    color: var(--text-primary, #333);
-    font-weight: 500;
-  }
+.form-row {
+  margin-bottom: 0.85rem;
 
   input {
     width: 100%;
-    padding: 0.75rem;
-    border: 1px solid var(--border-color, #ddd);
-    border-radius: 4px;
-    font-size: 1rem;
-    background: var(--input-bg, #fff);
-    color: var(--text-primary, #333);
-
-    &:focus {
-      outline: none;
-      border-color: var(--primary-color, #007bff);
-      box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
-    }
   }
+}
+
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.login-footer {
+  margin-top: 1rem;
+  color: var(--text-muted, #64748b);
 }
 
 .auth-switch {
   text-align: center;
-  margin-top: 1.5rem;
-  color: var(--text-secondary, #666);
+  margin-top: 1.25rem;
+  color: var(--text-secondary, #475569);
 
   .link-btn {
     background: none;
     border: none;
-    color: var(--primary-color, #007bff);
+    color: var(--primary, #0e7490);
     cursor: pointer;
     text-decoration: underline;
-    font-size: inherit;
-
-    &:hover {
-      color: var(--primary-hover, #0056b3);
-    }
+    padding: 0;
   }
 }
 
-.login-footer {
-  text-align: center;
-  padding-top: 1rem;
-  border-top: 1px solid var(--border-color, #ddd);
+.inpage-login-view {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
 
-  p {
-    margin: 0;
-    font-size: 0.875rem;
-    color: var(--text-secondary, #666);
+[data-theme="dark"] {
+  .login-container,
+  .login-card {
+    background: var(--dark-surface);
+    border-color: var(--dark-border);
+  }
 
-    .link-btn {
-      background: none;
-      border: none;
-      color: var(--primary-color, #007bff);
-      cursor: pointer;
-      text-decoration: underline;
-      font-size: inherit;
-
-      &:hover {
-        color: var(--primary-hover, #0056b3);
-      }
-    }
+  .login-card-inner h3,
+  .login-header h1,
+  .auth-form h2 {
+    color: var(--dark-text);
   }
 }

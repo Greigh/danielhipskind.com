@@ -1,6 +1,8 @@
 // Multi-Channel Support Module
 import { crmManager } from './crm/CRMManager.js';
 import { showToast } from '../utils/toast.js';
+import { apiFetch } from '../utils/api.js';
+import { escapeHtml } from '../utils/helpers.js';
 
 export function initializeMultiChannel() {
   // ... existing initialization code ...
@@ -284,11 +286,10 @@ function initializeSMSChannel() {
       sendSmsBtn.textContent = 'Sending...';
 
       try {
-        const response = await fetch('/api/sms', {
+        const response = await apiFetch('/api/sms', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('token') || ''}`,
           },
           body: JSON.stringify({ to, message }),
         });
@@ -324,10 +325,10 @@ function addSMSHistory(number, message, type) {
 
   smsItem.innerHTML = `
     <div class="sms-meta">
-      <span class="sms-number">${number}</span>
-      <span class="sms-time">${timeString}</span>
+      <span class="sms-number">${escapeHtml(number)}</span>
+      <span class="sms-time">${escapeHtml(timeString)}</span>
     </div>
-    <div class="sms-content">${message}</div>
+    <div class="sms-content">${escapeHtml(message)}</div>
   `;
 
   historyList.insertBefore(smsItem, historyList.firstChild);
@@ -338,7 +339,7 @@ function addChatMessage(sender, message) {
   if (!chatMessages) return;
   const messageDiv = document.createElement('div');
   messageDiv.className = 'chat-message';
-  messageDiv.innerHTML = `<strong>${sender}:</strong> ${message}`;
+  messageDiv.innerHTML = `<strong>${escapeHtml(sender)}:</strong> ${escapeHtml(message)}`;
   chatMessages.appendChild(messageDiv);
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }

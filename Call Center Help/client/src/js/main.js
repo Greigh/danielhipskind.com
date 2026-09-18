@@ -46,9 +46,12 @@ import { showToast } from './utils/toast.js';
 
 // Lazy load advanced features
 let advancedModulesLoaded = false;
+let advancedModulesLoadingPromise = null;
 const lazyLoadAdvancedModules = async () => {
   if (advancedModulesLoaded) return;
+  if (advancedModulesLoadingPromise) return advancedModulesLoadingPromise;
 
+  advancedModulesLoadingPromise = (async () => {
   try {
     const [
       { initializeCollaboration },
@@ -188,7 +191,11 @@ const lazyLoadAdvancedModules = async () => {
     initializeWhenReady();
   } catch (error) {
     console.error('Failed to load advanced modules:', error);
+    advancedModulesLoadingPromise = null; // allow retry on failure
   }
+  })();
+
+  return advancedModulesLoadingPromise;
 };
 
 // Tab navigation functions
@@ -283,10 +290,10 @@ function handleResize() {
 
 // Show the main app content
 function showMainApp() {
-  document.getElementById('main-app').classList.remove('hidden');
-  document.getElementById('settings-view').classList.add('hidden');
-  document.getElementById('stats-view').classList.add('hidden');
-  document.getElementById('knowledge-base-view').classList.add('hidden');
+  document.getElementById('main-app')?.classList.remove('hidden');
+  document.getElementById('settings-view')?.classList.add('hidden');
+  document.getElementById('stats-view')?.classList.add('hidden');
+  document.getElementById('knowledge-base-view')?.classList.add('hidden');
   document.getElementById('main-tab')?.classList.add('active');
   document.getElementById('settings-tab')?.classList.remove('active');
   document.getElementById('stats-tab')?.classList.remove('active');
@@ -304,10 +311,10 @@ window.showMainApp = showMainApp;
 
 // Show settings panel
 function showSettings() {
-  document.getElementById('main-app').classList.add('hidden');
-  document.getElementById('settings-view').classList.remove('hidden');
-  document.getElementById('stats-view').classList.add('hidden');
-  document.getElementById('knowledge-base-view').classList.add('hidden');
+  document.getElementById('main-app')?.classList.add('hidden');
+  document.getElementById('settings-view')?.classList.remove('hidden');
+  document.getElementById('stats-view')?.classList.add('hidden');
+  document.getElementById('knowledge-base-view')?.classList.add('hidden');
   document.getElementById('main-tab')?.classList.remove('active');
   document.getElementById('settings-tab')?.classList.add('active');
   document.getElementById('stats-tab')?.classList.remove('active');
@@ -345,10 +352,10 @@ window.test = window.showSettings;
 
 // Show stats panel
 function showStats() {
-  document.getElementById('main-app').classList.add('hidden');
-  document.getElementById('settings-view').classList.add('hidden');
-  document.getElementById('stats-view').classList.remove('hidden');
-  document.getElementById('knowledge-base-view').classList.add('hidden');
+  document.getElementById('main-app')?.classList.add('hidden');
+  document.getElementById('settings-view')?.classList.add('hidden');
+  document.getElementById('stats-view')?.classList.remove('hidden');
+  document.getElementById('knowledge-base-view')?.classList.add('hidden');
   document.getElementById('main-tab')?.classList.remove('active');
   document.getElementById('settings-tab')?.classList.remove('active');
   document.getElementById('stats-tab')?.classList.add('active');
@@ -361,12 +368,14 @@ function showStats() {
   lazyLoadAdvancedModules();
 }
 
+window.showStats = showStats;
+
 // Show knowledge base panel
 function showKnowledgeBase() {
-  document.getElementById('main-app').classList.add('hidden');
-  document.getElementById('settings-view').classList.add('hidden');
-  document.getElementById('stats-view').classList.add('hidden');
-  document.getElementById('knowledge-base-view').classList.remove('hidden');
+  document.getElementById('main-app')?.classList.add('hidden');
+  document.getElementById('settings-view')?.classList.add('hidden');
+  document.getElementById('stats-view')?.classList.add('hidden');
+  document.getElementById('knowledge-base-view')?.classList.remove('hidden');
   document.getElementById('main-tab')?.classList.remove('active');
   document.getElementById('settings-tab')?.classList.remove('active');
   document.getElementById('stats-tab')?.classList.remove('active');
@@ -384,6 +393,8 @@ function showKnowledgeBase() {
   }
 }
 
+window.showKnowledgeBase = showKnowledgeBase;
+
 function updateAuthHeader() {
   const btn = document.getElementById('header-login-btn');
   if (!btn) return;
@@ -391,8 +402,8 @@ function updateAuthHeader() {
   if (auth.isLoggedIn()) {
     const user = auth.getUser();
     btn.textContent = `Logout (${user ? user.username : 'User'})`;
-    btn.onclick = () => {
-      auth.logout();
+    btn.onclick = async () => {
+      await auth.logout();
       showToast('Logged out successfully', 'success');
       updateAuthHeader();
       // Optional: Reload to clear state if needed, but for now just stay
@@ -409,31 +420,16 @@ function showRegister() {
   const modal = document.createElement('div');
   modal.className = 'confirm-modal-overlay';
   modal.innerHTML = `
-    <div class="confirm-modal login-modal">
-      <div class="modal-header">
-        <h3>Create Account</h3>
-        <button type="button" class="modal-close" id="modal-close-x">×</button>
-      </div>
-      <div class="modal-body">
-        <form id="register-form" class="auth-form">
-          <div class="form-group">
-            <label for="reg-username">Username</label>
-            <input id="reg-username" type="text" placeholder="Desired Username" required autocomplete="username" />
-          </div>
-           <div class="form-group">
-            <label for="reg-email">Email</label>
-            <input id="reg-email" type="email" placeholder="name@example.com" required autocomplete="email" />
-          </div>
-          <div class="form-group">
-            <label for="reg-password">Password</label>
-            <input id="reg-password" type="password" placeholder="Create a password" required autocomplete="new-password" />
-          </div>
-          <button type="submit" id="do-register-submit" class="button btn-primary btn-full">Create Account</button>
-        </form>
-         <div class="auth-footer">
-          <p>Already have an account? <button type="button" id="switch-to-login" class="btn-link">Log In</button></p>
-        </div>
-      </div>
+    <div class="confirm-modal">
+      <h3>Create Account</h3>
+      <form id="register-form" style="display: contents;">
+        <input id="reg-username" type="text" placeholder="Username" required autocomplete="username" />
+        <input id="reg-email" type="email" placeholder="Email" required autocomplete="email" />
+        <input id="reg-password" type="password" placeholder="Password" required autocomplete="new-password" />
+        <button type="submit" id="do-register-submit">Create Account</button>
+      </form>
+      <button type="button" id="switch-to-login">Already have an account? Login</button>
+      <button type="button" id="modal-close">Close</button>
     </div>
   `;
   document.body.appendChild(modal);
@@ -453,21 +449,13 @@ function showRegister() {
       const email = document.getElementById('reg-email').value;
       const password = document.getElementById('reg-password').value;
 
-      const submitBtn = document.getElementById('do-register-submit');
-      const originalText = submitBtn.textContent;
-      submitBtn.textContent = 'Creating...';
-      submitBtn.disabled = true;
-
       try {
         await auth.register(username, email, password);
         showToast('Registration successful! Please login.', 'success');
-        modal.classList.add('closing');
-        setTimeout(() => modal.remove(), 200);
+        modal.remove();
         showLogin(); // Switch to login after success
       } catch (err) {
         showToast(err.message, 'error');
-        submitBtn.textContent = originalText;
-        submitBtn.disabled = false;
       }
     });
 
@@ -476,51 +464,25 @@ function showRegister() {
     showLogin();
   });
 
-  // Close buttons
-  const close = () => {
-    modal.classList.add('closing');
-    setTimeout(() => modal.remove(), 200);
-  };
-
-  document.getElementById('modal-close-x').addEventListener('click', close);
-
-  // click outside
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) close();
-  });
+  document
+    .getElementById('modal-close')
+    .addEventListener('click', () => modal.remove());
 }
-
-// Make available globally
-window.showLogin = showLogin;
-window.showRegister = showRegister;
 
 function showLogin() {
   // Simple modal for login/register
   const modal = document.createElement('div');
   modal.className = 'confirm-modal-overlay';
   modal.innerHTML = `
-    <div class="confirm-modal login-modal">
-      <div class="modal-header">
-        <h3>Welcome Back</h3>
-        <button type="button" class="modal-close" id="modal-close-x">×</button>
-      </div>
-      <div class="modal-body">
-        <form id="login-form-submit" class="auth-form">
-          <div class="form-group">
-            <label for="login-email">Email</label>
-            <input id="login-email" type="email" placeholder="name@example.com" required autocomplete="username" />
-          </div>
-          <div class="form-group">
-            <label for="login-password">Password</label>
-            <input id="login-password" type="password" placeholder="••••••••" required autocomplete="current-password" />
-          </div>
-          <button type="submit" id="login-submit" class="button btn-primary btn-full">Log In</button>
-        </form>
-        
-        <div class="auth-footer">
-          <p>Don't have an account? <button type="button" id="switch-to-register" class="btn-link">Sign Up</button></p>
-        </div>
-      </div>
+    <div class="confirm-modal">
+      <h3>Login</h3>
+      <form id="login-form-submit" style="display: contents;">
+        <input id="login-email" type="email" placeholder="Email" required autocomplete="username" />
+        <input id="login-password" type="password" placeholder="Password" required autocomplete="current-password" />
+        <button type="submit" id="login-submit">Login</button>
+      </form>
+      <button type="button" id="switch-to-register">Need an account? Register</button>
+      <button type="button" id="modal-close">Close</button>
     </div>
   `;
   document.body.appendChild(modal);
@@ -540,31 +502,15 @@ function showLogin() {
       e.preventDefault();
       const email = document.getElementById('login-email').value;
       const password = document.getElementById('login-password').value;
-
-      const submitBtn = document.getElementById('login-submit');
-      const originalText = submitBtn.textContent;
-      submitBtn.textContent = 'Logging in...';
-      submitBtn.disabled = true;
-
       try {
         await auth.login(email, password);
         showToast('Logged in successfully');
-        modal.classList.add('closing'); // nice closing animation
-        setTimeout(() => modal.remove(), 200);
+        modal.remove();
         updateAuthHeader();
-
-        // Trigger Sync
-        try {
-          const { syncManager } = await import('./modules/sync.js');
-          await syncManager.handleLoginSync();
-        } catch (syncErr) {
-          console.warn('Sync skipped:', syncErr);
-          window.location.reload();
-        }
+        // Reload to sync fresh data
+        window.location.reload();
       } catch (err) {
         showToast(err.message, 'error');
-        submitBtn.textContent = originalText;
-        submitBtn.disabled = false;
       }
     });
 
@@ -576,18 +522,9 @@ function showLogin() {
       showRegister();
     });
 
-  // Close buttons
-  const close = () => {
-    modal.classList.add('closing');
-    setTimeout(() => modal.remove(), 200);
-  };
-
-  document.getElementById('modal-close-x').addEventListener('click', close);
-
-  // click outside
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) close();
-  });
+  document
+    .getElementById('modal-close')
+    .addEventListener('click', () => modal.remove());
 }
 
 // Show service worker update notification
@@ -867,12 +804,46 @@ function setupAllEventListeners() {
 import { initializeSectionSettings } from './modules/section-settings.js';
 
 // Main initialization function
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', async function () {
   try {
+    // Wait for httpOnly session cookie probe before feature modules
+    try {
+      await auth.whenReady();
+    } catch (err) {
+      console.warn('Session restore skipped:', err);
+    }
+
+    // Authenticated realtime channel (handshake uses httpOnly cookie)
+    if (auth.isLoggedIn() && typeof io === 'function') {
+      try {
+        window.adamasSocket = io({
+          withCredentials: true,
+          transports: ['websocket', 'polling'],
+        });
+        const user = auth.getUser();
+        if (user && user._id) {
+          window.adamasSocket.emit('join', user._id);
+        }
+      } catch (err) {
+        console.warn('Socket.IO connect skipped:', err);
+      }
+    }
+
     // Core services
     initializeSectionSettings();
     // Set up global error handling first
     setupGlobalErrorHandling();
+
+    // Request persistent storage to prevent browser from clearing data
+    import('./modules/storage.js')
+      .then((storage) => {
+        if (storage.requestPersistentStorage) {
+          storage.requestPersistentStorage();
+        }
+      })
+      .catch((err) => {
+        console.warn('Could not request persistent storage:', err);
+      });
 
     initializeSettings();
     window.appSettings = appSettings;
@@ -1001,26 +972,30 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Handle service worker for offline functionality
     if ('serviceWorker' in navigator) {
-      if (
+      const isLocalDev =
         window.location.hostname === 'localhost' ||
-        window.location.hostname === '127.0.0.1'
-      ) {
-        // In development mode, unregister any existing service workers
+        window.location.hostname === '127.0.0.1';
+
+      // Drop stale Cache Storage from the old cache-first SW (adamas-*-v1.0.0)
+      if ('caches' in window) {
+        caches.keys().then((keys) => {
+          keys
+            .filter((k) => !k.startsWith('adamas-facet-'))
+            .forEach((k) => caches.delete(k));
+        });
+      }
+
+      if (isLocalDev) {
         navigator.serviceWorker.getRegistrations().then((registrations) => {
           registrations.forEach((registration) => {
-            registration.unregister().then(() => {
-              //console.log('Service Worker unregistered in development mode');
-            });
+            registration.unregister();
           });
         });
       } else {
-        // In production mode, register service worker
         navigator.serviceWorker
-          .register('/adamas/sw.js')
+          .register('/adamas/sw.facet.js?v=20260918', { updateViaCache: 'none' })
           .then((registration) => {
-            //console.log('Service Worker registered successfully:', registration.scope);
-
-            // Check for updates
+            registration.update().catch(() => {});
             registration.addEventListener('updatefound', () => {
               const newWorker = registration.installing;
               if (newWorker) {
@@ -1029,7 +1004,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     newWorker.state === 'installed' &&
                     navigator.serviceWorker.controller
                   ) {
-                    // New version available
+                    newWorker.postMessage({ type: 'SKIP_WAITING' });
                     showUpdateNotification();
                   }
                 });

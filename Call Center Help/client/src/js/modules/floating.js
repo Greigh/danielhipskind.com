@@ -62,6 +62,8 @@ export class FloatingWindowManager {
     }
 
     // Update all IDs in the cloned section to avoid collisions
+    clonedSection.removeAttribute('data-patterns-attached');
+    clonedSection.style.display = '';
     clonedSection.querySelectorAll('[id]').forEach((element) => {
       const originalId = element.id;
       const newId = `floating-${sectionId}-${originalId}`;
@@ -167,9 +169,9 @@ export class FloatingWindowManager {
                 <style>
                     /* CSS Variables - Exact match from main app */
                     :root {
-                        --primary-blue: #1976d2;
-                        --primary-blue-dark: #1565c0;
-                        --primary-blue-light: #42a5f5;
+                        --primary-blue: #0e7490;
+                        --primary-blue-dark: #155e75;
+                        --primary-blue-light: #22d3ee;
                         --secondary-green: #2e7d32;
                         --secondary-orange: #f57c00;
                         --secondary-red: #d32f2f;
@@ -197,9 +199,9 @@ export class FloatingWindowManager {
                         --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
                         --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
                         --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
-                        --font-family-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+                        --font-family-base: 'IBM Plex Sans', 'Segoe UI', sans-serif;
                         --font-family-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
-                        --font-family-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+                        --font-family-sans: 'IBM Plex Sans', 'Segoe UI', sans-serif;
                         --bg-color: #ffffff;
                         --text-color: var(--gray-800);
                         --border-color: var(--gray-200);
@@ -266,7 +268,7 @@ export class FloatingWindowManager {
                     }
                     
                     .button, button:not(.nav-tab):not(.tab-button) {
-                        background: linear-gradient(90deg, #3498db 60%, var(--primary-blue) 100%);
+                        background: linear-gradient(90deg, #0e7490 60%, var(--primary-blue) 100%);
                         color: var(--white);
                         border: none;
                         border-radius: 0.375rem;
@@ -867,6 +869,9 @@ export class FloatingWindowManager {
         this.removePoppedOutIndicator(sectionId);
       }
 
+      if (typeof floatingWindow.__floatingDragCleanup === 'function') {
+        floatingWindow.__floatingDragCleanup();
+      }
       floatingWindow.remove();
       this.floatingWindows.delete(sectionId);
     }
@@ -888,7 +893,7 @@ export class FloatingWindowManager {
       indicator.textContent = text;
       indicator.style.marginLeft = '8px';
       indicator.style.fontSize = '0.85em';
-      indicator.style.color = '#1976d2';
+      indicator.style.color = '#0e7490';
 
       const header =
         section.querySelector('.section-header .title-container') ||
@@ -960,7 +965,7 @@ export class FloatingWindowManager {
       });
     }
 
-    document.addEventListener('mousemove', (e) => {
+    const onMouseMove = (e) => {
       if (!isDragging) return;
 
       e.preventDefault();
@@ -969,11 +974,20 @@ export class FloatingWindowManager {
 
       window.style.left = `${currentX}px`;
       window.style.top = `${currentY}px`;
-    });
+    };
 
-    document.addEventListener('mouseup', () => {
+    const onMouseUp = () => {
       isDragging = false;
-    });
+    };
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+
+    // Allow dock/close to remove document listeners and avoid leaks
+    window.__floatingDragCleanup = () => {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    };
   }
 }
 
@@ -1022,14 +1036,21 @@ export function setupAllFloating() {
 }
 
 // Update your initialization code to periodically check for new sections
+let floatingInitialized = false;
+let floatingSetupInterval = null;
+
 export function initFloating() {
+  if (floatingInitialized) return;
+  floatingInitialized = true;
+
   // Initialize the floating manager
   getFloatingManager();
 
   setupAllFloating();
 
   // Periodically check for new floating buttons
-  setInterval(setupAllFloating, 2000);
+  if (floatingSetupInterval) clearInterval(floatingSetupInterval);
+  floatingSetupInterval = setInterval(setupAllFloating, 2000);
 }
 
 // Export the instance getter for external use

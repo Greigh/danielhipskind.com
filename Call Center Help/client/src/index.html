@@ -4,13 +4,19 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Adamas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <link
       rel="icon"
-      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💎</text></svg>"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%230e7490' d='M32 4L8 24l24 36 24-36L32 4zm0 10.5L46.5 26 32 48.2 17.5 26 32 14.5z'/%3E%3C/svg%3E"
     />
     <link
       rel="manifest"
-      href="/adamas/manifest.json"
+      href="<%= htmlWebpackPlugin.files.publicPath %>manifest.json"
     />
 
     <!-- SEO & Open Graph -->
@@ -89,28 +95,8 @@
       }
     </script>
 
-    <script>
-      // Deferred-call stubs to tolerate script reordering (Rocket Loader / optimizers)
-      window.__deferredCalls = window.__deferredCalls || [];
-      if (!window.showConfirmModal) {
-        window.showConfirmModal = function (opts) {
-          return new Promise((resolve) => {
-            window.__deferredCalls.push({ type: 'confirm', opts, resolve });
-          });
-        };
-      }
-      if (!window.showToast) {
-        window.showToast = function (message, type, duration) {
-          // Queue toast requests until toastManager is available
-          window.__deferredCalls.push({
-            type: 'toast',
-            message,
-            toastType: type,
-            duration,
-          });
-        };
-      }
-    </script>
+    <script src="<%= htmlWebpackPlugin.files.publicPath %>js/theme-init.js"></script>
+    <script src="js/deferred-stubs.js"></script>
   </head>
   <body>
     <div id="app">
@@ -118,7 +104,16 @@
       <header class="app-header">
         <div class="header-content">
           <div class="app-title">
-            <h1>💎 Adamas <span class="beta-badge">BETA</span></h1>
+            <h1>
+              <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true">
+                <path
+                  fill="currentColor"
+                  d="M32 4L8 24l24 36 24-36L32 4zm0 10.5L46.5 26 32 48.2 17.5 26 32 14.5z"
+                />
+              </svg>
+              <span class="brand-name">Adamas</span>
+              <span class="beta-badge">BETA</span>
+            </h1>
           </div>
           <nav class="main-nav">
             <button id="main-tab" class="nav-tab active">Main</button>
@@ -236,10 +231,8 @@
                 <input
                   type="text"
                   id="patternNumberInput"
-                  name="patternNumberInput"
                   placeholder="Enter number to format..."
                   aria-label="Number to format"
-                  autocomplete="off"
                 />
                 <span class="tooltip-wrapper">
                   <button id="pastePatternBtn" class="button">Paste</button>
@@ -305,7 +298,6 @@
                       name="step-input"
                       placeholder="Enter step description..."
                       aria-label="Call flow step description"
-                      autocomplete="off"
                     />
                     <button id="add-step-btn" class="button">Add Step</button>
                   </div>
@@ -320,6 +312,7 @@
                     ></textarea>
                     <button id="bulk-add-btn" class="button">Bulk Add</button>
                   </div>
+                  <div id="flow-steps" class="flow-steps"></div>
                 </div>
 
                 <div id="flow-tab" class="tab-content">
@@ -507,7 +500,6 @@
                       id="caller-name"
                       name="caller-name"
                       placeholder="e.g. Jane Doe"
-                      autocomplete="name"
                     />
                   </div>
 
@@ -518,7 +510,6 @@
                       id="caller-phone"
                       name="caller-phone"
                       placeholder="(555) 555-5555"
-                      autocomplete="tel"
                     />
                   </div>
                 </div>
@@ -581,7 +572,6 @@
                         id="caller-account"
                         name="caller-account"
                         placeholder="Account Number"
-                        autocomplete="off"
                       />
                     </div>
                     <div class="form-group">
@@ -1184,7 +1174,6 @@
                         id="account-username"
                         name="username"
                         class="form-input"
-                        autocomplete="username"
                       />
                     </div>
                   </div>
@@ -1200,7 +1189,6 @@
                         id="account-email"
                         name="email"
                         class="form-input"
-                        autocomplete="email"
                       />
                     </div>
                   </div>
@@ -1223,14 +1211,6 @@
               >
                 <h4 class="settings-group-title">Change Password</h4>
                 <form id="change-password-form" class="settings-form">
-                  <input
-                    type="text"
-                    id="change-password-username"
-                    name="username"
-                    autocomplete="username"
-                    style="display: none"
-                    aria-hidden="true"
-                  />
                   <div class="setting-item">
                     <div class="setting-info">
                       <label for="current-password" class="setting-label"
@@ -3299,24 +3279,31 @@
       </div>
 
       <!-- Welcome Overlay -->
-      <div id="welcome-overlay" class="welcome-overlay">
+      <div
+        id="welcome-overlay"
+        class="welcome-overlay"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="welcome-title"
+        aria-hidden="true"
+      >
         <div class="welcome-content wizard-container">
           <!-- Step 1: Role Selection -->
           <div class="wizard-step active" data-step="1">
-            <div style="position: absolute; top: 1rem; right: 1rem;">
-               <button id="welcome-login-btn" class="button btn-link">Have an account? Log In</button>
-            </div>
             <div class="welcome-header">
-              <h1>Welcome to Adamas</h1>
-              <p>
-                Your ultimate call center companion. Let's set up your
-                workspace.
-              </p>
+              <h1 id="welcome-title">Adamas</h1>
+              <p>Set up your agent workspace in a few short steps.</p>
             </div>
             <div class="welcome-body">
               <div class="role-grid">
                 <!-- Agent Role -->
-                <div class="role-card selected" data-role="agent">
+                <div
+                  class="role-card selected"
+                  data-role="agent"
+                  role="button"
+                  tabindex="0"
+                  aria-pressed="true"
+                >
                   <div class="check-icon">✓</div>
                   <span class="role-icon">🎧</span>
                   <h3>Agent</h3>
@@ -3480,6 +3467,26 @@
                   <span class="module-icon">⚡</span>
                   <span class="module-name">Quick Bar</span>
                 </label>
+                <!-- Performance -->
+                <label class="module-card">
+                  <input
+                    type="checkbox"
+                    name="modules"
+                    value="showPerformanceMonitoring"
+                  />
+                  <span class="module-icon">📈</span>
+                  <span class="module-name">Performance</span>
+                </label>
+                <!-- Knowledge Base -->
+                <label class="module-card">
+                  <input
+                    type="checkbox"
+                    name="modules"
+                    value="showKnowledgeBase"
+                  />
+                  <span class="module-icon">📚</span>
+                  <span class="module-name">Knowledge Base</span>
+                </label>
               </div>
             </div>
           </div>
@@ -3488,14 +3495,14 @@
           <div class="wizard-step" data-step="3">
             <div class="welcome-header">
               <h1>Choose Your Look</h1>
-              <p>Select the theme that fits your vibe.</p>
+              <p>Pick a theme for long shifts.</p>
             </div>
             <div class="welcome-body">
               <div
                 class="theme-grid"
                 style="display: flex; justify-content: center; gap: 2rem"
               >
-                <div class="theme-card" data-theme="light">
+                <div class="theme-card selected" data-theme="light">
                   <div class="theme-preview light"></div>
                   <h3>Light Mode</h3>
                 </div>
@@ -3549,10 +3556,18 @@
           <div class="wizard-step" data-step="5">
             <div class="welcome-header">
               <h1>All Set!</h1>
-              <p>Your workspace is ready. Enjoy using Adamas.</p>
+              <p>Your workspace is ready.</p>
             </div>
             <div class="welcome-body">
-              <div style="font-size: 4rem; margin-bottom: 1rem">🚀</div>
+              <div class="welcome-finish-mark" aria-hidden="true">
+                <svg viewBox="0 0 64 64" width="56" height="56">
+                  <path
+                    fill="currentColor"
+                    d="M32 4L8 24l24 36 24-36L32 4zm0 10.5L46.5 26 32 48.2 17.5 26 32 14.5z"
+                  />
+                </svg>
+              </div>
+              <p id="welcome-summary" class="welcome-summary"></p>
             </div>
           </div>
 

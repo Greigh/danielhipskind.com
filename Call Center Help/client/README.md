@@ -1,157 +1,166 @@
-# Adamas (Call Center Helper) [BETA]
+# Adamas [BETA]
 
 **Current Status**: 🚧 Public Beta
 
-A modern web application designed to streamline call center operations, providing tools for workflow management, note-taking, number formatting, and more. Built with HTML, JavaScript (ES Modules), SCSS, and featuring modular architecture, persistent storage, and a responsive UI.
+Adamas is a modular call-center assistant for agents. It combines number formatting, call flows, notes, hold timers, call logging, CRM hooks, analytics, and related productivity tools in one browser app — with optional cloud sync when signed in.
+
+Deployed under the `/adamas/` path (legacy `/callcenterhelper/` redirects are still supported by the server).
+
+## Stack
+
+| Layer | Technology |
+| --- | --- |
+| **Frontend** | Vanilla JavaScript (ES modules), HTML, modular **SCSS** |
+| **Bundler** | **Webpack 5** (`webpack-dev-server` for local UI, Babel for transpile) |
+| **Backend** | **Node.js** + **Express 5** (`server.js`) |
+| **Realtime** | **Socket.IO** (server + client) |
+| **Data** | **MongoDB** via **Mongoose** (falls back to an in-memory mock DB when Mongo is unavailable) |
+| **Auth** | **JWT** in **httpOnly** session cookies (`adamas_session`) + **bcryptjs** |
+| **Charts** | **Chart.js** |
+| **Integrations** | Twilio, Nodemailer, OpenAI, CRM providers (Salesforce, HubSpot, Zendesk, Dynamics, Five9, Finesse) |
+| **Security** | Helmet CSP (nonce-based, no `unsafe-inline`/`unsafe-eval` on scripts), CORS w/ credentials, express-rate-limit (API routes), express-validator, Socket.IO handshake auth |
+| **Logging** | Winston |
+| **Testing** | Jest (jsdom unit tests), Playwright (e2e + smoke) |
+| **Tooling** | ESLint, Prettier, TypeScript (types/check), Sass, Concurrently, Nodemon |
+
+This is **not** a React/Vite app. The UI is multi-page HTML wired by `src/js/main.js` and feature modules under `src/js/modules/`.
 
 ## Features
 
-- **Call Flow Builder**: Create, edit, reorder, and track call flow steps with checkboxes.
-- **Notes Management**: Take and organize notes per call or session with persistent storage.
-- **Pattern Formatter**: Format phone numbers and other data using customizable patterns with auto-copy functionality.
-- **Timer**: Integrated hold timer with pause/resume capabilities.
-- **Settings & Themes**: Switch between light and dark modes, customize preferences.
-- **Floating Windows**: Pop out sections for multitasking on multiple monitors.
-- **Internationalization**: Support for multiple languages (English, Spanish).
-- **Accessibility**: Modal dialogs with proper focus management and screen reader support.
-- **CRM Integration**: Support for Cisco Finesse, Five9, Salesforce, Zendesk, HubSpot, Dynamics with bi-directional sync.
-- **Authentication & Security**: Role-based access control (Admin, Supervisor, Agent), audit logging, GDPR compliance.
-- **API Integrations**: REST API, webhooks, telephony (Twilio, Asterisk), email integration.
-- **Progressive Web App**: Offline capability, push notifications, camera integration.
-- **Training & Onboarding**: Interactive script practice with feedback, certification tracking.
-- **Voice Commands**: Speech recognition for hands-free operation.
-- **Help System**: Contextual tooltips and help documentation.
-- **Testing**: Comprehensive unit and end-to-end tests using Jest and Playwright.
+- **Number / Pattern Formatter** — customizable patterns, paste, format, copy, history; works in floating pop-outs
+- **Call Flow Builder** — add, bulk-add, reorder, and track steps
+- **Notes** — session notes with local persistence (and API sync when authenticated)
+- **Hold Timer** — stopwatch/countdown, alerts, history, optional multi-timer
+- **Call Logging** — start/end calls, verification fields, sensitive data, templates, history
+- **Scripts, Tasks, QA, Performance Metrics** — agent workflow helpers
+- **CRM Integration** — pluggable providers (Salesforce, HubSpot, Zendesk, Dynamics, Five9, Finesse)
+- **Analytics & Reporting** — Chart.js dashboards and advanced reporting controls
+- **Collaboration / Multichannel / Workflows / AI Insights** — lazy-loaded advanced modules
+- **Settings & Themes** — light/dark themes, section visibility, welcome wizard, layout preferences
+- **Quick Actions Toolbar** — shortcuts for common agent actions
+- **PWA bits** — service worker, manifest, offline-oriented assets
+- **Auth & Account** — register/login, profile/password, optional cloud settings sync
 
 ## Project Structure
 
-```text
-Call Center Help/client/
-├── src/
-│   ├── index.html
-│   ├── privacy.html
-│   ├── terms.html
-│   ├── contact.html
-│   ├── settings.html
-│   ├── js/
-│   │   ├── main.js
-│   │   ├── modules/
-│   │   └── utils/
-│   ├── styles/
-│   └── locales/
-├── public/
-├── test/
-├── dist/ (generated)
+```
+Adamas/
+├── server.js              # Express API, static hosting, Socket.IO
+├── build.js               # Post-webpack production copy/rewrite helpers
+├── clean-build.js         # Clears dist/
+├── webpack.config.js      # Bundler + webpack-dev-server
 ├── package.json
-├── webpack.config.js
-├── jest.config.js
-├── playwright.config.js
-├── nodemon.json
-├── server.js
+├── src/
+│   ├── index.html         # Main app shell
+│   ├── settings.html      # Standalone settings page
+│   ├── contact.html / privacy.html / terms.html / login.html
+│   ├── js/
+│   │   ├── main.js        # App bootstrap & navigation
+│   │   ├── contact.js
+│   │   ├── modules/       # Feature modules (formatter, timer, CRM, …)
+│   │   └── utils/         # Toast, modal, config, error boundary, …
+│   ├── styles/            # Modular SCSS (sections/, components/, …)
+│   └── public/            # Static assets (audio, manifest, sw helpers)
+├── public/                # Extra public assets (e.g. service worker)
+├── dist/                  # Production build output (generated)
+├── test/                  # Jest unit tests
+│   └── e2e/               # Playwright e2e + smoke harness
 └── README.md
 ```
 
 ## Prerequisites
 
-- Node.js (v18 or higher)
-- npm (comes with Node.js)
+- **Node.js** v18 or higher (v22 tested)
+- **npm** (comes with Node.js)
+- Optional: MongoDB, SMTP (`EMAIL_USER` / related env), Twilio, OpenAI, and other integration credentials via `.env`
 
 ## Installation
 
-1. Clone the repository:
+```bash
+# GitHub
+git clone https://github.com/Greigh/Adamas.git
+# Or Greigh Studios Forgejo (dual-homed)
+# git clone git@git.greighstudios.com:greighstudios/Adamas.git
+cd Adamas
+npm install
+```
 
-   ```sh
-   git clone <repository-url>
-   cd "Call Center Help/client"
-   ```
+Attach the studio forge remote on an existing clone:
 
-2. Install dependencies:
-
-   ```sh
-   npm install
-   ```
+```bash
+git remote add gitea git@git.greighstudios.com:greighstudios/Adamas.git
+```
 
 ## Development
 
-Start the full development environment (Frontend + Backend):
+**Full local stack** (API on `:8080` + webpack UI on `:3000` with API proxy):
 
-```sh
+```bash
 npm run dev:local
 ```
 
-The application will be available at `http://localhost:8080`.
+Or separately:
 
-For a simple local server (static files):
-
-```sh
-npm start
+```bash
+npm run server:dev   # Express on http://localhost:8080
+npm run dev          # Webpack dev server on http://localhost:3000
 ```
+
+- Webpack proxies `/api`, `/adamas/api`, and `/socket.io` to the Express server.
+- Production-style serving: build first, then `npm start` and open `http://localhost:8080/adamas/`.
 
 ## Building
 
-Create a production build:
-
-```sh
+```bash
 npm run build
 ```
 
-This generates optimized files in the `dist/` directory.
+This cleans `dist/`, runs a production Webpack build (`publicPath: /adamas/`), then `build.js` copies predictable asset names (`main.js`, `main.css`, …) and rewrites static HTML links.
 
-Clean build (removes old files):
-
-```sh
-npm run clean
-npm run build
+```bash
+npm start            # serve dist/ + API on PORT (default 8080)
 ```
 
 ## Testing
 
-Run unit tests:
-
-```sh
-npm test
+```bash
+npm test             # Jest unit tests
+npm run test:e2e     # Production build + Playwright floating-formatter e2e
+npm run test:smoke   # Playwright smoke suite against a running server
+                     # e.g. node test/e2e/smoke-test.js http://127.0.0.1:8080/adamas/
 ```
 
-Run end-to-end tests:
+Lint / format:
 
-```sh
-npm run test:e2e
+```bash
+npm run lint
+npm run format
 ```
-
-## Deployment
-
-1. Build the application:
-
-   ```sh
-   npm run upload
-   ```
-
-   This script builds, cleans, and uploads to the server.
-
-For manual deployment, use `upload.sh` after building.
 
 ## Usage
 
-- Access the main interface via `index.html`.
-- Configure settings in `settings.html`.
-- View privacy policy at `privacy.html`.
-- Terms of service at `terms.html`.
-- Contact information at `contact.html`.
+1. Open the app and complete the welcome wizard (role + theme).
+2. Enable the sections you need under **Settings** (many advanced tools are off by default).
+3. Use the **Number Formatter**, **Hold Timer**, and **Call Logging** tools from the main view.
+4. Float sections with the ⧉ control for side-by-side agent workflows.
+5. Sign in to sync notes/settings through the API when a database is configured.
 
-## Contributing
+Settings and most agent data persist in **localStorage**; authenticated users can also sync via `/api/*`.
 
-1. Fork the repository.
-2. Create a feature branch.
-3. Make your changes.
-4. Run tests: `npm test` and `npm run test:e2e`.
-5. Lint and format: `npm run lint` and `npm run format`.
-6. Submit a pull request.
+## Environment
+
+Common variables (see `server.js` / `.env`):
+
+| Variable | Purpose |
+| --- | --- |
+| `PORT` | HTTP port (default `8080`) |
+| `MONGODB_URI` / DB config | Mongo connection (mock DB used if unavailable) |
+| `JWT_SECRET` | Auth token signing |
+| `EMAIL_USER` (and SMTP-related) | Contact form / mail |
+| Twilio / OpenAI / CRM vars | Optional integrations |
 
 ## License
 
 **License:** [CC BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/)
 
-This software and its documentation are the exclusive property of Daniel Hipskind.
-Unauthorized reproduction or distribution of this work, or any portion of it, may result in severe civil and criminal penalties, and will be prosecuted to the maximum extent possible under law.
-
-See [`LICENSE.html`](./src/LICENSE.html) for the full license text.
+This software and its documentation are the exclusive property of Daniel Hipskind (Greigh). Unauthorized reproduction or distribution of this work is prohibited.
