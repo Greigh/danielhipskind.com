@@ -35,7 +35,9 @@
     "deploy": "bash scripts/deploy-with-site.sh",
     "deploy:skip-tests": "DEPLOY_SKIP_TESTS=1 bash scripts/deploy-with-site.sh",
     "test:security": "jest --runInBand test/security.helpers.test.js test/security.client.test.js test/http.security.smoke.test.js",
-    "test:audit": "jest --runInBand test/security.helpers.test.js test/security.client.test.js test/memory.bounds.test.js test/legal.and.features.test.js test/http.security.smoke.test.js"
+    "test:audit": "jest --runInBand test/security.helpers.test.js test/security.client.test.js test/memory.bounds.test.js test/legal.and.features.test.js test/http.security.smoke.test.js",
+    "git:identity": "git config user.name Greigh && git config user.email dghipskind@gmail.com",
+    "prepare": "npm run git:identity || true"
   },
   "author": "Daniel Hipskind aka Greigh",
   "license": "CC BY-NC-ND",
