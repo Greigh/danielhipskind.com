@@ -8,28 +8,31 @@
  *  3. Purges Cloudflare cache and verifies live response headers
  */
 
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const rootDir = path.resolve(__dirname, '..');
-const envFile = path.join(rootDir, '.env.deploy');
+const rootDir = path.resolve(__dirname, "..");
+const envFile = path.join(rootDir, ".env.deploy");
 
 if (!fs.existsSync(envFile)) {
-  console.error('❌ .env.deploy file not found at:', envFile);
+  console.error("❌ .env.deploy file not found at:", envFile);
   process.exit(1);
 }
 
 function parseEnv(filePath) {
-  const content = fs.readFileSync(filePath, 'utf8');
+  const content = fs.readFileSync(filePath, "utf8");
   const env = {};
-  for (const line of content.split('\n')) {
+  for (const line of content.split("\n")) {
     const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith('#')) continue;
-    const eqIdx = trimmed.indexOf('=');
+    if (!trimmed || trimmed.startsWith("#")) continue;
+    const eqIdx = trimmed.indexOf("=");
     if (eqIdx !== -1) {
       const key = trimmed.slice(0, eqIdx).trim();
       let val = trimmed.slice(eqIdx + 1).trim();
-      if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+      if (
+        (val.startsWith('"') && val.endsWith('"')) ||
+        (val.startsWith("'") && val.endsWith("'"))
+      ) {
         val = val.slice(1, -1);
       }
       env[key] = val;
@@ -42,90 +45,123 @@ const env = parseEnv(envFile);
 const ZONE_ID = env.CLOUDFLARE_ZONE_ID;
 const API_KEY = env.CLOUDFLARE_API_KEY;
 const EMAIL = env.CLOUDFLARE_EMAIL;
+const API_TOKEN = env.CLOUDFLARE_API_TOKEN;
 
-if (!ZONE_ID || !API_KEY || !EMAIL) {
-  console.error('❌ Missing CLOUDFLARE_ZONE_ID, CLOUDFLARE_API_KEY, or CLOUDFLARE_EMAIL in .env.deploy');
+// API Tokens (e.g. "cfat_*") authenticate via "Authorization: Bearer".
+// A Global API Key is a 37-char hex string and needs X-Auth-Email/X-Auth-Key.
+const looksLikeGlobalKey = (v) => /^[0-9a-f]{37}$/i.test(v || "");
+const useBearer = API_TOKEN || (API_KEY && !looksLikeGlobalKey(API_KEY));
+
+if (!ZONE_ID || (!API_TOKEN && !API_KEY)) {
+  console.error(
+    "❌ Missing CLOUDFLARE_ZONE_ID and CLOUDFLARE_API_TOKEN (or CLOUDFLARE_API_KEY) in .env.deploy",
+  );
+  process.exit(1);
+}
+if (!useBearer && !EMAIL) {
+  console.error(
+    "❌ CLOUDFLARE_EMAIL is required when using a Global API Key in .env.deploy",
+  );
   process.exit(1);
 }
 
-const CF_HEADERS = {
-  'X-Auth-Email': EMAIL,
-  'X-Auth-Key': API_KEY,
-  'Content-Type': 'application/json',
-};
+const CF_HEADERS = useBearer
+  ? {
+      Authorization: `Bearer ${API_TOKEN || API_KEY}`,
+      "Content-Type": "application/json",
+    }
+  : {
+      "X-Auth-Email": EMAIL,
+      "X-Auth-Key": API_KEY,
+      "Content-Type": "application/json",
+    };
 
 async function updateBrowserCacheTTL() {
-  console.log('⚙️  Configuring Browser Cache TTL to 0 (Respect Origin Headers)...');
-  const res = await fetch(`https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/settings/browser_cache_ttl`, {
-    method: 'PATCH',
-    headers: CF_HEADERS,
-    body: JSON.stringify({ value: 0 }),
-  });
+  console.log(
+    "⚙️  Configuring Browser Cache TTL to 0 (Respect Origin Headers)...",
+  );
+  const res = await fetch(
+    `https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/settings/browser_cache_ttl`,
+    {
+      method: "PATCH",
+      headers: CF_HEADERS,
+      body: JSON.stringify({ value: 0 }),
+    },
+  );
   const data = await res.json();
   if (data.success) {
-    console.log('✅ Browser Cache TTL set to Respect Existing Headers (value: 0)');
+    console.log(
+      "✅ Browser Cache TTL set to Respect Existing Headers (value: 0)",
+    );
   } else {
-    console.error('⚠️ Failed to update Browser Cache TTL:', data.errors);
+    console.error("⚠️ Failed to update Browser Cache TTL:", data.errors);
   }
 }
 
 async function updateCacheRules() {
-  console.log('⚙️  Finding cache ruleset (phase: http_request_cache_settings)...');
-  const listRes = await fetch(`https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/rulesets`, {
-    headers: CF_HEADERS,
-  });
+  console.log(
+    "⚙️  Finding cache ruleset (phase: http_request_cache_settings)...",
+  );
+  const listRes = await fetch(
+    `https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/rulesets`,
+    {
+      headers: CF_HEADERS,
+    },
+  );
   const listData = await listRes.json();
   if (!listData.success) {
-    console.error('❌ Failed to fetch rulesets:', listData.errors);
+    console.error("❌ Failed to fetch rulesets:", listData.errors);
     return;
   }
 
-  let cacheRuleset = listData.result.find((r) => r.phase === 'http_request_cache_settings');
+  let cacheRuleset = listData.result.find(
+    (r) => r.phase === "http_request_cache_settings",
+  );
   let rulesetId = cacheRuleset ? cacheRuleset.id : null;
 
   const rules = [
     {
-      action: 'set_cache_settings',
+      action: "set_cache_settings",
       action_parameters: {
         cache: false,
       },
-      description: 'Bypass Cache for Dynamic Endpoints',
+      description: "Bypass Cache for Dynamic Endpoints",
       enabled: true,
       expression:
         '(starts_with(http.request.uri.path, "/api/") or starts_with(http.request.uri.path, "/adamas/api/") or starts_with(http.request.uri.path, "/admin/") or starts_with(http.request.uri.path, "/socket.io/") or starts_with(http.request.uri.path, "/cleartab/api/"))',
     },
     {
-      action: 'set_cache_settings',
+      action: "set_cache_settings",
       action_parameters: {
         cache: true,
-        edge_ttl: { mode: 'respect_origin' },
-        browser_ttl: { mode: 'respect_origin' },
+        edge_ttl: { mode: "respect_origin" },
+        browser_ttl: { mode: "respect_origin" },
       },
-      description: 'Cache Static Assets',
+      description: "Cache Static Assets",
       enabled: true,
       expression:
         '(starts_with(http.request.uri.path, "/_next/static/") or starts_with(http.request.uri.path, "/assets/") or starts_with(http.request.uri.path, "/adamas/js/") or starts_with(http.request.uri.path, "/adamas/styles/") or starts_with(http.request.uri.path, "/adamas/audio/"))',
     },
     {
-      action: 'set_cache_settings',
+      action: "set_cache_settings",
       action_parameters: {
         cache: true,
-        edge_ttl: { mode: 'respect_origin' },
-        browser_ttl: { mode: 'respect_origin' },
+        edge_ttl: { mode: "respect_origin" },
+        browser_ttl: { mode: "respect_origin" },
       },
-      description: 'Cache Adamas Static Web App',
+      description: "Cache Adamas Static Web App",
       enabled: true,
       expression:
         '(starts_with(http.request.uri.path, "/adamas/") and not starts_with(http.request.uri.path, "/adamas/api/"))',
     },
     {
-      action: 'set_cache_settings',
+      action: "set_cache_settings",
       action_parameters: {
         cache: true,
-        edge_ttl: { mode: 'respect_origin' },
-        browser_ttl: { mode: 'respect_origin' },
+        edge_ttl: { mode: "respect_origin" },
+        browser_ttl: { mode: "respect_origin" },
       },
-      description: 'Cache Site Pages with Origin Cache Control',
+      description: "Cache Site Pages with Origin Cache Control",
       enabled: true,
       expression:
         '(http.host eq "danielhipskind.com" and not starts_with(http.request.uri.path, "/api/") and not starts_with(http.request.uri.path, "/admin/") and not starts_with(http.request.uri.path, "/socket.io/") and not starts_with(http.request.uri.path, "/cleartab/"))',
@@ -137,65 +173,68 @@ async function updateCacheRules() {
     const updateRes = await fetch(
       `https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/rulesets/${rulesetId}`,
       {
-        method: 'PUT',
+        method: "PUT",
         headers: CF_HEADERS,
         body: JSON.stringify({ rules }),
-      }
+      },
     );
     const updateData = await updateRes.json();
     if (updateData.success) {
-      console.log('✅ Cloudflare Cache Rules updated successfully.');
+      console.log("✅ Cloudflare Cache Rules updated successfully.");
     } else {
-      console.error('❌ Failed to update ruleset:', updateData.errors);
+      console.error("❌ Failed to update ruleset:", updateData.errors);
     }
   } else {
-    console.log('⚙️  Creating new cache ruleset...');
+    console.log("⚙️  Creating new cache ruleset...");
     const createRes = await fetch(
       `https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/rulesets`,
       {
-        method: 'POST',
+        method: "POST",
         headers: CF_HEADERS,
         body: JSON.stringify({
-          name: 'default',
-          kind: 'zone',
-          phase: 'http_request_cache_settings',
+          name: "default",
+          kind: "zone",
+          phase: "http_request_cache_settings",
           rules,
         }),
-      }
+      },
     );
     const createData = await createRes.json();
     if (createData.success) {
-      console.log('✅ Cloudflare Cache Ruleset created successfully.');
+      console.log("✅ Cloudflare Cache Ruleset created successfully.");
     } else {
-      console.error('❌ Failed to create ruleset:', createData.errors);
+      console.error("❌ Failed to create ruleset:", createData.errors);
     }
   }
 }
 
 async function purgeCache() {
-  console.log('🔄 Purging Cloudflare cache...');
-  const res = await fetch(`https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/purge_cache`, {
-    method: 'POST',
-    headers: CF_HEADERS,
-    body: JSON.stringify({ purge_everything: true }),
-  });
+  console.log("🔄 Purging Cloudflare cache...");
+  const res = await fetch(
+    `https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/purge_cache`,
+    {
+      method: "POST",
+      headers: CF_HEADERS,
+      body: JSON.stringify({ purge_everything: true }),
+    },
+  );
   const data = await res.json();
   if (data.success) {
-    console.log('✅ Cloudflare cache purged successfully.');
+    console.log("✅ Cloudflare cache purged successfully.");
   } else {
-    console.warn('⚠️ Cloudflare purge warning:', data.errors);
+    console.warn("⚠️ Cloudflare purge warning:", data.errors);
   }
 }
 
 async function main() {
-  console.log('🚀 Starting Cloudflare Cache Setup & Verification...');
+  console.log("🚀 Starting Cloudflare Cache Setup & Verification...");
   await updateBrowserCacheTTL();
   await updateCacheRules();
   await purgeCache();
-  console.log('🎉 Cloudflare Cache setup complete!');
+  console.log("🎉 Cloudflare Cache setup complete!");
 }
 
 main().catch((err) => {
-  console.error('Error:', err);
+  console.error("Error:", err);
   process.exit(1);
 });
