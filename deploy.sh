@@ -106,16 +106,16 @@ resolve_adamas_src() {
     if [ -z "$SRC" ] && [ -f "$SCRIPT_DIR/Call Center Help/client/package.json" ] \
         && [ -f "$SCRIPT_DIR/Call Center Help/client/server.js" ] \
         && [ -f "$SCRIPT_DIR/Call Center Help/client/src/styles/base/_variables.scss" ]; then
-        # Prefer external Adamas; nested-only only if explicitly allowed
-        if [ "${REQUIRE_ADAMAS_SRC:-1}" = "0" ]; then
+        # Prefer external Adamas; nested client used if external not found unless REQUIRE_ADAMAS_SRC=1
+        if [ "${REQUIRE_ADAMAS_SRC:-0}" = "0" ]; then
             SRC="$SCRIPT_DIR/Call Center Help/client"
         fi
     fi
     if [ -z "$SRC" ] || [ ! -f "$SRC/package.json" ] || [ ! -f "$SRC/server.js" ]; then
-        echo "❌ Adamas source required for deploy."
-        echo "   Clone Greigh/Adamas next to this repo, or:"
-        echo "   export ADAMS_SRC=/path/to/Adamas"
-        echo "   (npm run deploy from Adamas sets ADAMS_SRC automatically)"
+        echo "❌ Adamas source required for deploy." >&2
+        echo "   Clone Greigh/Adamas next to this repo, or:" >&2
+        echo "   export ADAMS_SRC=/path/to/Adamas" >&2
+        echo "   (npm run deploy from Adamas sets ADAMS_SRC automatically)" >&2
         return 1
     fi
     echo "$SRC"
@@ -313,16 +313,16 @@ restart_application() {
     # For password auth, use a simpler approach - execute commands one by one
     if [ -n "$SSH_PASSWORD" ]; then
         echo "📦 Installing main dependencies..."
-        if ! sshpass -p "$SSH_PASSWORD" ssh "$VPS_USER@$VPS_HOST" "cd /var/www/danielhipskind.com && rm -rf node_modules package-lock.json && npm install --omit=dev --silent"; then
+        if ! $SSH_CMD "$VPS_USER@$VPS_HOST" "cd /var/www/danielhipskind.com && npm install --omit=dev --silent"; then
             echo "❌ Failed to install main dependencies"
             return 1
         fi
 
         echo "📦 Installing Call Center Helper dependencies..."
-        sshpass -p "$SSH_PASSWORD" ssh "$VPS_USER@$VPS_HOST" "cd /var/www/danielhipskind.com && [ -d 'adamas/client' ] && cd 'adamas/client' && rm -rf node_modules package-lock.json && npm install --omit=dev --silent" || true
+        $SSH_CMD "$VPS_USER@$VPS_HOST" "cd /var/www/danielhipskind.com && [ -d 'adamas/client' ] && cd 'adamas/client' && npm install --omit=dev --ignore-scripts --silent" || true
 
         echo "🔄 Restarting application with PM2..."
-        if sshpass -p "$SSH_PASSWORD" ssh "$VPS_USER@$VPS_HOST" "cd /var/www/danielhipskind.com && pm2 restart danielhipskind --update-env || pm2 start ecosystem.config.cjs && pm2 save" >/dev/null 2>&1; then
+        if $SSH_CMD "$VPS_USER@$VPS_HOST" "cd /var/www/danielhipskind.com && (pm2 restart danielhipskind --update-env || pm2 start ecosystem.config.cjs) && pm2 save"; then
             echo "✅ Application restarted successfully"
         else
             echo "❌ Failed to restart application"
@@ -380,7 +380,7 @@ setup_nginx_auth() {
 
     # For password auth, execute commands directly
     if [ -n "$SSH_PASSWORD" ]; then
-        if sshpass -p "$SSH_PASSWORD" ssh "$VPS_USER@$VPS_HOST" "echo '$ADMIN_BASIC_PASS' | htpasswd -ci /etc/nginx/.htpasswd '$ADMIN_BASIC_USER' && nginx -t && systemctl reload nginx"; then
+        if $SSH_CMD "$VPS_USER@$VPS_HOST" "echo '$ADMIN_BASIC_PASS' | htpasswd -ci /etc/nginx/.htpasswd '$ADMIN_BASIC_USER' && nginx -t && systemctl reload nginx"; then
             echo "✅ Nginx authentication configured"
         else
             echo "❌ Failed to configure nginx authentication"

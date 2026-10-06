@@ -17,24 +17,49 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const DESCRIPTION =
+  "Daniel Hipskind is a software engineer and founder of Greigh Studios LLC. Full-stack developer working in React, Next.js, Node.js, and Flutter — creator of Sensecast, a weather app for iOS and Android.";
+
 export const metadata = {
-  title: "Daniel Hipskind | Software Engineer",
-  description:
-    "Software Engineer Portfolio - React, Next.js, Full Stack Development. View my projects, skills, and experience.",
+  title: "Daniel Hipskind | Software Engineer & Founder of Greigh Studios",
+  description: DESCRIPTION,
+  applicationName: "Daniel Hipskind Portfolio",
+  authors: [{ name: "Daniel Hipskind", url: "https://danielhipskind.com" }],
+  creator: "Daniel Hipskind",
+  publisher: "Greigh Studios LLC",
+  keywords: [
+    "Daniel Hipskind",
+    "Greigh",
+    "Greigh Studios",
+    "software engineer",
+    "full-stack developer",
+    "React",
+    "Next.js",
+    "Flutter",
+    "Sensecast",
+    "portfolio",
+  ],
   openGraph: {
-    title: "Daniel Hipskind | Software Engineer",
-    description:
-      "Software Engineer Portfolio - React, Next.js, Full Stack Development. View my projects, skills, and experience.",
+    title: "Daniel Hipskind | Software Engineer & Founder of Greigh Studios",
+    description: DESCRIPTION,
     url: "https://danielhipskind.com",
     siteName: "Daniel Hipskind",
     locale: "en_US",
     type: "website",
+    images: [
+      {
+        url: "/assets/images/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Daniel Hipskind — Software Engineer, Founder of Greigh Studios LLC",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Daniel Hipskind | Software Engineer",
-    description:
-      "Software Engineer Portfolio - React, Next.js, Full Stack Development.",
+    title: "Daniel Hipskind | Software Engineer & Founder of Greigh Studios",
+    description: DESCRIPTION,
+    images: ["/assets/images/og-image.png"],
   },
   icons: {
     icon: [
@@ -54,6 +79,13 @@ export const metadata = {
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
   },
 };
 

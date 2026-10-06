@@ -1,4 +1,4 @@
-import Image from 'next/image';
+import Image from "next/image";
 
 const Hero = () => {
   return (
@@ -13,11 +13,11 @@ const Hero = () => {
             width={150}
             height={150}
             priority
-            style={{ width: 'auto', height: 'auto' }} // Preserve aspect ratio
+            style={{ width: "auto", height: "auto" }} // Preserve aspect ratio
           />
         </div>
         <h1>Daniel Hipskind</h1>
-        <p>Software Engineer</p>
+        <p>Software Engineer · Founder of Greigh Studios LLC</p>
       </div>
     </section>
   );

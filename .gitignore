@@ -70,3 +70,5 @@ mail-server-logins.md
 
 templates/*
 templates-old/*
+# playwright-mcp artifacts
+.playwright-mcp/

@@ -1,0 +1,31 @@
+# Daniel Hipskind
+
+> Daniel Hipskind is a software engineer and the founder of Greigh Studios LLC,
+> an independent software studio. This site is his personal portfolio covering
+> his projects, skills, and background.
+
+## About
+
+- Software engineer — React, Next.js, TypeScript, Node.js, Flutter/Dart, Swift, Kotlin
+- Founder of Greigh Studios LLC, an independent software studio
+- Creator of Sensecast, a weather app for iOS, iPadOS, and Android
+- Studied computer programming at Grand Rapids Community College
+
+## Projects
+
+- [Sensecast](https://sensecast.app): Weather app that routes each forecast to the
+  agency that actually models your terrain across 18 sources, explains every
+  metric in plain language, and runs live tornado, power-grid, and storm
+  trackers underneath the forecast. On the App Store and Google Play.
+- [Adamas](https://danielhipskind.com/adamas/): Productivity toolkit for call
+  center agents — hold timers, call flow guides, pattern formatters, quick
+  notes, and dark/light themes.
+- [Lgenia](https://lgenia.com/): Official website for a biotech company;
+  built with Next.js and Tailwind CSS.
+
+## Links
+
+- [Portfolio](https://danielhipskind.com)
+- [GitHub](https://github.com/greigh)
+- [LinkedIn](https://linkedin.com/in/danielhipskind)
+- [Email](mailto:me@danielhipskind.com)

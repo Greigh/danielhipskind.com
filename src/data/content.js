@@ -3,11 +3,13 @@ export const about = {
   intro:
     "Hi!👋🏻 I'm Daniel Hipskind, a software engineer with a solid foundation in React and full-stack development, committed to creating clean, efficient code.",
   shortDescription: [
-    'My journey into programming began with a curiosity about how technology shapes our daily lives, and it has since evolved into a deep-seated passion for crafting elegant solutions to complex problems.',
+    "My journey into programming began with a curiosity about how technology shapes our daily lives, and it has since evolved into a deep-seated passion for crafting elegant solutions to complex problems.",
 
-    'I have a solid foundation in front-end technologies like HTML, CSS, and JavaScript, and experience with modern frameworks like React. My approach is centered on creating clean, efficient code that not only meets functional requirements but also enhances user experience.',
+    "I have a solid foundation in front-end technologies like HTML, CSS, and JavaScript, and experience with modern frameworks like React. My approach is centered on creating clean, efficient code that not only meets functional requirements but also enhances user experience.",
 
     "My experience extends beyond front-end development. I've worked on several full-stack projects, utilizing technologies like Node.js and Express for backend development, and MongoDB for database management. This full-stack experience allows me to understand and contribute to all aspects of web application development.",
+
+    "I'm also the founder of Greigh Studios LLC, an independent software studio where I design, build, and ship products end to end — most recently Sensecast, a weather app now live on the App Store and Google Play.",
   ],
   expandedDescription: [
     "I'm currently pursuing an Associate's degree in Computer Programming at Grand Rapids Community College, where I'm constantly expanding my knowledge and honing my skills. This formal education, combined with self-driven learning and practical projects, has given me a well-rounded understanding of software development principles and best practices.",
@@ -25,10 +27,27 @@ export const about = {
 // Manual projects configuration
 export const manualProjects = [
   {
-    title: 'Lgenia - Biotech Company Website',
-    repoName: 'lgenia',
+    title: "Sensecast - Weather App",
+    repoName: "sensecast",
     description:
-      'The official website for Lgenia, a biotech company dedicated to discovering affordable medications for debilitating diseases like Tuberculosis, Malaria, and Alzheimer’s. Built with Next.js and Tailwind CSS, the site features a modern, responsive design with smooth Framer Motion animations, showcasing Lgenia’s research, partnerships, and mission to transform global health.',
+      "A Flutter weather app for iOS, iPadOS, and Android that reads the weather like a meteorologist and explains it like a person. Smart routing hands each forecast to the agency that actually models your terrain across 18 sources, every metric teaches you what the number means, and live tornado, power-grid, and storm trackers run underneath the forecast.",
+    githubUrl: null, // Private repository
+    languages: {
+      Dart: 85000, // 85%
+      Swift: 8000, // 8%
+      Kotlin: 7000, // 7%
+    },
+    updatedAt: new Date().toLocaleDateString(),
+    order: 0,
+    demoUrl: "https://sensecast.app",
+    has_pages: false,
+    topics: ["weather", "flutter", "ios", "android"],
+  },
+  {
+    title: "Lgenia - Biotech Company Website",
+    repoName: "lgenia",
+    description:
+      "The official website for Lgenia, a biotech company dedicated to discovering affordable medications for debilitating diseases like Tuberculosis, Malaria, and Alzheimer’s. Built with Next.js and Tailwind CSS, the site features a modern, responsive design with smooth Framer Motion animations, showcasing Lgenia’s research, partnerships, and mission to transform global health.",
     githubUrl: null, // Private repository
     languages: {
       JavaScript: 65000,
@@ -37,16 +56,16 @@ export const manualProjects = [
     },
     updatedAt: new Date().toLocaleDateString(),
     order: 1,
-    demoUrl: 'https://lgenia.com/',
+    demoUrl: "https://lgenia.com/",
     has_pages: false,
-    topics: ['pharmaceutical', 'research', 'nextjs', 'tailwind-css'],
+    topics: ["pharmaceutical", "research", "nextjs", "tailwind-css"],
   },
   {
-    title: 'Adamas - Call Center Helper',
-    repoName: 'callcenterhelper',
+    title: "Adamas - Call Center Helper",
+    repoName: "callcenterhelper",
     description:
-      'A powerful productivity toolkit designed for call center agents. Streamlines workflows with hold timers, call flow guides, pattern formatters, and quick notes. Features dark/light themes for reduced eye strain. Enhances customer interactions while improving efficiency and compliance.',
-    githubUrl: 'https://github.com/Greigh/Adamas',
+      "A powerful productivity toolkit designed for call center agents. Streamlines workflows with hold timers, call flow guides, pattern formatters, and quick notes. Features dark/light themes for reduced eye strain. Enhances customer interactions while improving efficiency and compliance.",
+    githubUrl: "https://github.com/Greigh/Adamas",
     languages: {
       JavaScript: 48000, // 48%
       SCSS: 42000, // 42%
@@ -55,51 +74,51 @@ export const manualProjects = [
     },
     updatedAt: new Date().toLocaleDateString(),
     order: 2,
-    demoUrl: 'https://danielhipskind.com/adamas/',
+    demoUrl: "https://danielhipskind.com/adamas/",
     has_pages: false,
-    topics: ['utility', 'call-center', 'customer-service'],
+    topics: ["utility", "call-center", "customer-service"],
   },
 ];
 
 // Social links configuration
 export const socialLinks = [
   {
-    name: 'GitHub',
-    url: 'https://github.com/greigh',
-    icon: 'githubSocial',
+    name: "GitHub",
+    url: "https://github.com/greigh",
+    icon: "githubSocial",
   },
   {
-    name: 'LinkedIn',
-    url: 'https://linkedin.com/in/danielhipskind',
-    icon: 'linkedin',
+    name: "LinkedIn",
+    url: "https://linkedin.com/in/danielhipskind",
+    icon: "linkedin",
   },
   {
-    name: 'Email',
-    url: 'mailto:me@danielhipskind.com',
-    icon: 'email',
+    name: "Email",
+    url: "mailto:me@danielhipskind.com",
+    icon: "email",
   },
 ];
 
 export const skills = {
   technical: [
-    { name: 'JavaScript', id: 'javascript', level: 94 },
-    { name: 'TypeScript', id: 'typescript', level: 88 },
-    { name: 'React', id: 'react', level: 91 },
-    { name: 'Next.js', id: 'nextjs', level: 85 },
-    { name: 'Node.js', id: 'nodejs', level: 83 },
-    { name: 'Tailwind CSS', id: 'tailwindcss', level: 89 },
-    { name: 'Swift', id: 'swift', level: 72 },
-    { name: 'Kotlin', id: 'kotlin', level: 68 },
+    { name: "JavaScript", id: "javascript", level: 94 },
+    { name: "TypeScript", id: "typescript", level: 88 },
+    { name: "React", id: "react", level: 91 },
+    { name: "Next.js", id: "nextjs", level: 85 },
+    { name: "Node.js", id: "nodejs", level: 83 },
+    { name: "Tailwind CSS", id: "tailwindcss", level: 89 },
+    { name: "Swift", id: "swift", level: 72 },
+    { name: "Kotlin", id: "kotlin", level: 68 },
   ],
   professional: [
-    { name: 'Problem Solving', level: 90 },
-    { name: 'Critical Thinking', level: 88 },
-    { name: 'Adaptability', level: 92 },
-    { name: 'Attention to Detail', level: 90 },
-    { name: 'Team Collaboration', level: 85 },
-    { name: 'Time Management', level: 78 },
-    { name: 'Leadership', level: 75 },
-    { name: 'Project Management', level: 72 },
+    { name: "Problem Solving", level: 90 },
+    { name: "Critical Thinking", level: 88 },
+    { name: "Adaptability", level: 92 },
+    { name: "Attention to Detail", level: 90 },
+    { name: "Team Collaboration", level: 85 },
+    { name: "Time Management", level: 78 },
+    { name: "Leadership", level: 75 },
+    { name: "Project Management", level: 72 },
   ],
 };
 
