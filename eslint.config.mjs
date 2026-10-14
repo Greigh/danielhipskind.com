@@ -10,6 +10,17 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Project dirs that are not Next app source:
+    "Call Center Help/**",
+    "_legacy_backup/**",
+    "public/**",
+    "dist/**",
+    "uploads/**",
+    "nginx/**",
+    "deploy/**",
+    "scripts/**",
+    "backups/**",
+    "adamas/**",
   ]),
 ]);
 

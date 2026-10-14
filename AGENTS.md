@@ -1,18 +1,16 @@
 # Project notes
 
-## ESLint is pinned to 9.x — do not upgrade to 10
+## ESLint 10 — works as of Next 16.4, but keep config ignores tight
 
-`eslint-config-next@16.3.8` nominally allows `eslint >=9`, but the stack is
-genuinely incompatible with ESLint 10:
+`eslint-config-next@16.3.8` was genuinely broken under ESLint 10 (vendored
+babel parser missing `addGlobals`, `eslint-plugin-react` using removed
+`context.getFilename()`), so eslint was pinned to 9.x. `next` +
+`eslint-config-next` 16.4.0 fixed the stack — ESLint 10.12 now lints cleanly.
 
-- `next`'s vendored babel parser (`eslint-config-next/parser`) returns a scope
-  manager without the `addGlobals` API ESLint 10 requires → `TypeError:
-scopeManager.addGlobals is not a function` on every file.
-- `eslint-plugin-react@7.x` calls `context.getFilename()`, removed in ESLint 10
-  → `TypeError: contextOrFilename.getFilename is not a function`.
-
-Upgrade only after eslint-config-next / eslint-plugin-react publish ESLint 10
-support. The `npm warn deprecated eslint@9` line is expected and harmless.
+Caveat: the flat config's `globalIgnores` REPLACES eslint-config-next's
+defaults — `eslint.config.mjs` must keep ignoring `Call Center Help/**`,
+`_legacy_backup/**`, `public/**`, `dist/**` etc. or lint scans minified
+build output (thousands of false errors).
 
 ## npm audit: `braces` advisory is unfixable today
 

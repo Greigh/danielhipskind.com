@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useRef, useCallback } from 'react';
-import ProjectCard from './ProjectCard';
-import Icon from './Icon';
+import { useState, useEffect, useRef, useCallback } from "react";
+import ProjectCard from "./ProjectCard";
+import Icon from "./Icon";
 
 const ProjectCarousel = ({ projects = [] }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -30,16 +30,16 @@ const ProjectCarousel = ({ projects = [] }) => {
       resizeTimer = setTimeout(handleResize, 250);
     };
 
-    window.addEventListener('resize', onResize);
+    window.addEventListener("resize", onResize);
     return () => {
       clearTimeout(resizeTimer);
-      window.removeEventListener('resize', onResize);
+      window.removeEventListener("resize", onResize);
     };
   }, []);
 
   const totalSlides = Math.max(
     0,
-    Math.ceil((projects.length || 0) / itemsPerSlide)
+    Math.ceil((projects.length || 0) / itemsPerSlide),
   );
 
   // Navigation handlers
@@ -58,13 +58,13 @@ const ProjectCarousel = ({ projects = [] }) => {
   };
 
   // Keep currentSlide in range when itemsPerSlide / project count changes
-  useEffect(() => {
-    if (totalSlides === 0) {
-      setCurrentSlide(0);
-      return;
-    }
-    setCurrentSlide((prev) => Math.min(prev, totalSlides - 1));
-  }, [totalSlides]);
+  const [prevTotalSlides, setPrevTotalSlides] = useState(totalSlides);
+  if (prevTotalSlides !== totalSlides) {
+    setPrevTotalSlides(totalSlides);
+    setCurrentSlide(
+      totalSlides === 0 ? 0 : Math.min(currentSlide, totalSlides - 1),
+    );
+  }
 
   // Autoplay logic
   useEffect(() => {
@@ -94,9 +94,9 @@ const ProjectCarousel = ({ projects = [] }) => {
           className="carousel-track"
           ref={trackRef}
           style={{
-            display: 'flex',
+            display: "flex",
             transform: `translateX(-${currentSlide * 100}%)`,
-            transition: 'transform 0.5s ease-in-out',
+            transition: "transform 0.5s ease-in-out",
           }}
         >
           {/* Create slides */}
@@ -104,29 +104,29 @@ const ProjectCarousel = ({ projects = [] }) => {
             const startIndex = slideIndex * itemsPerSlide;
             const slideItems = projects.slice(
               startIndex,
-              startIndex + itemsPerSlide
+              startIndex + itemsPerSlide,
             );
 
             return (
               <div
                 key={slideIndex}
                 className={`carousel-slide ${
-                  slideIndex === currentSlide ? 'active' : ''
+                  slideIndex === currentSlide ? "active" : ""
                 }`}
                 style={{
-                  flex: '0 0 100%',
-                  display: 'flex',
-                  gap: '24px',
-                  justifyContent: 'center',
+                  flex: "0 0 100%",
+                  display: "flex",
+                  gap: "24px",
+                  justifyContent: "center",
                 }}
               >
                 {slideItems.map((project) => (
                   <div
                     key={project.repoName || project.title}
                     style={{
-                      flex: itemsPerSlide === 1 ? '0 0 100%' : '0 0 400px',
-                      maxWidth: '400px',
-                      width: '100%',
+                      flex: itemsPerSlide === 1 ? "0 0 100%" : "0 0 400px",
+                      maxWidth: "400px",
+                      width: "100%",
                     }}
                   >
                     <ProjectCard project={project} />
@@ -184,7 +184,7 @@ const ProjectCarousel = ({ projects = [] }) => {
               <div
                 key={index}
                 className={`carousel-dot ${
-                  index === currentSlide ? 'active' : ''
+                  index === currentSlide ? "active" : ""
                 }`}
                 onClick={() => goToSlide(index)}
                 role="button"
