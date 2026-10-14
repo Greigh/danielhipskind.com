@@ -21,19 +21,21 @@ eslint-config-next to 14.x). Production installs use `npm install --omit=dev`
 (deploy.sh), so the vulnerable chain never ships. `npm audit --omit=dev` is
 clean.
 
-## Call Center Help/client audit: 4 findings left, all `braces`
+## Call Center Help/client audit: clean (0 vulnerabilities)
 
-After cleanup, `npm audit` reports 4 highs, one chain:
-`webpack-dev-server@6 → http-proxy-middleware → micromatch → braces`.
-`braces` has no patched release (all versions affected); chain is dev-only
-(`npm run dev` proxy). Resolved by upgrades, not overrides:
+`npm audit` is now clean. The last chain (`webpack-dev-server →
+http-proxy-middleware → micromatch → braces`, no patched braces release)
+was removed by replacing `webpack serve` with `dev-server.js` — a small
+Express dev server using `webpack-dev-middleware` + `webpack-hot-middleware`
+(HMR preserved) + `http-proxy` for /adamas/api, /api, /socket.io (ws).
+Do NOT re-add webpack-dev-server or http-proxy-middleware — the advisory
+covers every braces version, so the chain can only be avoided, not patched.
 
-- `webpack-dev-server` ^5 → ^6 (dropped chokidar@2 + old HPM)
-- `nodemon` removed — `server:dev` now uses `node --watch` (killed
-  nodemon → chokidar@3 → braces chain)
-- `overrides: js-yaml ^4.1.0` — collapsed the 19-package sprintf-js
-  cluster; load-nyc-config uses `.load()`, compatible with js-yaml 4.
-  Do NOT revert this override or the whole jest subtree re-flags.
-- `elliptic` chain gone — `crypto-browserify` removed (unused polyfill).
+Other resolved pieces (keep as-is):
 
-If `braces` ever ships a patch, `npm update` clears the rest.
+- `nodemon` removed — `server:dev` uses `node --watch`
+- `overrides: js-yaml ^4.1.0` — collapsed the sprintf-js cluster
+  (load-nyc-config calls `.load()`, safe under js-yaml 4). Do not revert.
+- `crypto-browserify` + 10 other polyfills, `@sentry/node`, `dotenv`,
+  `@types/*`, `http-server`, `typescript`, eslint-prettier pair removed —
+  all unused.

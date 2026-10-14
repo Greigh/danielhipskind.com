@@ -11,7 +11,7 @@
     "test": "jest --runInBand",
     "test:e2e": "npm run build && node test/e2e/run-e2e.js",
     "test:smoke": "node test/e2e/smoke-test.js",
-    "dev": "NODE_OPTIONS='--no-deprecation' NODE_ENV=development webpack serve --mode development",
+    "dev": "NODE_OPTIONS='--no-deprecation' NODE_ENV=development node dev-server.js",
     "sass": "sass src/styles/main.scss:src/styles/main.css --style compressed",
     "sass:watch": "sass --watch src/styles/main.scss:src/styles/main.css",
     "build:webpack": "NODE_ENV=production npx webpack --mode production",
@@ -45,6 +45,7 @@
     "eslint": "^9.39.2",
     "globals": "^17.13.0",
     "html-webpack-plugin": "^5.6.5",
+    "http-proxy": "^1.18.1",
     "jest": "^30.2.0",
     "jest-environment-jsdom": "^30.2.0",
     "mini-css-extract-plugin": "^2.9.4",
@@ -55,7 +56,8 @@
     "terser-webpack-plugin": "^5.3.16",
     "webpack": "^5.104.1",
     "webpack-cli": "^6.0.1",
-    "webpack-dev-server": "^6.0.0"
+    "webpack-dev-middleware": "^8.3.0",
+    "webpack-hot-middleware": "^2.26.1"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
