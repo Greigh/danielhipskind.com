@@ -21,23 +21,19 @@ eslint-config-next to 14.x). Production installs use `npm install --omit=dev`
 (deploy.sh), so the vulnerable chain never ships. `npm audit --omit=dev` is
 clean.
 
-## Call Center Help/client audit: remaining advisories have no patch
+## Call Center Help/client audit: 4 findings left, all `braces`
 
-`npm audit` in the nested client reports ~28 findings, all in dev/build
-tooling with no patched release available — `npm audit fix --force` only
-offers breaking downgrades:
+After cleanup, `npm audit` reports 4 highs, one chain:
+`webpack-dev-server@6 → http-proxy-middleware → micromatch → braces`.
+`braces` has no patched release (all versions affected); chain is dev-only
+(`npm run dev` proxy). Resolved by upgrades, not overrides:
 
-- `braces` (high): `webpack-dev-server → chokidar/micromatch`. Dev-server
-  watcher only. "Fix" would be webpack-dev-server@6, a breaking major bump.
-- `sprintf-js` (moderate, Dependabot #74): `jest → babel-jest →
-babel-plugin-istanbul → @istanbuljs/load-nyc-config → js-yaml@3 →
-argparse@1 → sprintf-js`. No patched version exists; js-yaml@4 would break
-  load-nyc-config (`safeLoad` removed). Only exploitable via a malicious
-  nyc/babel config — i.e., already inside the repo.
-- `elliptic` (low/mod): `crypto-browserify → browserify-sign/create-ecdh`.
-  "Risky implementation" advisory, all versions affected, latest 6.6.1
-  included. Only reached if bundled browser code calls sign/verify.
-- `source-map-js`, `serialize-javascript`: FIXED via lockfile bumps +
-  `overrides` floor `serialize-javascript@^7.1.2` in client package.json.
+- `webpack-dev-server` ^5 → ^6 (dropped chokidar@2 + old HPM)
+- `nodemon` removed — `server:dev` now uses `node --watch` (killed
+  nodemon → chokidar@3 → braces chain)
+- `overrides: js-yaml ^4.1.0` — collapsed the 19-package sprintf-js
+  cluster; load-nyc-config uses `.load()`, compatible with js-yaml 4.
+  Do NOT revert this override or the whole jest subtree re-flags.
+- `elliptic` chain gone — `crypto-browserify` removed (unused polyfill).
 
-Do not chase these with --force; revisit when upstream publishes patches.
+If `braces` ever ships a patch, `npm update` clears the rest.

@@ -1,6 +1,0 @@
-{
-  "watch": ["dist"],
-  "ext": "js,html,css,json,mp3",
-  "ignore": ["*.test.js", "node_modules/"],
-  "delay": 1000
-}
