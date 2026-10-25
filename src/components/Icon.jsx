@@ -1,12 +1,12 @@
-import { languages, social, theme } from '@/data/icons';
+import { languages, social, theme } from "@/data/icons";
 
-const Icon = ({ name, category = 'languages', className = '', ...props }) => {
+const Icon = ({ name, category = "languages", className = "", ...props }) => {
   let iconHtml = null;
 
   // Handle direct mapping if name matches a key in any category
-  if (category === 'languages' && languages[name]) iconHtml = languages[name];
-  else if (category === 'social' && social[name]) iconHtml = social[name];
-  else if (category === 'theme' && theme[name]) iconHtml = theme[name];
+  if (category === "languages" && languages[name]) iconHtml = languages[name];
+  else if (category === "social" && social[name]) iconHtml = social[name];
+  else if (category === "theme" && theme[name]) iconHtml = theme[name];
 
   // Fallback check across all categories if specific one failed
   if (!iconHtml) {
@@ -20,6 +20,7 @@ const Icon = ({ name, category = 'languages', className = '', ...props }) => {
   return (
     <span
       className={`icon-wrapper ${className}`}
+      aria-hidden="true"
       dangerouslySetInnerHTML={{ __html: iconHtml }}
       {...props}
     />

@@ -10,10 +10,8 @@ require("dotenv").config(); // also allow .env for local overrides
 const express = require("express");
 const http = require("http");
 const socketIo = require("socket.io");
-const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const multer = require("multer");
+const mongoose = require("mongoose");
 const nodemailer = require("nodemailer");
 const rateLimit = require("express-rate-limit");
 const { ipKeyGenerator } = require("express-rate-limit");
@@ -30,7 +28,6 @@ try {
   /* ignore */
 }
 const bodyParser = require("body-parser");
-const { body, validationResult } = require("express-validator");
 const next = require("next");
 const {
   seoRedirectMiddleware,
@@ -77,213 +74,62 @@ const server = http.createServer(app);
 const io = socketIo(server);
 const port = process.env.PORT || 3001;
 
-// Database connection
-let isDbConnected = false;
-let db = {};
-
-// Mock DB Implementation
-class MockModel {
-  constructor(data) {
-    Object.assign(this, data);
-    this._id = data._id || Date.now().toString();
-    this.createdAt = new Date();
-  }
-
-  save() {
-    const collection = MockModel.collections[this.constructor.modelName];
-    if (!this._id) this._id = Date.now().toString();
-    const existingIndex = collection.findIndex((i) => i._id === this._id);
-    if (existingIndex >= 0) {
-      collection[existingIndex] = this;
-    } else {
-      collection.push(this);
-    }
-    return Promise.resolve(this);
-  }
-
-  static findOne(query) {
-    const collection = MockModel.collections[this.modelName] || [];
-    const item = collection.find((item) => {
-      return Object.keys(query).every((key) => item[key] === query[key]);
-    });
-    return Promise.resolve(item ? new this(item) : null);
-  }
-
-  static find(query) {
-    const collection = MockModel.collections[this.modelName] || [];
-    if (query.content && query.content instanceof RegExp) {
-      const results = collection.filter((item) =>
-        query.content.test(item.content),
-      );
-      return Promise.resolve(results);
-    }
-    if (query.userId) {
-      const results = collection.filter((item) => item.userId == query.userId);
-      return Promise.resolve(results);
-    }
-    return Promise.resolve(collection);
-  }
-
-  static findById(id) {
-    const collection = MockModel.collections[this.modelName] || [];
-    const item = collection.find((i) => i._id == id);
-    return Promise.resolve(item ? new this(item) : null);
-  }
-
-  static findByIdAndUpdate(id, update) {
-    const collection = MockModel.collections[this.modelName] || [];
-    const index = collection.findIndex((i) => i._id == id);
-    if (index > -1) {
-      if (update.$set) Object.assign(collection[index], update.$set);
-      else Object.assign(collection[index], update);
-      return Promise.resolve(new this(collection[index]));
-    }
-    return Promise.resolve(null);
-  }
-
-  static findByIdAndDelete(id) {
-    const collection = MockModel.collections[this.modelName] || [];
-    const index = collection.findIndex((i) => i._id == id);
-    if (index > -1) {
-      collection.splice(index, 1);
-    }
-    return Promise.resolve();
-  }
-
-  static deleteMany(query) {
-    if (query.userId) {
-      const collection = MockModel.collections[this.modelName] || [];
-      const newCollection = collection.filter(
-        (item) => item.userId != query.userId,
-      );
-      MockModel.collections[this.modelName] = newCollection;
-    }
-    return Promise.resolve();
-  }
-}
-MockModel.collections = { User: [], Note: [], AuditLog: [], CallLog: [] };
-
-function initializeModels() {
-  if (isDbConnected) {
-    const UserSchema = new mongoose.Schema({
-      username: { type: String, required: true, unique: true },
-      email: { type: String, required: true, unique: true },
-      password: { type: String, required: true },
-      role: { type: String, default: "agent" },
-      createdAt: { type: Date, default: Date.now },
-      settings: { type: mongoose.Schema.Types.Mixed, default: {} },
-      twilio: {
-        accountSid: { type: String, default: "" },
-        authToken: { type: String, default: "" },
-        phoneNumber: { type: String, default: "" },
-      },
-    });
-    db.User = mongoose.model("User", UserSchema);
-
-    const NoteSchema = new mongoose.Schema({
-      userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-      content: String,
-      createdAt: { type: Date, default: Date.now },
-    });
-    db.Note = mongoose.model("Note", NoteSchema);
-
-    const CallLogSchema = new mongoose.Schema({
-      userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-      callerName: String,
-      callerPhone: String,
-      callType: String,
-      startTime: Date,
-      endTime: Date,
-      duration: Number,
-      notes: String,
-      status: String,
-      customData: { type: mongoose.Schema.Types.Mixed },
-      accountNumber: String,
-      ssn: String,
-      createdAt: { type: Date, default: Date.now },
-    });
-    db.CallLog = mongoose.model("CallLog", CallLogSchema);
-
-    const AuditLogSchema = new mongoose.Schema({
-      userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-      action: { type: String, required: true },
-      resource: { type: String, required: true },
-      details: { type: mongoose.Schema.Types.Mixed },
-      ip: String,
-      userAgent: String,
-      timestamp: { type: Date, default: Date.now },
-    });
-    db.AuditLog = mongoose.model("AuditLog", AuditLogSchema);
-    logger.info("Using MongoDB Models");
-  } else {
-    db.User = class User extends MockModel {
-      static modelName = "User";
-    };
-    db.Note = class Note extends MockModel {
-      static modelName = "Note";
-    };
-    db.CallLog = class CallLog extends MockModel {
-      static modelName = "CallLog";
-    };
-    db.AuditLog = class AuditLog extends MockModel {
-      static modelName = "AuditLog";
-    };
-    logger.warn(
-      "WARNING: Using In-Memory Mock Database. Data will be lost on restart.",
-    );
-  }
-}
-
-mongoose
-  .connect(process.env.MONGODB_URI || "mongodb://localhost:27017/callcenter", {
+// Socket.IO — authenticated realtime channel for the Adamas client.
+// Handshake token comes from socket.handshake.auth.token or the httpOnly
+// adamas_session cookie; user lookup reuses the mongoose connection the
+// Next route handlers establish (same process, same module instance).
+async function ensureSocketDb() {
+  if (mongoose.connection.readyState === 1) return;
+  await mongoose.connect(process.env.MONGODB_URI, {
     serverSelectionTimeoutMS: 5000,
-  })
-  .then(() => {
-    logger.info("MongoDB connected");
-    isDbConnected = true;
-    initializeModels();
-  })
-  .catch((err) => {
-    logger.error(
-      "MongoDB connection error - Falling back to Mock DB",
-      err.message,
-    );
-    isDbConnected = false;
-    initializeModels();
   });
-
-initializeModels();
-
-const Models = {
-  get User() {
-    return db.User;
-  },
-  get Note() {
-    return db.Note;
-  },
-  get CallLog() {
-    return db.CallLog;
-  },
-  get AuditLog() {
-    return db.AuditLog;
-  },
-};
-
-async function logAudit(userId, action, resource, details, req) {
-  try {
-    const auditEntry = new Models.AuditLog({
-      userId,
-      action,
-      resource,
-      details,
-      ip: req.ip,
-      userAgent: req.get("User-Agent"),
-    });
-    await auditEntry.save();
-  } catch (err) {
-    logger.error("Audit log error:", err);
-  }
 }
+
+io.use(async (socket, next) => {
+  try {
+    let token = socket.handshake.auth && socket.handshake.auth.token;
+    if (!token && socket.handshake.headers && socket.handshake.headers.cookie) {
+      const match = socket.handshake.headers.cookie.match(
+        /(?:^|;\s*)adamas_session=([^;]*)/,
+      );
+      token = match ? decodeURIComponent(match[1]) : null;
+    }
+    if (!token) return next(new Error("Unauthorized"));
+    const verified = jwt.verify(token, getJwtSecret());
+    await ensureSocketDb();
+    const user = await mongoose.connection
+      .collection("users")
+      .findOne({ _id: new mongoose.Types.ObjectId(String(verified._id)) });
+    if (!user || (verified.tv || 0) !== (user.tokenVersion || 0)) {
+      return next(new Error("Unauthorized"));
+    }
+    socket.user = { _id: user._id, role: user.role };
+    return next();
+  } catch {
+    return next(new Error("Unauthorized"));
+  }
+});
+
+io.on("connection", (socket) => {
+  socket.on("join", (userId) => {
+    if (!socket.user || String(userId) !== String(socket.user._id)) return;
+    socket.join(String(userId));
+  });
+  socket.on("note-update", (data) => {
+    if (
+      !socket.user ||
+      !data ||
+      String(data.userId) !== String(socket.user._id)
+    ) {
+      return;
+    }
+    socket.to(String(data.userId)).emit("note-updated", data);
+  });
+});
+
+// All user/auth/DB APIs live in the Next.js route handlers under src/app/api
+// (forwarded below via nextApiForward). Express owns static hosting, SEO
+// redirects, rate limiting, admin analytics, and the contact form.
 
 // prepare Next.js
 nextApp.prepare().then(() => {
@@ -323,6 +169,11 @@ nextApp.prepare().then(() => {
   app.all("/api/health", nextApiForward);
   app.all("/api/notes", nextApiForward);
   app.all("/api/upload", nextApiForward);
+  app.all("/api/register", nextApiForward);
+  app.all("/api/login", nextApiForward);
+  app.all("/api/me", nextApiForward);
+  app.all("/api/logout", nextApiForward);
+  app.all(/^\/api\/user(?:\/|$)/, nextApiForward);
   app.all(/^\/callcenterhelper\/api(?:\/|$)/, nextApiForward);
 
   app.use(bodyParser.json({ limit: "10mb" }));
@@ -351,43 +202,10 @@ nextApp.prepare().then(() => {
       req.method === "GET" &&
       (req.path.startsWith("/_next/") ||
         req.path.startsWith("/assets/") ||
+        req.path.startsWith("/adamas/") ||
         req.path === "/favicon.ico"),
   });
   app.use(limiter);
-
-  const auth = (req, res, next) => {
-    const token = req.header("Authorization")?.replace("Bearer ", "");
-    // Allow Next.js assets to bypass auth
-    if (req.path.startsWith("/_next") || req.path.startsWith("/assets"))
-      return next();
-
-    // Check if it is an API call
-    if (req.path.startsWith("/api/") || req.path.startsWith("/adamas/")) {
-      next();
-      return;
-    }
-    next();
-  };
-
-  // Re-define auth properly for route usage
-  const authMiddleware = (req, res, next) => {
-    const token = req.header("Authorization")?.replace("Bearer ", "");
-    if (!token) return res.status(401).json({ error: "Access denied" });
-    try {
-      const verified = jwt.verify(token, getJwtSecret());
-      req.user = verified;
-      next();
-    } catch {
-      res.status(400).json({ error: "Invalid token" });
-    }
-  };
-
-  const storage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, "uploads/"),
-    filename: (req, file, cb) =>
-      cb(null, Date.now() + path.extname(file.originalname)),
-  });
-  const upload = multer({ storage });
 
   // Correct path for Adamas files on server (root/adamas)
   const adamasPath = path.join(__dirname, "adamas");
@@ -440,7 +258,12 @@ nextApp.prepare().then(() => {
     express.static(adamasPath, { setHeaders: setAdamasCacheHeaders }),
   );
 
+  // Legacy multer-era uploads live in ./uploads; the Next /api/upload route
+  // writes to public/uploads — serve both locations under /uploads.
+  const publicUploadsDir = path.join(__dirname, "public", "uploads");
+  fs.mkdirSync(publicUploadsDir, { recursive: true });
   app.use("/uploads", express.static(uploadsDir));
+  app.use("/uploads", express.static(publicUploadsDir));
   app.use(
     "/socket.io",
     express.static(path.join(__dirname, "node_modules/socket.io/client-dist")),
@@ -468,70 +291,8 @@ nextApp.prepare().then(() => {
     next();
   });
 
-  const popupStore = new Map();
-
   // --- API ROUTES (Adamas) ---
-  // Using authMiddleware where appropriate
-
-  app.post(
-    "/api/register",
-    [
-      body("username").isLength({ min: 3 }).trim().escape(),
-      body("email").isEmail().normalizeEmail(),
-      body("password").isLength({ min: 6 }),
-    ],
-    async (req, res) => {
-      const errors = validationResult(req);
-      if (!errors.isEmpty())
-        return res.status(400).json({ errors: errors.array() });
-
-      // Never accept client-supplied role — privilege escalation vector
-      const { username, email, password } = req.body;
-      const hashedPassword = await bcrypt.hash(password, 10);
-      const user = new Models.User({
-        username,
-        email,
-        password: hashedPassword,
-        role: "agent",
-      });
-      try {
-        await user.save();
-        res.status(201).json({ message: "User registered" });
-      } catch {
-        res.status(400).json({ error: "User already exists" });
-      }
-    },
-  );
-
-  app.post(
-    "/api/login",
-    [body("email").isEmail().normalizeEmail(), body("password").exists()],
-    async (req, res) => {
-      const errors = validationResult(req);
-      if (!errors.isEmpty())
-        return res.status(400).json({ errors: errors.array() });
-
-      const { email, password } = req.body;
-      const user = await Models.User.findOne({ email });
-      if (!user || !(await bcrypt.compare(password, user.password))) {
-        return res.status(400).json({ error: "Invalid credentials" });
-      }
-      const token = jwt.sign(
-        { _id: user._id, role: user.role },
-        getJwtSecret(),
-        { expiresIn: "7d" },
-      );
-      res.json({
-        token,
-        user: {
-          _id: user._id,
-          username: user.username,
-          email: user.email,
-          role: user.role,
-        },
-      });
-    },
-  );
+  // /api/register and /api/login are handled by the Next.js route handlers.
 
   // --- Admin Logic & Analytics (In-Memory Session Fallback) ---
   const ADMIN_SESSION_NAME = "admin_session";
@@ -773,18 +534,32 @@ nextApp.prepare().then(() => {
     auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
   });
 
+  // Strip characters that could break or inject into email headers
+  const safeName = (s) =>
+    String(s ?? "")
+      .replace(/["\\\r\n<>]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, 100);
+
   app.post("/api/contact", async (req, res) => {
-    // reuse logic from original or just pass for now
-    const { name, email, message } = req.body;
-    if (!name || !email || !message)
+    const { name, email, message } = req.body ?? {};
+    const fromName = safeName(name);
+    const replyTo = String(email ?? "")
+      .trim()
+      .slice(0, 254);
+    const text = String(message ?? "").slice(0, 10000);
+    if (!fromName || !replyTo || !text.trim())
       return res.status(400).json({ error: "Missing fields" });
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(replyTo))
+      return res.status(400).json({ error: "Invalid email" });
     try {
       await transporter.sendMail({
-        from: `"${name}" <${process.env.EMAIL_USER}>`,
-        replyTo: email,
+        from: `"${fromName}" <${process.env.EMAIL_USER}>`,
+        replyTo,
         to: process.env.EMAIL_USER,
-        subject: `Adamas Contact: ${name}`,
-        text: message,
+        subject: `Adamas Contact: ${fromName}`,
+        text,
       });
       res.json({ success: true });
     } catch (e) {

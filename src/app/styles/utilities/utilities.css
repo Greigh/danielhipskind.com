@@ -14,6 +14,22 @@
   display: none !important;
 }
 
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -3rem;
+  z-index: 10001;
+  padding: 0.5rem 1rem;
+  background: var(--accent-color);
+  color: var(--bg-color);
+  border-radius: 0.5rem;
+  transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+  top: 1rem;
+}
+
 .glass-effect {
   background: var(--nav-bg);
   backdrop-filter: blur(10px);

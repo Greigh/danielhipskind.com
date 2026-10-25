@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useTheme } from 'next-themes';
-import Icon from './Icon';
+import { useState, useEffect } from "react";
+import { useTheme } from "next-themes";
+import Icon from "./Icon";
 
 const Navbar = () => {
   const [mounted, setMounted] = useState(false);
@@ -16,11 +16,14 @@ const Navbar = () => {
   }, []);
 
   const toggleTheme = () => {
-    setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
+    setTheme(resolvedTheme === "dark" ? "light" : "dark");
   };
 
   return (
     <header>
+      <a href="#hero" className="skip-link">
+        Skip to content
+      </a>
       <nav>
         <div className="nav-container glass-effect">
           <div className="nav-content">
@@ -42,7 +45,7 @@ const Navbar = () => {
             >
               {mounted ? (
                 <Icon
-                  name={resolvedTheme === 'dark' ? 'sun' : 'moon'}
+                  name={resolvedTheme === "dark" ? "sun" : "moon"}
                   category="theme"
                 />
               ) : (

@@ -118,3 +118,35 @@
 .ease-out {
   transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
 }
+
+/* Reduced motion: disable reveals, hover transforms, and looping pulses */
+@media (prefers-reduced-motion: reduce) {
+  .transition-all,
+  .transition-transform,
+  .transition-opacity,
+  .hero-img,
+  .carousel-track,
+  .carousel-slide,
+  .carousel-dot,
+  .expanded-content {
+    transition: none;
+  }
+
+  .translate-y-12 {
+    transform: none;
+  }
+
+  .opacity-0 {
+    opacity: 1;
+  }
+
+  .heart,
+  .animate-spin,
+  .animate-fade-in,
+  .animate-slide-up,
+  .hover-scale:hover,
+  .hover-up:hover {
+    animation: none;
+    transform: none;
+  }
+}

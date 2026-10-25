@@ -1,16 +1,19 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { about } from '@/data/content';
+import { useState } from "react";
+import { about } from "@/data/content";
 
 const About = () => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <section id="about">
+    <section id="about" aria-labelledby="about-heading">
+      <h2 id="about-heading" className="sr-only">
+        About
+      </h2>
       <div className="about-container">
         <div className="about-content glass-effect">
-          <div className={`about-text ${isExpanded ? 'expanded' : ''}`}>
+          <div className={`about-text ${isExpanded ? "expanded" : ""}`}>
             <div className="initial-content">
               <p className="about-intro">{about.intro}</p>
               {about.shortDescription.map((paragraph, index) => (
@@ -19,12 +22,14 @@ const About = () => {
             </div>
 
             <div
-              className={`expanded-content ${isExpanded ? 'show' : ''}`}
+              id="about-expanded"
+              className={`expanded-content ${isExpanded ? "show" : ""}`}
+              aria-hidden={!isExpanded}
               style={{
-                maxHeight: isExpanded ? '1000px' : '0',
+                maxHeight: isExpanded ? "1000px" : "0",
                 opacity: isExpanded ? 1 : 0,
-                overflow: 'hidden',
-                transition: 'all 0.5s ease',
+                overflow: "hidden",
+                transition: "all 0.5s ease",
               }}
             >
               {about.expandedDescription.map((paragraph, index) => (
@@ -37,19 +42,21 @@ const About = () => {
             <button
               className="read-more-btn"
               onClick={() => setIsExpanded(!isExpanded)}
+              aria-expanded={isExpanded}
+              aria-controls="about-expanded"
             >
-              {isExpanded ? 'Show Less' : 'Read More'}
+              {isExpanded ? "Show Less" : "Read More"}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
                 width="24"
                 height="24"
                 style={{
-                  transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-                  transition: 'transform 0.3s ease',
-                  marginLeft: '8px',
-                  display: 'inline-block',
-                  verticalAlign: 'middle',
+                  transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)",
+                  transition: "transform 0.3s ease",
+                  marginLeft: "8px",
+                  display: "inline-block",
+                  verticalAlign: "middle",
                 }}
               >
                 <path

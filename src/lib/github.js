@@ -1,29 +1,39 @@
-const GITHUB_API_BASE = 'https://api.github.com';
-const USERNAME = 'greigh';
+const GITHUB_API_BASE = "https://api.github.com";
+const USERNAME = "greigh";
 
 // Define your featured projects with custom display names
 export const FEATURED_REPOS = [
   {
-    repo: 'fihaven',
-    displayName: 'FiHaven',
+    repo: "fihaven",
+    displayName: "FiHaven",
     order: 0,
   },
   {
-    repo: 'blockingmachine',
-    displayName: 'Blocking Machine',
+    repo: "blockingmachine",
+    displayName: "Blocking Machine",
     order: 3,
   },
   {
-    repo: 'danielhipskind.com',
-    displayName: 'Portfolio Website',
+    repo: "danielhipskind.com",
+    displayName: "Portfolio Website",
     order: 4,
   },
   {
-    repo: 'WebExpressStudioTemplate',
-    displayName: 'Web Express Studio Template',
+    repo: "WebExpressStudioTemplate",
+    displayName: "Web Express Studio Template",
     order: 5,
   },
 ];
+
+const GITHUB_HEADERS = {
+  "User-Agent": "danielhipskind.com",
+  Accept: "application/vnd.github+json",
+  "X-GitHub-Api-Version": "2022-11-28",
+  // Add token if you have one in env, otherwise anonymous
+  ...(process.env.GITHUB_TOKEN && {
+    Authorization: `token ${process.env.GITHUB_TOKEN}`,
+  }),
+};
 
 export async function fetchGitHubData() {
   try {
@@ -34,20 +44,15 @@ export async function fetchGitHubData() {
           const repoResponse = await fetch(
             `${GITHUB_API_BASE}/repos/${USERNAME}/${repo}`,
             {
-              headers: {
-                // Add token if you have one in env, otherwise anonymous
-                ...(process.env.GITHUB_TOKEN && {
-                  Authorization: `token ${process.env.GITHUB_TOKEN}`,
-                }),
-              },
+              headers: GITHUB_HEADERS,
               next: { revalidate: 3600 },
-            }
+            },
           );
 
           if (!repoResponse.ok) {
             console.error(
               `Failed to fetch repo ${repo}:`,
-              await repoResponse.text()
+              await repoResponse.text(),
             );
             return null;
           }
@@ -57,13 +62,9 @@ export async function fetchGitHubData() {
           const languagesResponse = await fetch(
             `${GITHUB_API_BASE}/repos/${USERNAME}/${repo}/languages`,
             {
-              headers: {
-                ...(process.env.GITHUB_TOKEN && {
-                  Authorization: `token ${process.env.GITHUB_TOKEN}`,
-                }),
-              },
+              headers: GITHUB_HEADERS,
               next: { revalidate: 3600 },
-            }
+            },
           );
 
           let languages = {};
@@ -74,7 +75,7 @@ export async function fetchGitHubData() {
           return {
             title: displayName,
             repoName: repo,
-            description: repoData.description || 'No description available',
+            description: repoData.description || "No description available",
             githubUrl: repoData.html_url,
             homepage: repoData.homepage,
             languages: languages || {},
@@ -88,13 +89,13 @@ export async function fetchGitHubData() {
           console.error(`Error processing repo ${repo}:`, error);
           return null;
         }
-      }
+      },
     );
 
     const repos = (await Promise.all(repoPromises)).filter(Boolean);
     return repos.sort((a, b) => a.order - b.order);
   } catch (error) {
-    console.error('Error in fetchGitHubData:', error);
+    console.error("Error in fetchGitHubData:", error);
     return [];
   }
 }
@@ -109,11 +110,11 @@ function getDemoUrl(repo) {
   }
 
   const demoTopics = repo.topics?.filter(
-    (topic) => topic.startsWith('demo-') || topic.includes('deployed-at')
+    (topic) => topic.startsWith("demo-") || topic.includes("deployed-at"),
   );
 
   if (demoTopics?.length > 0) {
-    return demoTopics[0].replace(/(demo-|deployed-at-)/, 'https://');
+    return demoTopics[0].replace(/(demo-|deployed-at-)/, "https://");
   }
 
   return null;

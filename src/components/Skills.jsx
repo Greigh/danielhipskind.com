@@ -1,11 +1,11 @@
-import { skills } from '@/data/content';
-import Icon from './Icon';
+import { skills } from "@/data/content";
+import Icon from "./Icon";
 
 const SkillItem = ({ skill, type }) => {
   return (
     <div className="skill-item">
       <div className="skill-info">
-        {type === 'technical' && (
+        {type === "technical" && (
           <div className="skill-icon">
             <Icon
               name={skill.id || skill.name.toLowerCase()}
@@ -15,7 +15,14 @@ const SkillItem = ({ skill, type }) => {
         )}
         <span className="skill-name">{skill.name}</span>
       </div>
-      <div className="skill-progress-bar">
+      <div
+        className="skill-progress-bar"
+        role="progressbar"
+        aria-valuenow={skill.level}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-label={`${skill.name} proficiency`}
+      >
         <div
           className="skill-progress-fill"
           style={{ width: `${skill.level}%` }}

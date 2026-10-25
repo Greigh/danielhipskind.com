@@ -8,12 +8,11 @@ const Hero = () => {
           {/* Using Next.js Image for optimization, but keeping structure similar */}
           <Image
             src="/assets/images/DanielPortfolio.webp"
-            alt="Daniel Hipskind"
+            alt="Portrait of Daniel Hipskind"
             className="hero-img"
-            width={150}
-            height={150}
+            width={190}
+            height={190}
             priority
-            style={{ width: "auto", height: "auto" }} // Preserve aspect ratio
           />
         </div>
         <h1>Daniel Hipskind</h1>

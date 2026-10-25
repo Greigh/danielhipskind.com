@@ -30,6 +30,8 @@ const jsonLd = {
       name: "Daniel Hipskind",
       alternateName: "Greigh",
       jobTitle: "Software Engineer",
+      description:
+        "Software engineer and founder of Greigh Studios LLC. Full-stack developer working in React, Next.js, Node.js, and Flutter — creator of Sensecast.",
       url: "https://danielhipskind.com/",
       image: "https://danielhipskind.com/assets/images/DanielPortfolio.webp",
       email: "mailto:me@danielhipskind.com",
@@ -98,7 +100,9 @@ export default function Home() {
     <main>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
+        }}
       />
       <Hero />
       <ScrollReveal>

@@ -8,6 +8,7 @@ const ProjectCarousel = ({ projects = [] }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [itemsPerSlide, setItemsPerSlide] = useState(1);
   const [isPaused, setIsPaused] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const trackRef = useRef(null);
   const autoplayRef = useRef(null);
 
@@ -66,16 +67,25 @@ const ProjectCarousel = ({ projects = [] }) => {
     );
   }
 
+  // Respect reduced-motion preference (WCAG 2.2.2 — no auto-advancing content)
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setPrefersReducedMotion(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
   // Autoplay logic
   useEffect(() => {
-    if (isPaused || totalSlides <= 1) return;
+    if (isPaused || prefersReducedMotion || totalSlides <= 1) return;
 
     autoplayRef.current = setInterval(() => {
       nextSlide();
     }, 15000); // 15s interval
 
     return () => clearInterval(autoplayRef.current);
-  }, [isPaused, nextSlide, totalSlides]);
+  }, [isPaused, prefersReducedMotion, nextSlide, totalSlides]);
 
   if (!projects.length) {
     return <p className="carousel-empty">No projects to display right now.</p>;
@@ -88,6 +98,8 @@ const ProjectCarousel = ({ projects = [] }) => {
       onMouseLeave={() => setIsPaused(false)}
       onTouchStart={() => setIsPaused(true)}
       onTouchEnd={() => setIsPaused(false)}
+      onFocus={() => setIsPaused(true)}
+      onBlur={() => setIsPaused(false)}
     >
       <div className="carousel-track-container">
         <div
@@ -181,14 +193,15 @@ const ProjectCarousel = ({ projects = [] }) => {
 
           <div className="carousel-pagination">
             {Array.from({ length: totalSlides }).map((_, index) => (
-              <div
+              <button
                 key={index}
+                type="button"
                 className={`carousel-dot ${
                   index === currentSlide ? "active" : ""
                 }`}
                 onClick={() => goToSlide(index)}
-                role="button"
                 aria-label={`Go to slide ${index + 1}`}
+                aria-current={index === currentSlide ? "true" : undefined}
               />
             ))}
           </div>

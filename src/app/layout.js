@@ -89,6 +89,11 @@ export const metadata = {
   },
 };
 
+// Matches theme_color in public/assets/manifest.json
+export const viewport = {
+  themeColor: "#0066cc",
+};
+
 export default function RootLayout({ children }) {
   return (
     <html
